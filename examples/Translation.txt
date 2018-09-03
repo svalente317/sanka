@@ -1,0 +1,95 @@
+ExpressionDefinition.translate() writes to the output stream any C
+statements necessary to setup the expression. Then, it returns a
+string of C code that evaluates to the expression, given the setup.
+It generates the C string such that it can be evaluated multiple times
+without side effects.
+
+For example, consider this Sanka boolean expression:
+
+    obj1.field1 == obj1.field2
+
+This is parsed as a binary expression.
+* LHS is "obj1.field1"
+* operator is "=="
+* RHS is "obj1.field2"
+
+So:
+
+1. translate("obj1.field1 == obj1.field2") calls itself recursively.
+2. translate("obj1.field1") calls itself recursively.
+3. translate("obj1") writes nothing to the output stream.
+   It is the base case. It simply returns "obj1".
+4. Control passes back to translate("obj1.field1").
+   It got the string "obj1" from the recursive call,
+   and it knows that this string has no side effects,
+   so it writes to the output stream:
+   NULLCHECK(obj1);
+   Then, since field access has no side-effects, it returns
+   "obj1->field1"
+5. Control passes back to the top-level call to translate().
+   It calls itself recursively for the RHS.
+6. translate("obj1.field2") calls itself recursively.
+7. translate("obj1") returns "obj1".
+8. Control passes back up. It writes NULLCHECK(obj1) to the output stream,
+   then returns "obj1->field2"
+9. Control passes back to the top-level call to translate().
+   It puts the LHS strings and RHS strings together, and it wraps the
+   binary operation in parentheses, so the final string is
+   "(obj1->field1 == obj1->field2)".
+10. Note that the C output file will contain two consecutive lines that
+    say "NULLCHECK(obj1)". Since NULLCHECK() is a simple CPP macro, we
+    expect the C compiler to optimize these to a single check.
+
+Now, consider this integer expression, where obj1 is known to be of
+type Dummy, and randomInteger() is known to take no arguments and
+return an int.
+
+    obj2.randomInteger()
+
+1. translate("obj2.randomInteger()") calls itself recursively.
+2. translate("obj2.randomInteger") calls itself recursively.
+3. translate("obj2") returns "obj2".
+4. translate("obj2.randomInteger") writes NULLCHECK(obj2)
+   and returns "Dummy__randomInteger", and updates the
+   ExpressionDefinition object to say that the context is "obj2".
+5. translate("obj2.randomInteger()") calculates that the final C code
+   is "Dummy__randomInteger(obj2)", but it doesn't return this string.
+   Function calls may have side-effects. so translate() never returns
+   a string with a function call in it. Instead, it generates a new
+   temporary C variable, and it writes to the output stream:
+   int tmp1 = Dummy__randomInteger(obj2);
+   And it returns "tmp1".
+
+Finally, let's change the function call from randomInteger() to
+randomBoolean(), and then put it all together in an AND expression:
+
+    obj1.field1 == obj1.field2 && obj2.randomBoolean()
+
+1. translate() calls itself recursively on the LHS.
+2. From the above examples, we know that this writes to output:
+   NULLCHECK(obj1);
+   NULLCHECK(obj1);
+   and it returns "(obj1->field1 == obj1->field2)"
+3. The AND expression wants to short-circuit the RHS. In other words,
+   if the LHS is false, then we must not check if obj2 is null.
+   So we can't immediately make a recursive call to translate(RHS).
+   Instead, we must write code to the output stream first:
+       int tmp1 = (obj1->field1 == obj1->field2);
+       if (tmp1) {
+4. Now we recursively call translate(RHS).
+5. From the above example, we know that this writes to output:
+       NULLCHECK(obj2)
+       int tmp2 = Dummy__randomBoolean(obj2);
+   And it returns "tmp2".
+6. Finally, translate() writes the code to finish the top-level expression:
+       tmp1 = tmp2; }
+   And it returns "tmp1". So the final code is:
+
+    NULLCHECK(obj1);
+    NULLCHECK(obj1);
+    int tmp1 = (obj1->field1 == obj1->field2);
+    if (tmp1) {
+        NULLCHECK(obj2)
+        int tmp2 = Dummy__randomBoolean(obj2);
+        tmp1 = tmp2;
+    }

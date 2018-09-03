@@ -1,0 +1,29 @@
+class Adder {
+    int operate(int x, int y) {
+        return x + y;
+    }
+}
+
+class Multiplier {
+    int operate(int x, int y) {
+        return x * y;
+    }
+}
+
+interface Calculator {
+    int operate(int x, int y);
+}
+
+class User {
+    static void operateAndPrint(Calculator calc, int x, int y) {
+        System.out.println("value=%d", calc.operate(x, y);
+    }
+
+    static void addAndMultiply() {
+        adder = new Adder;
+        operateAndPrint(adder, 4, 5);
+
+        multiplier = new Multiplier;
+        operateAndPrint(multiplier, 4, 5);
+    }
+}

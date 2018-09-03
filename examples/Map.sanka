@@ -1,0 +1,135 @@
+class Node {
+    Key key;
+    Value value;
+    Node lchild;
+    Node rchild;
+    boolean color;
+}
+
+class Map<Key, Value> {
+
+    const RB_BLACK = false;
+    const RB_RED = true;
+
+    private int height;
+    private Node root;
+
+    Value get(Key key) {
+        var node = this.root;
+        while (node != null) {
+            var cmp = this.compare(key, node.key);
+            if (cmp == 0) {
+                return node.value;
+            }
+            node = cmp < 0 ? node.lchild : node.rchild;
+        }
+        return null;
+    }
+
+    private Node probe(Key key, Value value) {
+        inline var pa = new Node[this.height + 1];
+        inline var da = new boolean[this.height + 1];
+        pa[0] = this.root;
+        da[0] = false;
+        var k = 1;
+        var node = this.root;
+        while (node != null) {
+            var cmp = this.compare(key, node.key);
+            if (cmp == 0) {
+                return node;
+            }
+            pa[k] = node;
+            da[k] = cmp > 0;
+            k++;
+            node = cmp < 0 ? node.lchild : node.rchild;
+        }
+
+        node = new Node();
+        node.key = key;
+        node.value = value;
+        node.color = RB_RED;
+        setChild(pa[k - 1], da[k - 1], node);
+        if (this.height < k) {
+            this.height = k;
+        }
+
+        while (k >= 3 && pa[k - 1].color == RB_RED) {
+            if (da[k - 2] == false) {
+                var y = pa[k - 2].rchild;
+                if (y != null && y.color == RB_RED) {
+                    pa[k - 1].color = y.color = RB_BLACK;
+                    pa[k - 2].color = RB_RED;
+                    k -= 2;
+                } else {
+                    var x = null;
+                    if (da[k - 1] == false) {
+                        y = pa[k - 1];
+                    } else {
+                        x = pa[k - 1];
+                        y = x.rchild;
+                        x.rchild = y.lchild;
+                        y.lchild = x;
+                        pa[k - 2].lchild = y;
+                    }
+                    x = pa[k - 2];
+                    x.color = RB_RED;
+                    y.color = RB_BLACK;
+                    x.lchild = y.rchild;
+                    y.rchild = x;
+                    setChild(pa[k - 3], da[k - 3], y);
+                    break;
+                }
+            } else {
+                var y = pa[k - 2].lchild;
+                if (y != null && y.color == RB_RED) {
+                    pa[k - 1].color = y.color = RB_BLACK;
+                    pa[k - 2].color = RB_RED;
+                    k -= 2;
+                } else {
+                    var x = null;
+                    if (da[k - 1] == true) {
+                        y = pa[k - 1];
+                    } else {
+                        x = pa[k - 1];
+                        y = x.lchild;
+                        x.lchild = y.rchild;
+                        y.rchild = x;
+                        pa[k - 2].rchild = y;
+                    }
+                    x = pa[k - 2];
+                    x.color = RB_RED;
+                    y.color = RB_BLACK;
+                    x.rchild = y.lchild;
+                    y.lchild = x;
+                    setChild(pa[k - 3], da[k - 3], y);
+                    break;
+                }
+            }
+        }
+        this.root.color = RB_BLACK;
+        return null;
+    }
+
+    private static void setChild(Node parent, boolean dir, Node child) {
+        if (dir == false) {
+            parent.lchild = child;
+        } else {
+            parent.rchild = child;
+        }
+    }
+
+    Value put(Key key, Value value) {
+        var node = probe(key, value);
+        if (node == null) {
+            return null;
+        }
+        var oldValue = node.value;
+        node.value = value;
+        return oldValue;
+    }
+
+    Value putIfAbsent(Key key, Value value) {
+        var node = probe(key, value);
+        return (node == null ? null : node.value);
+    }
+}

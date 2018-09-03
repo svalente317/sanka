@@ -1,0 +1,39 @@
+package syntax;
+
+import dummy;
+
+class Class {
+    Type1 a, b, c;
+    private Type2 privateField;
+    static Type2 FIELD;
+    private inline Type3 inline_me;
+
+    // TODO export a;
+
+    // TODO static method
+
+    private Type1 method_name(qualified.Type p1, int p2) {
+        var x = 0;
+        var y = (-(x&255))&(x<<1);
+        inline var v1 = new Type1();
+        if (p1.random() + v1.random() < p2) {
+            return this.a;
+        }
+        while (this.a.equals(this.b)) {
+            var v2 = this.privateField;
+            if (v2.isTrue()) {
+                break;
+            } else {
+                continue;
+            }
+        }
+        var b1 = true;
+        var i1 = 17;
+        if (b1 && i1 == 17) {
+            this.a.getType2().type2Function();
+        }
+        return this.c;
+    }
+
+    // TODO arrays
+}

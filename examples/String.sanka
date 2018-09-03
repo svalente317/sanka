@@ -1,0 +1,110 @@
+class String {
+    private char[] data;
+
+    String(char[] data) {
+        this.data = data;
+    }
+
+    char charAt(int idx) {
+        return this.data[idx];
+    }
+
+    int length() {
+        return this.data.length;
+    }
+
+    int compareTo(String that) {
+        for (var idx = 0; true; idx++) {
+            if (idx == this.data.length && idx == that.data.length) {
+                break;
+            }
+            if (idx == this.data.length) {
+                return -1;
+            }
+            if (idx == that.data.length) {
+                return +1;
+            }
+            if (this.data[idx] < that.data[idx]) {
+                return -1;
+            }
+            if (this.data[idx] > that.data[idx]) {
+                return +1;
+            }
+        }
+        return 0;
+    }
+
+    boolean equals(String that) {
+        if (this.data.length != that.data.length) {
+            return false;
+        }
+        for (var idx = 0; idx < this.data.length; idx++) {
+            if (this.data[idx] != that.data[idx]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    int indexOf(String pattern) {
+        // Definition of overlap table:
+        // overlap[n] = "for the first n characters of the pattern,
+        // the length of the longest common prefix and suffix
+        // (but not the entire string)"
+        //
+        // Example #1: say pattern="A B A x A B A z" (spaces for clarity)
+        // overlap[1] is zero by definition.
+        // overlap[3] is overlap of "A B A" which is 1
+        // overlap[7] is overlap of "A B A x A B A" which is 3
+        //
+        // Notice that there is an interesting chain here.
+        // overlap[7] is 3, overlap[3] is 1, overlap[1] is 0.
+        // By following the chain, we find all common prefix/suffixes:
+        // "A B A", "A", "".
+        //
+        // Example #2: say pattern="N N N N N N N N N N".
+        // overlap[1] is zero by definition.
+        // overlap[2] is overlap of "N N" which is 1.
+        // overlap[X] is X-1 all the way up to overlap[10]=9.
+        // In each case, drop a single N for the "not entire string" rule.
+        // Again, there is a chain of common prefix/suffixes.
+
+        var overlapTable = getOverlapTable(pattern);
+        var matched = 0;
+        for (var idx = 0; idx < this.length(); idx++) {
+            while (true) {
+                if (this.charAt(idx) == pattern.charAt(matched)) {
+                    matched++;
+                    if (matched == pattern.length()) {
+                        return idx + 1 - matched;
+                    }
+                    break;
+                }
+                if (matched == 0) {
+                    break;
+                }
+                matched = overlapTable[matched];
+            }
+        }
+        return -1;
+    }
+
+    private int[] getOverlapTable(String pattern) {
+        var overlapTable = new int[pattern.length() + 1];
+        for (var idx = 2; idx <= pattern.length(); idx++) {
+            var matched = overlapTable[idx - 1];
+            while (true) {
+                if (pattern.charAt(idx - 1) == pattern.charAt(matched)) {
+                    overlapTable[idx] = matched + 1;
+                    break;
+                }
+                if (matched == 0) {
+                    overlapTable[idx] = 0;
+                    break;
+                }
+                matched = overlapTable[matched];
+            }
+        }
+        return overlapTable;
+    }
+}

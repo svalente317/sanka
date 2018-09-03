@@ -1,0 +1,7 @@
+<project name="sanka" default="compile">
+  <target name="compile">
+    <mkdir dir="bin"/>
+    <javac srcdir="src" destdir="bin" debug="on"
+           classpath="/usr/share/java/antlr4-runtime.jar"/>
+  </target>
+</project>
