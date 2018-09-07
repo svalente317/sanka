@@ -13,11 +13,11 @@ class Translator {
      * Pass 1: Parse each class. For each class, note the defined methods and signatures.
      */
     void parse(CompilationUnitContext ctx) {
+        Builtins.importBuiltins();
         Environment env = Environment.getInstance();
         if (ctx.packageDeclaration() != null) {
             env.currentPackage = ctx.packageDeclaration().qualifiedName().getText();
         }
-        // TODO importDeclaration
         if (ctx.typeDeclaration() == null) {
             return;
         }
@@ -32,16 +32,7 @@ class Translator {
             ClassDefinition classdef = new ClassDefinition();
             classdef.packageName = env.currentPackage;
             classdef.parse(ctx.classDeclaration());
-            String qualifiedName = classdef.packageName == null ? classdef.name :
-                classdef.packageName + "." + classdef.name;
-            if (env.classMap.containsKey(qualifiedName)) {
-                env.printError(ctx, "class " + qualifiedName + " already defined");
-            } else {
-                env.classMap.put(qualifiedName, classdef);
-            }
-        }
-        if (ctx.interfaceDeclaration() != null) {
-            // TODO interfaceDeclaration
+            env.classList.add(classdef);
         }
     }
 
@@ -50,8 +41,10 @@ class Translator {
      */
     void evaluate() {
         Environment env = Environment.getInstance();
-        for (ClassDefinition classdef : env.classMap.values()) {
-            classdef.evaluate();
+        for (ClassDefinition classdef : env.classList) {
+            if (!classdef.isImport) {
+                classdef.evaluate();
+            }
         }
     }
 
@@ -60,8 +53,12 @@ class Translator {
      */
     void translate() {
         Environment env = Environment.getInstance();
-        for (ClassDefinition classdef : env.classMap.values()) {
-            classdef.translate();
+        env.print("#include <sanka_header.h>");
+        for (ClassDefinition classdef : env.classList) {
+            if (!classdef.isImport) {
+                env.print("");
+                classdef.translate();
+            }
         }
     }
 

@@ -22,6 +22,7 @@ class ClassDefinition {
         boolean isInline;
     }
 
+    boolean isImport;
     boolean isInterface;
     String packageName;
     String name;
@@ -37,10 +38,13 @@ class ClassDefinition {
         this.exports = new LinkedList<>();
     }
 
+    String qualifiedName() {
+        return this.packageName == null ? this.name : this.packageName + "." + this.name;
+    }
+
     void parse(ClassDeclarationContext ctx) {
         Environment env = Environment.getInstance();
         this.name = ctx.Identifier().getText();
-        // TODO typeParameters
         if (ctx.classBody().classBodyDeclaration() == null) {
             return;
         }
@@ -71,10 +75,12 @@ class ClassDefinition {
                 MethodDefinition method = new MethodDefinition();
                 method.parse(item.methodDeclaration());
                 if (method.name.equals(this.name)) {
-                    env.printError(ctx, "class " + this.name + " constructor cannot have return type");
+                    env.printError(ctx, "class " + this.name +
+                            " constructor cannot have return type");
                 }
                 if (getMethod(method.name) != null) {
-                    env.printError(ctx, "class " + this.name + " method " + method.name + " already defined");
+                    env.printError(ctx, "class " + this.name + " method " + method.name +
+                            " already defined");
                 }
                 this.methodList.add(method);
             }
@@ -135,6 +141,9 @@ class ClassDefinition {
     void evaluate() {
         Environment env = Environment.getInstance();
         env.currentClass = this;
+        for (FieldDefinition field : this.fieldMap.values()) {
+            field.type.evaluate();
+        }
         if (this.constructor != null) {
             env.symbolTable = new TreeMap<>();
             this.constructor.evaluate();
@@ -147,7 +156,6 @@ class ClassDefinition {
 
     void translate() {
         Environment env = Environment.getInstance();
-        // TODO translate static fields to globals
         env.print("struct " + this.name + " {");
         env.level++;
         for (Map.Entry<String, FieldDefinition> entry : this.fieldMap.entrySet()) {
@@ -155,11 +163,10 @@ class ClassDefinition {
             if (field.isStatic) {
                 continue;
             }
-            // TODO inline
-            env.print(field.type.translate() + entry.getKey() + ";");
+            env.print(field.type.translateSpace() + entry.getKey() + ";");
         }
         env.level--;
-        env.print("}");
+        env.print("};");
         if (this.constructor != null) {
             this.constructor.returnType = TypeDefinition.VOID_TYPE;
             env.print("");

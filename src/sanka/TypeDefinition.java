@@ -2,6 +2,7 @@ package sanka;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -18,34 +19,32 @@ class TypeDefinition {
     static final TypeDefinition INT_TYPE = new TypeDefinition("int");
     static final TypeDefinition DOUBLE_TYPE = new TypeDefinition("double");
     static final TypeDefinition METHOD_TYPE = new TypeDefinition("method");
-    static final TypeDefinition STRING_TYPE = new TypeDefinition(null, "String");
+    static final TypeDefinition STRING_TYPE = new TypeDefinition("String");
 
+    ParserRuleContext parserCtx;
     String primitiveType;
     String packageName;
-    String typeName;
+    String name;
     int arrayCount;
 
     TypeDefinition() {
     }
 
-    TypeDefinition(String primitiveType) {
-        this.primitiveType = primitiveType;
-    }
-
-    TypeDefinition(String primitiveType, String typeName) {
-        this.primitiveType = primitiveType;
-        this.typeName = typeName;
+    private TypeDefinition(String name) {
+        if (name.equals("String")) {
+            this.name = name;
+        } else {
+            this.primitiveType = name;
+        }
     }
 
     TypeDefinition copy() {
-        TypeDefinition copy = new TypeDefinition(this.primitiveType, this.typeName);
+        TypeDefinition copy = new TypeDefinition();
+        copy.primitiveType = this.primitiveType;
         copy.packageName = this.packageName;
+        copy.name = this.name;
         copy.arrayCount = this.arrayCount;
         return copy;
-    }
-
-    public boolean equals(TypeDefinition that) {
-        return true;
     }
 
     @Override
@@ -54,11 +53,11 @@ class TypeDefinition {
         if (this.primitiveType != null) {
             text = this.primitiveType;
         }
-        else if (this.typeName != null) {
+        else if (this.name != null) {
             if (this.packageName != null) {
-                text = this.packageName + "." + this.typeName;
+                text = this.packageName + "." + this.name;
             } else {
-                text = this.typeName;
+                text = this.name;
             }
         }
         if (this.arrayCount > 0) {
@@ -87,6 +86,7 @@ class TypeDefinition {
     }
 
     void parse(PrimitiveTypeContext primitiveCtx, ClassOrInterfaceTypeContext classCtx) {
+        this.parserCtx = primitiveCtx;
         if (primitiveCtx != null) {
             Token token = primitiveCtx.getStart();
             this.primitiveType = token.getText();
@@ -95,13 +95,13 @@ class TypeDefinition {
             List<TerminalNode> ids = classCtx.Identifier();
             int idCount = ids.size();
             if (idCount == 1) {
-                this.typeName = ids.get(0).getText();
+                this.name = ids.get(0).getText();
             } else {
                 this.packageName = ids.get(0).getText();
                 for (int i = 1; i < idCount-1; i++) {
                     this.packageName += "." + ids.get(i).getText();
                 }
-                this.typeName = ids.get(idCount-1).getText();
+                this.name = ids.get(idCount-1).getText();
             }
         }
     }
@@ -130,6 +130,25 @@ class TypeDefinition {
                         this.primitiveType.equals("char"));
     }
 
+    void evaluate() {
+        if (this.primitiveType != null || this.packageName != null || this.name == null) {
+            return;
+        }
+        Environment env = Environment.getInstance();
+        boolean found = false;
+        for (ClassDefinition classdef : env.classList) {
+             if (this.name.equals(classdef.name)) {
+                 if (found) {
+                     env.printError(this.parserCtx, "type " + this.name + " in package " +
+                             this.packageName + " and " + classdef.packageName);
+                        return;
+                 }
+                 this.packageName = classdef.packageName;
+                 found = true;
+             }
+         }
+    }
+
     /**
      * isCompatible() is part of the evaluate pass.
      *
@@ -146,28 +165,41 @@ class TypeDefinition {
             return true;
         }
         if (that.isNullType()) {
-            return this.typeName != null || this.arrayCount > 0;
+            return this.name != null || this.arrayCount > 0;
         }
         if (this.arrayCount != that.arrayCount) {
             return false;
         }
         if (this.primitiveType != null) {
-            // TODO promotions of primitive types?
             return this.primitiveType.equals(that.primitiveType);
         }
-        // TODO package names - relative, absolute?
-        // TODO interfaces?
-        return this.typeName.equals(that.typeName);
+        boolean samePackage = this.packageName == null ? that.packageName == null :
+            this.packageName.equals(that.packageName);
+        return samePackage && this.name.equals(that.name);
     }
 
     String translate() {
         if (this.arrayCount > 0) {
-            return "struct array ";
+            return "struct array *";
         }
         if (this.primitiveType != null) {
-            return this.primitiveType + " ";
+            return this.primitiveType.equals("boolean") ? "int" : this.primitiveType;
         }
-        // TODO packageName
-        return "struct " + this.typeName + " *";
+        return "struct " + this.name + " *";
+    }
+
+    String translateSpace() {
+        String text = translate();
+        return text.endsWith("*") ? text : text + " ";
+    }
+
+    String translateDereference() {
+        if (this.arrayCount > 1) {
+            return "struct array *";
+        }
+        if (this.primitiveType != null) {
+            return null;
+        }
+        return "struct " + this.name;
     }
 }

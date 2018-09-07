@@ -26,11 +26,9 @@ class MethodDefinition {
     TypeDefinition returnType;
     String name;
     List<ParameterDefinition> parameters;
-    List<String> throwsList;
     StatementDefinition[] body;
 
     MethodDefinition() {
-        this.throwsList = new LinkedList<>();
         this.parameters = new LinkedList<>();
         this.body = null;
     }
@@ -53,7 +51,9 @@ class MethodDefinition {
                 }
             }
         }
-        if (returnTypeCtx != null) {
+        if (returnTypeCtx == null) {
+            this.returnType = TypeDefinition.VOID_TYPE;
+        } else {
             this.returnType = new TypeDefinition();
             this.returnType.parse(returnTypeCtx);
         }
@@ -90,7 +90,9 @@ class MethodDefinition {
     void evaluate() {
         Environment env = Environment.getInstance();
         env.currentMethod = this;
+        this.returnType.evaluate();
         for (ParameterDefinition param : this.parameters) {
+            param.type.evaluate();
             env.symbolTable.put(param.name, param.type);
         }
         for (StatementDefinition stmtdef : this.body) {
@@ -99,14 +101,14 @@ class MethodDefinition {
     }
 
     String parametersToString(String className) {
+        // Instead of hardcoding "struct" here, we could convert
+        // ClassDefinition -> TypeDefinition -> translate().
         String code = "struct " + className + " *this";
         if (this.parameters == null || this.parameters.isEmpty()) {
             return code;
         }
         for (ParameterDefinition param : this.parameters) {
-            // TODO dotdotdot?
-            String typeName = param.type.translate();
-            code = code + ", " + typeName + param.name;
+            code = code + ", " + param.type.translateSpace() + param.name;
         }
         return code;
     }
@@ -114,14 +116,17 @@ class MethodDefinition {
     void translate(String className) {
         Environment env = Environment.getInstance();
         String tag = this.isStatic ? "static " : "";
-        // TODO void return type fails?
-        env.print(tag + this.returnType.translate() + className + "__" + this.name + "(" +
-                  parametersToString(className) + ") {");
+        env.print(tag + this.returnType.translateSpace() + translatedName(className) +
+                "(" + parametersToString(className) + ") {");
         env.level++;
         for (StatementDefinition stmtdef : this.body) {
             stmtdef.translate();
         }
         env.level--;
         env.print("}");
+    }
+
+    String translatedName(String className) {
+        return className + "__" + this.name;
     }
 }

@@ -1,13 +1,14 @@
 package sanka;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
 class Environment {
 
-    Map<String, ClassDefinition> classMap;
+    List<ClassDefinition> classList;
     String currentPackage;
     int errorCount = 0;
 
@@ -16,9 +17,10 @@ class Environment {
     Map<String, TypeDefinition> symbolTable;
 
     int level = 0;
+    int tmpVariableCount = 0;
 
     Environment() {
-        this.classMap = new TreeMap<>();
+        this.classList = new LinkedList<>();
     }
 
     void printError(ParserRuleContext ctx, String error) {
@@ -35,11 +37,20 @@ class Environment {
     }
 
     ClassDefinition getClassDefinition(TypeDefinition typeDefinition) {
-        // TODO implicit package?
-        if (typeDefinition.typeName == null) {
+        if (typeDefinition.name == null) {
             return null;
         }
-        return this.classMap.get(typeDefinition.typeName);
+        for (ClassDefinition classdef : this.classList) {
+            if (classdef.qualifiedName().equals(typeDefinition.name)) {
+                return classdef;
+            }
+        }
+        return null;
+    }
+
+    String getTmpVariable() {
+        this.tmpVariableCount++;
+        return "tmp" + this.tmpVariableCount;
     }
 
     static Environment instance = null;

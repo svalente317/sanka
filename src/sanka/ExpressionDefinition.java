@@ -18,6 +18,12 @@ import sanka.antlr4.SankaParser.PrimaryContext;
 
 class ExpressionDefinition {
 
+    static enum ExpressionType {
+        LITERAL, IDENTIFIER, NEW_INSTANCE, NEW_ARRAY_WITH_VALUES, NEW_ARRAY_WITH_LENGTHS,
+        UNARY, FIELD_ACCESS, BINARY, ARRAY_ACCESS, FUNCTION_CALL, TERNARY
+    };
+
+    ExpressionType expressionType;
     TypeDefinition type;
     String name;
     String operator;
@@ -25,7 +31,12 @@ class ExpressionDefinition {
     ExpressionDefinition expression2;
     MethodDefinition method;
     ExpressionDefinition[] argList;
+    String translatedThis;
 
+    /**
+     * Run expression through pass 2 (of 3). Check for any type errors, and calculate the type
+     * of the expression.
+     */
     void evaluate(ExpressionContext ctx) {
         if (ctx.primary() != null) {
             evaluatePrimary(ctx.primary());
@@ -86,9 +97,10 @@ class ExpressionDefinition {
             this.evaluate(primary.parExpression().expression());
             return;
         }
+        this.expressionType = ExpressionType.LITERAL;
         this.name = primary.getText();
         if (primary.literal() != null) {
-            // TODO Parse all of the complex literals, such as:
+            // Parse all of the complex literals, such as:
             // * integers in binary, octal, hex
             // * floating points in hex and/or exp mode
             // * characters in octal mode
@@ -123,6 +135,7 @@ class ExpressionDefinition {
         }
         if (primary.Identifier() != null) {
             if (env.symbolTable.containsKey(this.name)) {
+                this.expressionType = ExpressionType.IDENTIFIER;
                 this.type = env.symbolTable.get(this.name);
                 if (this.type == null) {
                     env.printError(primary, "variable " + this.name + " used before defined");
@@ -131,79 +144,51 @@ class ExpressionDefinition {
             }
             this.method = env.currentClass.getMethod(this.name);
             if (this.method != null) {
+                this.expressionType = ExpressionType.FIELD_ACCESS;
                 this.type = TypeDefinition.METHOD_TYPE;
+                this.expression1 = new ExpressionDefinition();
+                this.expression1.evaluateThis();
                 return;
             }
-            // TODO class name and package name are valid
             env.printError(primary, "undefined variable: " + this.name);
             return;
         }
         if (this.name.equals("this")) {
-            this.type = new TypeDefinition();
-            this.type.packageName = env.currentClass.packageName;
-            this.type.typeName = env.currentClass.name;
+            evaluateThis();
             return;
         }
         env.printError(primary, "unknown primary expression");
     }
 
+    void evaluateThis() {
+        Environment env = Environment.getInstance();
+        this.expressionType = ExpressionType.IDENTIFIER;
+        this.name = "this";
+        this.type = new TypeDefinition();
+        this.type.packageName = env.currentClass.packageName;
+        this.type.name = env.currentClass.name;
+    }
+
+    /**
+     * Evaluate an expression like "new Class()" or "new Class[x]" or "new Class[]{...}".
+     */
     void evaluateCreator(CreatorContext creator) {
         Environment env = Environment.getInstance();
-        System.out.println(creator.getText());
         CreatedNameContext namectx = creator.createdName();
         this.type = new TypeDefinition();
         this.type.parse(namectx.primitiveType(), namectx.classOrInterfaceType());
+        this.type.evaluate();
         ClassDefinition classdef = env.getClassDefinition(this.type);
         if (this.type.primitiveType == null && classdef == null) {
             env.printError(creator, "class " + this.type + " undefined");
             this.type = null;
             return;
         }
-        ArrayCreatorRestContext arrayCreator = creator.arrayCreatorRest();
-        if (arrayCreator != null) {
-            if (arrayCreator.expression() == null) {
-                // Case 1: Count the number of [] pairs, and then evaluate the optional
-                // list of expressions as the array's value.
-                int childCount = arrayCreator.getChildCount();
-                for (int i = 0; i < childCount; i+= 2) {
-                    String ls = arrayCreator.getChild(i).getText();
-                    String rs = arrayCreator.getChild(i+1).getText();
-                    if (ls.equals("[") && rs.equals("]")) {
-                        this.type.arrayCount++;
-                    } else if (!ls.equals("{")) {
-                        env.printError(arrayCreator, "unrecognized array creator");
-                    }
-                }
-                // TODO evaluate expressionList
-                return;
-            }
-            // Case 2: Count the number of [] pairs, and also evaluate the lengths
-            // of the first one or more arrays.
-            int childCount = arrayCreator.getChildCount();
-            List<ExpressionDefinition> arrayLengths = new ArrayList<>();
-            for (int i = 0; i < childCount; i++) {
-                String ls = arrayCreator.getChild(i).getText();
-                if (!ls.equals("[")) {
-                    env.printError(arrayCreator, "unrecognized array creator");
-                    break;
-                }
-                i++;
-                if (arrayCreator.getChild(i) instanceof ExpressionContext) {
-                    ExpressionDefinition arrayLength = new ExpressionDefinition();
-                    arrayLength.evaluate((ExpressionContext) arrayCreator.getChild(i));
-                    arrayLengths.add(arrayLength);
-                    i++;
-                }
-                String rs = arrayCreator.getChild(i).getText();
-                if (!rs.equals("]")) {
-                    env.printError(arrayCreator, "unrecognized array creator");
-                    break;
-                }
-                this.type.arrayCount++;
-            }
-            // TODO Do something with arrayLengths
+        if (creator.arrayCreatorRest() != null) {
+            evaluateArrayCreator(creator.arrayCreatorRest());
             return;
         }
+        this.expressionType = ExpressionType.NEW_INSTANCE;
         if (classdef == null) {
             env.printError(creator, "cannot create new instance of primitive type " + this.type);
             return;
@@ -216,9 +201,61 @@ class ExpressionDefinition {
             return;
         }
         evaluateFunctionArguments(creator, classdef.constructor, exprlist);
-        // TODO evaluate classBody() for adapter expressions?
     }
 
+    /**
+     * Evaluate the array part of an expression like "new Class[x]" or "new Class[]{...}".
+     */
+    void evaluateArrayCreator(ArrayCreatorRestContext ctx) {
+        Environment env = Environment.getInstance();
+        if (ctx.expression() == null) {
+            // Case 1: Count the number of [] pairs, and then evaluate the optional
+            // list of expressions as the array's value.
+            this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
+            int childCount = ctx.getChildCount();
+            for (int i = 0; i < childCount; i+= 2) {
+                String ls = ctx.getChild(i).getText();
+                String rs = ctx.getChild(i+1).getText();
+                if (ls.equals("[") && rs.equals("]")) {
+                    this.type.arrayCount++;
+                } else if (!ls.equals("{")) {
+                    env.printError(ctx, "unrecognized array creator");
+                }
+            }
+            return;
+        }
+        // Case 2: Count the number of [] pairs, and also evaluate the lengths
+        // of the first one or more arrays.
+        this.expressionType = ExpressionType.NEW_ARRAY_WITH_LENGTHS;
+        int childCount = ctx.getChildCount();
+        List<ExpressionDefinition> arrayLengths = new ArrayList<>();
+        for (int i = 0; i < childCount; i++) {
+            String ls = ctx.getChild(i).getText();
+            if (!ls.equals("[")) {
+                env.printError(ctx, "unrecognized array creator");
+                break;
+            }
+            i++;
+            if (ctx.getChild(i) instanceof ExpressionContext) {
+                ExpressionDefinition arrayLength = new ExpressionDefinition();
+                arrayLength.evaluate((ExpressionContext) ctx.getChild(i));
+                arrayLengths.add(arrayLength);
+                i++;
+            }
+            String rs = ctx.getChild(i).getText();
+            if (!rs.equals("]")) {
+                env.printError(ctx, "unrecognized array creator");
+                break;
+            }
+            this.type.arrayCount++;
+        }
+        this.argList = arrayLengths.toArray(new ExpressionDefinition[0]);
+        return;
+    }
+
+    /**
+     * Check the expression has the necessary primitive type.
+     */
     void checkBooleanType(ParserRuleContext ctx, TypeDefinition type) {
         if (type != null) {
             if (!type.isBooleanType()) {
@@ -247,8 +284,8 @@ class ExpressionDefinition {
     }
 
     /**
-     * If one of these types could be promoted to be stored in a variable of the
-     * other type, then return the storage type.
+     * If one of these types could be promoted to be stored in a variable of the other type,
+     * then return the storage type.
      */
     TypeDefinition promoteType(TypeDefinition type1, TypeDefinition type2) {
         if (type1.isCompatible(type2)) {
@@ -261,6 +298,7 @@ class ExpressionDefinition {
     }
 
     void evaluateUnaryOp(ExpressionContext ctx) {
+        this.expressionType = ExpressionType.UNARY;
         this.expression1 = new ExpressionDefinition();
         this.expression1.evaluate(ctx);
         if (this.operator.equals("!")) {
@@ -275,6 +313,7 @@ class ExpressionDefinition {
 
     void evaluateFieldAccess(ExpressionContext expr, TerminalNode identifier) {
         Environment env = Environment.getInstance();
+        this.expressionType = ExpressionType.FIELD_ACCESS;
         this.expression1 = new ExpressionDefinition();
         this.expression1.evaluate(expr);
         this.name = identifier.getText();
@@ -308,31 +347,26 @@ class ExpressionDefinition {
             isPrivate = fielddef.isPrivate;
         }
         if (isPrivate && classdef != env.currentClass) {
-            env.printError(expr, "type " + this.expression1.type + " field " + this.name + " is private");
+            env.printError(expr, "type " + this.expression1.type + " field " + this.name +
+                    " is private");
         }
     }
 
     void evaluateBinaryOp(ExpressionContext lhs, ExpressionContext rhs) {
+        this.expressionType = ExpressionType.BINARY;
         this.expression1 = new ExpressionDefinition();
         this.expression1.evaluate(lhs);
         this.expression2 = new ExpressionDefinition();
         this.expression2.evaluate(rhs);
         if (this.expression1.type != null && this.expression2.type != null) {
-            // TODO character addition and subtraction
             if (this.operator.equals("*") || this.operator.equals("/") ||
                     this.operator.equals("+") || this.operator.equals("-")) {
                 checkNumericType(lhs, this.expression1.type);
                 checkNumericType(rhs, this.expression2.type);
-                // If either side is a char, then:
-                // 1. the other side must be a char or int.
-                // 2. the operator must be plus or minus.
-                // 3. the expression type is demoted to char.
-                // TODO
                 this.type = promoteType(this.expression1.type, this.expression2.type);
             }
             else if (this.operator.equals("<=") || this.operator.equals(">=") ||
                     this.operator.equals("<") || this.operator.equals(">")) {
-                    // TODO characters again
                 checkNumericType(lhs, this.expression1.type);
                 checkNumericType(rhs, this.expression2.type);
                 this.type = TypeDefinition.BOOLEAN_TYPE;
@@ -350,13 +384,13 @@ class ExpressionDefinition {
                 this.type = this.expression1.type;
             }
             else if (this.operator.equals("==") || this.operator.equals("!=")) {
-                // TODO Check that types are the same or comparable or null?
                 this.type = TypeDefinition.BOOLEAN_TYPE;
             }
         }
     }
 
     void evaluateArrayAccess(ExpressionContext expr, ExpressionContext itemExpr) {
+        this.expressionType = ExpressionType.ARRAY_ACCESS;
         Environment env = Environment.getInstance();
         this.expression1 = new ExpressionDefinition();
         this.expression1.evaluate(expr);
@@ -380,6 +414,7 @@ class ExpressionDefinition {
     }
 
     void evaluateFunctionCall(ExpressionContext expr, ExpressionListContext argumentList) {
+        this.expressionType = ExpressionType.FUNCTION_CALL;
         Environment env = Environment.getInstance();
         this.expression1 = new ExpressionDefinition();
         this.expression1.evaluate(expr);
@@ -407,7 +442,6 @@ class ExpressionDefinition {
         } else {
             this.argList = new ExpressionDefinition[0];
         }
-        // TODO support dot-dot-dot functions
         int paramCount = method.parameters.size();
         if (this.argList.length != paramCount) {
             env.printError(expr, "function takes " + paramCount + " arguments, " +
@@ -428,27 +462,259 @@ class ExpressionDefinition {
 
     void evaluateTernaryConditional(ExpressionContext expr1, ExpressionContext expr2,
             ExpressionContext expr3) {
-        Environment env = Environment.getInstance();
+        this.expressionType = ExpressionType.TERNARY;
         ExpressionDefinition exprdef1 = new ExpressionDefinition();
         exprdef1.evaluate(expr1);
         ExpressionDefinition exprdef2 = new ExpressionDefinition();
         exprdef2.evaluate(expr2);
         ExpressionDefinition exprdef3 = new ExpressionDefinition();
         exprdef3.evaluate(expr3);
-        if (exprdef1.type != null && !exprdef1.type.isBooleanType()) {
-            env.printError(expr1, "incompatible types: " + exprdef1.type +
-                    " cannot be converted to boolean");
-        }
+        checkBooleanType(expr1, exprdef1.type);
         if (exprdef2.type == null || exprdef3.type == null) {
-            return;
-        }
-        if (!exprdef2.type.equals(exprdef3.type)) {
-            env.printError(expr2, "expression has ambiguous type: " +
-                    exprdef2.type + " or " + exprdef3.type);
             return;
         }
         this.expression1 = exprdef1;
         this.argList = new ExpressionDefinition[] { exprdef2, exprdef3 };
         this.type = exprdef2.type;
+    }
+
+    // --------------------------------------------------------------------------------
+
+    /**
+     * Write any C statements necessary to setup the expression. Then, return a string of C code
+     * that evaluates to the expression, given the setup.
+     * Generate the C string such that it can be evaluated multiple times without side effects.
+     *
+     * variableName is an optional C variable which has been declared to the correct type.
+     * It can be used to store the evaluated expression if necessary.
+     */
+    String translate(String variableName) {
+        switch (this.expressionType) {
+        case LITERAL:
+            return translateLiteral();
+        case IDENTIFIER:
+            return this.name;
+        case NEW_INSTANCE:
+            return translateNewInstance(variableName);
+        case NEW_ARRAY_WITH_VALUES:
+            break;
+        case NEW_ARRAY_WITH_LENGTHS:
+            return translateNewArrayWithLengths(variableName);
+        case UNARY:
+            return translateUnary();
+        case FIELD_ACCESS:
+            return translateFieldAccess();
+        case BINARY:
+            return translateBinary();
+        case ARRAY_ACCESS:
+            return translateArrayAccess();
+        case FUNCTION_CALL:
+            return translateFunctionCall(variableName);
+        case TERNARY:
+            return translateTernary(variableName);
+        }
+        return null;
+    }
+
+    String translateLiteral() {
+        if (this.type == TypeDefinition.INT_TYPE || this.type == TypeDefinition.DOUBLE_TYPE) {
+            return this.name;
+        }
+        if (this.type == TypeDefinition.CHAR_TYPE) {
+            return this.name;
+        }
+        if (this.type == TypeDefinition.BOOLEAN_TYPE) {
+            return this.name.equals("true") ? "1" : (this.name.equals("false") ? "0" : "error");
+        }
+        if (this.type == TypeDefinition.STRING_TYPE) {
+            return "STRINGLITERAL(" + this.name + ")";
+        }
+        if (this.type == TypeDefinition.NULL_TYPE) {
+            return "NULL";
+        }
+        return "error";
+    }
+
+    String translateNewInstance(String variableName) {
+        Environment env = Environment.getInstance();
+        StringBuilder builder = new StringBuilder();
+        if (variableName == null) {
+            builder.append(this.type.translateSpace());
+            variableName = env.getTmpVariable();
+        }
+        builder.append(variableName);
+        builder.append(" = calloc(1, sizeof(");
+        builder.append(this.type.translateDereference());
+        builder.append("));");
+        StringBuilder builder2 = null;
+        ClassDefinition classdef = env.getClassDefinition(this.type);
+        if (classdef.constructor != null) {
+            builder2 = new StringBuilder();
+            builder2.append(classdef.constructor.translatedName(classdef.name));
+            builder2.append("(");
+            builder2.append(variableName);
+            if (this.argList != null) {
+               for (ExpressionDefinition arg : this.argList) {
+                   builder2.append(", ");
+                   builder2.append(arg.translate(null));
+               }
+            }
+            builder2.append(");");
+        }
+        env.print(builder.toString());
+        if (builder2 != null) {
+            env.print(builder2.toString());
+        }
+        return variableName;
+    }
+
+    String translateNewArrayWithLengths(String variableName) {
+        Environment env = Environment.getInstance();
+        StringBuilder builder = new StringBuilder();
+        if (variableName == null) {
+            builder.append(this.type.translateSpace());
+            variableName = env.getTmpVariable();
+        }
+        builder.append(variableName);
+        builder.append(" = NEWARRAY(");
+        builder.append(this.argList[0].translate(null));
+        builder.append(", sizeof(");
+        TypeDefinition itemType = this.type.copy();
+        itemType.arrayCount--;
+        builder.append(itemType.translate());
+        builder.append("));");
+        env.print(builder.toString());
+        return variableName;
+    }
+
+    String translateUnary() {
+        return this.operator + this.expression1.translate(null);
+    }
+
+    String translateFieldAccess() {
+        Environment env = Environment.getInstance();
+        String text = this.expression1.translate(null);
+        if (!text.equals("this")) {
+            env.print("NULLCHECK(" + text + ");");
+        }
+        if (this.type == TypeDefinition.METHOD_TYPE) {
+            // Generate the C function name. MethodDefinition has code to generate the
+            // C constructor name. Move both blocks of code to TranslationUtils.
+            this.translatedThis = text;
+            return this.expression1.type.name + "__" + this.name;
+        }
+        return text + "->" + this.name;
+    }
+
+    String translateBinary() {
+        Environment env = Environment.getInstance();
+        if (this.operator.equals("&&") || this.operator.equals("||")) {
+            StringBuilder builder = new StringBuilder();
+            String variableName = env.getTmpVariable();
+            builder.append("int ");
+            builder.append(variableName);
+            builder.append(" = ");
+            builder.append(this.expression1.translate(null));
+            builder.append(";");
+            env.print(builder.toString());
+            builder.setLength(0);
+            builder.append("if (");
+            if (operator.equals("||")) {
+                builder.append("!");
+            }
+            builder.append(variableName);
+            builder.append(") {");
+            env.print(builder.toString());
+            env.level++;
+            String text = this.expression2.translate(variableName);
+            setTextToVariable(text, variableName);
+            env.level--;
+            env.print("}");
+            return variableName;
+        }
+        String text1 = this.expression1.translate(null);
+        String text2 = this.expression2.translate(null);
+        if (this.operator.equals("/")) {
+            env.print("DIVISIONCHECK(" + text2 + ");");
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("(");
+        builder.append(text1);
+        builder.append(" ");
+        builder.append(this.operator);
+        builder.append(" ");
+        builder.append(text2);
+        builder.append(")");
+        return builder.toString();
+    }
+
+    void setTextToVariable(String text, String variableName) {
+        Environment env = Environment.getInstance();
+        if (!text.equals(variableName)) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(variableName);
+            builder.append(" = ");
+            builder.append(text);
+            builder.append(";");
+            env.print(builder.toString());
+        }
+    }
+
+    String translateArrayAccess() {
+        Environment env = Environment.getInstance();
+        String text1 = this.expression1.translate(null);
+        String text2 = this.expression2.translate(null);
+        env.print("BOUNDSCHECK(" + text1 + ", " + text2 + ");");
+        return text1 + "->data[" + text2 + "]";
+    }
+
+    String translateFunctionCall(String variableName) {
+        Environment env = Environment.getInstance();
+        StringBuilder builder = new StringBuilder();
+        if (variableName == null) {
+            builder.append(this.type.translateSpace());
+            variableName = env.getTmpVariable();
+        }
+        builder.append(variableName);
+        builder.append(" = ");
+        builder.append(this.expression1.translate(null));
+        builder.append("(");
+        builder.append(this.expression1.translatedThis);
+        for (ExpressionDefinition arg : this.argList) {
+            builder.append(", ");
+            builder.append(arg.translate(null));
+        }
+        builder.append(");");
+        env.print(builder.toString());
+        return variableName;
+    }
+
+    String translateTernary(String variableName) {
+        Environment env = Environment.getInstance();
+        String text;
+        StringBuilder builder = new StringBuilder();
+        if (variableName == null) {
+            variableName = env.getTmpVariable();
+            builder.append(this.type.translateSpace());
+            builder.append(variableName);
+            builder.append(";");
+            env.print(builder.toString());
+        }
+        builder.setLength(0);
+        builder.append("if (");
+        builder.append(this.expression1.translate(null));
+        builder.append(") {");
+        env.print(builder.toString());
+        env.level++;
+        text = this.argList[0].translate(variableName);
+        setTextToVariable(text, variableName);
+        env.level--;
+        env.print("} else {");
+        env.level++;
+        text = this.argList[1].translate(variableName);
+        setTextToVariable(text, variableName);
+        env.level--;
+        env.print("}");
+        return variableName;
     }
 }

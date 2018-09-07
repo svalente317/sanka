@@ -1,6 +1,7 @@
 #!/bin/sh
+dir="$PWD"
 src="$1"
 if [ -z "$src" ]; then
-    src="${HOME}/shared/sanka/examples/Syntax.sk"
+    src="${dir}/examples/Syntax.sk"
 fi
-exec java -cp ${HOME}/shared/sanka/bin:/usr/share/java/antlr4-runtime.jar sanka/Translator "$src"
+exec java -cp ${dir}/bin:/usr/share/java/antlr4-runtime.jar sanka/Translator "$src"
