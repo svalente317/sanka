@@ -1,0 +1,27 @@
+// -*- mode: Java; -*-
+
+class Podo {
+    int intField;
+}
+
+class Class {
+    void method() {
+        var podo = new Podo();
+        var x;
+        for (var i = 0; i < 10; i++) {
+            if (x != null) {
+                if (x == podo) {
+                    break;
+                }
+                if (x == "podo") {
+                    break;
+                }
+            }
+            if (i % 2 == 0) {
+                x = null;
+            } else {
+                x = podo;
+            }
+        }
+    }
+}

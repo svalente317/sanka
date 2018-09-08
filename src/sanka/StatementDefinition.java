@@ -128,7 +128,7 @@ public class StatementDefinition {
             env.printError(vc, "variable " + this.name + " declared twice");
         }
         if (vc.expression() == null) {
-            env.symbolTable.put(this.name, null);
+            env.symbolTable.put(this.name, TypeDefinition.NULL_TYPE);
         } else {
             this.expression = new ExpressionDefinition();
             this.expression.evaluate(vc.expression());
@@ -180,7 +180,7 @@ public class StatementDefinition {
                         "array type " + type + ": cannot modify fields (" + this.name + ")");
                 return;
             }
-            if (type.primitiveType != null) {
+            if (type.isPrimitiveType) {
                 env.printError(assignment,
                         "primitive type " + type + ": cannot modify fields (" + this.name + ")");
                 return;
@@ -215,20 +215,16 @@ public class StatementDefinition {
             // Ok, we allow this field assignment.
             return;
         }
-        if (!env.symbolTable.containsKey(this.name)) {
+        TypeDefinition varType = env.symbolTable.get(this.name);
+        if (varType == null) {
             env.printError(assignment, "variable " + this.name + " undefined");
             return;
         }
-        TypeDefinition varType = env.symbolTable.get(this.name);
-        if (varType == null) {
-            if (this.statementType != SankaLexer.EQUAL) {
-                env.printError(assignment, "variable " + this.name + " uninitialized");
-                return;
-            }
-            env.symbolTable.put(this.name, this.expression.type);
-            return;
-        }
         if (this.statementType == SankaLexer.EQUAL) {
+            if (varType.isNullType()) {
+                varType = this.expression.type;
+                env.symbolTable.put(this.name, varType);
+            }
             if (!varType.isCompatible(this.expression.type)) {
                 env.printError(assignment, "incompatible types: " + this.expression.type +
                         " cannot be converted to " + varType);
@@ -397,6 +393,12 @@ public class StatementDefinition {
             env.level++;
             translateStatementInBlock(this.statement1);
             env.level--;
+            if (this.statementType == SankaLexer.IF && this.statement2 != null) {
+                env.print("} else {");
+                env.level++;
+                translateStatementInBlock(this.statement2);
+                env.level--;
+            }
             env.print("}");
             return;
         case SankaLexer.FOR:

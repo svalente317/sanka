@@ -137,9 +137,6 @@ class ExpressionDefinition {
             if (env.symbolTable.containsKey(this.name)) {
                 this.expressionType = ExpressionType.IDENTIFIER;
                 this.type = env.symbolTable.get(this.name);
-                if (this.type == null) {
-                    env.printError(primary, "variable " + this.name + " used before defined");
-                }
                 return;
             }
             this.method = env.currentClass.getMethod(this.name);
@@ -178,11 +175,14 @@ class ExpressionDefinition {
         this.type = new TypeDefinition();
         this.type.parse(namectx.primitiveType(), namectx.classOrInterfaceType());
         this.type.evaluate();
-        ClassDefinition classdef = env.getClassDefinition(this.type);
-        if (this.type.primitiveType == null && classdef == null) {
-            env.printError(creator, "class " + this.type + " undefined");
-            this.type = null;
-            return;
+        ClassDefinition classdef = null;
+        if (!this.type.isPrimitiveType) {
+            classdef = env.getClassDefinition(this.type);
+            if (classdef == null) {
+                env.printError(creator, "class " + this.type + " undefined");
+                this.type = null;
+                return;
+            }
         }
         if (creator.arrayCreatorRest() != null) {
             evaluateArrayCreator(creator.arrayCreatorRest());
@@ -665,7 +665,7 @@ class ExpressionDefinition {
         String text1 = this.expression1.translate(null);
         String text2 = this.expression2.translate(null);
         env.print("BOUNDSCHECK(" + text1 + ", " + text2 + ");");
-        return text1 + "->data[" + text2 + "]";
+        return "ARRCAST(" + text1 + ", " + this.type.translate() + ")[" + text2 + "]";
     }
 
     String translateFunctionCall(String variableName) {

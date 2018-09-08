@@ -37,5 +37,8 @@ static inline void DIVISIONCHECK(long d) {
 
 static inline void BOUNDSCHECK(struct array *a, int idx) {
 	NULLCHECK(a);
-    if (idx < 0 || idx >= a.length) PANIC("array bounds error");
+    if (idx < 0 || idx >= a->length) PANIC("array bounds error");
 }
+
+#define ARRCAST(e, t) ((t*)e->data)
+

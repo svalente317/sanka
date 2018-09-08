@@ -22,7 +22,7 @@ class TypeDefinition {
     static final TypeDefinition STRING_TYPE = new TypeDefinition("String");
 
     ParserRuleContext parserCtx;
-    String primitiveType;
+    boolean isPrimitiveType;
     String packageName;
     String name;
     int arrayCount;
@@ -31,16 +31,13 @@ class TypeDefinition {
     }
 
     private TypeDefinition(String name) {
-        if (name.equals("String")) {
-            this.name = name;
-        } else {
-            this.primitiveType = name;
-        }
+        this.isPrimitiveType = !name.equals("String");
+        this.name = name;
     }
 
     TypeDefinition copy() {
         TypeDefinition copy = new TypeDefinition();
-        copy.primitiveType = this.primitiveType;
+        copy.isPrimitiveType = this.isPrimitiveType;
         copy.packageName = this.packageName;
         copy.name = this.name;
         copy.arrayCount = this.arrayCount;
@@ -50,10 +47,7 @@ class TypeDefinition {
     @Override
     public String toString() {
         String text = "undefined";
-        if (this.primitiveType != null) {
-            text = this.primitiveType;
-        }
-        else if (this.name != null) {
+        if (this.name != null) {
             if (this.packageName != null) {
                 text = this.packageName + "." + this.name;
             } else {
@@ -89,7 +83,8 @@ class TypeDefinition {
         this.parserCtx = primitiveCtx;
         if (primitiveCtx != null) {
             Token token = primitiveCtx.getStart();
-            this.primitiveType = token.getText();
+            this.isPrimitiveType = true;
+            this.name = token.getText();
         }
         if (classCtx != null) {
             List<TerminalNode> ids = classCtx.Identifier();
@@ -107,31 +102,27 @@ class TypeDefinition {
     }
 
     boolean isNullType() {
-        return this.primitiveType != null && this.arrayCount == 0 &&
-                this.primitiveType.equals("null");
+        return this.isPrimitiveType && this.arrayCount == 0 && this.name.equals("null");
     }
 
     boolean isBooleanType() {
-        return this.primitiveType != null && this.arrayCount == 0 &&
-                this.primitiveType.equals("boolean");
+        return this.isPrimitiveType && this.arrayCount == 0 && this.name.equals("boolean");
     }
 
     boolean isIntegralType() {
-        return this.primitiveType != null && this.arrayCount == 0 &&
-                (this.primitiveType.equals("int") || this.primitiveType.equals("long"));
+        return this.isPrimitiveType && this.arrayCount == 0 &&
+                (this.name.equals("int") || this.name.equals("long"));
     }
 
     boolean isNumericType() {
-        return this.primitiveType != null && this.arrayCount == 0 &&
-                (this.primitiveType.equals("int") ||
-                        this.primitiveType.equals("long") ||
-                        this.primitiveType.equals("float") ||
-                        this.primitiveType.equals("double") ||
-                        this.primitiveType.equals("char"));
+        return this.isPrimitiveType && this.arrayCount == 0 &&
+                (this.name.equals("int") || this.name.equals("long") ||
+                        this.name.equals("float") || this.name.equals("double") ||
+                        this.name.equals("char"));
     }
 
     void evaluate() {
-        if (this.primitiveType != null || this.packageName != null || this.name == null) {
+        if (this.isPrimitiveType || this.packageName != null || this.name == null) {
             return;
         }
         Environment env = Environment.getInstance();
@@ -165,13 +156,13 @@ class TypeDefinition {
             return true;
         }
         if (that.isNullType()) {
-            return this.name != null || this.arrayCount > 0;
+            return this.isNullType() || !this.isPrimitiveType || this.arrayCount > 0;
         }
         if (this.arrayCount != that.arrayCount) {
             return false;
         }
-        if (this.primitiveType != null) {
-            return this.primitiveType.equals(that.primitiveType);
+        if (this.isPrimitiveType != that.isPrimitiveType) {
+            return false;
         }
         boolean samePackage = this.packageName == null ? that.packageName == null :
             this.packageName.equals(that.packageName);
@@ -182,8 +173,8 @@ class TypeDefinition {
         if (this.arrayCount > 0) {
             return "struct array *";
         }
-        if (this.primitiveType != null) {
-            return this.primitiveType.equals("boolean") ? "int" : this.primitiveType;
+        if (this.isPrimitiveType) {
+            return this.name.equals("boolean") ? "int" : this.name;
         }
         return "struct " + this.name + " *";
     }
@@ -197,7 +188,7 @@ class TypeDefinition {
         if (this.arrayCount > 1) {
             return "struct array *";
         }
-        if (this.primitiveType != null) {
+        if (this.isPrimitiveType) {
             return null;
         }
         return "struct " + this.name;
