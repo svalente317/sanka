@@ -1,4 +1,4 @@
-// Generated from Sanka.g4 by ANTLR 4.5.1
+// Generated from src/sanka/Sanka.g4 by ANTLR 4.5.1
 
     package sanka.antlr4;
 
@@ -373,18 +373,6 @@ public class SankaBaseListener implements SankaListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitStatement(SankaParser.StatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterBlockAsStatement(SankaParser.BlockAsStatementContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitBlockAsStatement(SankaParser.BlockAsStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

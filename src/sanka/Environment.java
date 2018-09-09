@@ -2,7 +2,6 @@ package sanka;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -14,13 +13,14 @@ class Environment {
 
     ClassDefinition currentClass;
     MethodDefinition currentMethod;
-    Map<String, TypeDefinition> symbolTable;
+    SymbolTable symbolTable;
 
     int level = 0;
     int tmpVariableCount = 0;
 
     Environment() {
         this.classList = new LinkedList<>();
+        this.symbolTable = new SymbolTable();
     }
 
     void printError(ParserRuleContext ctx, String error) {
@@ -41,7 +41,10 @@ class Environment {
             return null;
         }
         for (ClassDefinition classdef : this.classList) {
-            if (classdef.qualifiedName().equals(typeDefinition.name)) {
+            boolean samePackage = classdef.packageName == null ?
+                    typeDefinition.packageName == null :
+                        classdef.packageName.equals(typeDefinition.packageName);
+            if (samePackage && classdef.name.equals(typeDefinition.name)) {
                 return classdef;
             }
         }

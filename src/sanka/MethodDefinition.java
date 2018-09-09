@@ -27,6 +27,7 @@ class MethodDefinition {
     String name;
     List<ParameterDefinition> parameters;
     StatementDefinition[] body;
+    SymbolTable.Frame endSymbols;
 
     MethodDefinition() {
         this.parameters = new LinkedList<>();
@@ -90,6 +91,7 @@ class MethodDefinition {
     void evaluate() {
         Environment env = Environment.getInstance();
         env.currentMethod = this;
+        env.symbolTable.push(null);
         this.returnType.evaluate();
         for (ParameterDefinition param : this.parameters) {
             param.type.evaluate();
@@ -98,6 +100,7 @@ class MethodDefinition {
         for (StatementDefinition stmtdef : this.body) {
             stmtdef.evaluate();
         }
+        this.endSymbols = env.symbolTable.pop();
     }
 
     String parametersToString(String className) {
@@ -115,6 +118,7 @@ class MethodDefinition {
 
     void translate(String className) {
         Environment env = Environment.getInstance();
+        env.symbolTable.push(this.endSymbols);
         String tag = this.isStatic ? "static " : "";
         env.print(tag + this.returnType.translateSpace() + translatedName(className) +
                 "(" + parametersToString(className) + ") {");
@@ -124,6 +128,7 @@ class MethodDefinition {
         }
         env.level--;
         env.print("}");
+        env.symbolTable.pop();
     }
 
     String translatedName(String className) {

@@ -1,6 +1,6 @@
 // -*- mode: Java; -*-
 
-// package syntax;
+package syntax;
 
 class Podo {
     int intField;
@@ -45,4 +45,3 @@ class Class {
         return z == 0;
     }
 }
-

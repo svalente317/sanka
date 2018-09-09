@@ -1,4 +1,4 @@
-// Generated from Sanka.g4 by ANTLR 4.5.1
+// Generated from src/sanka/Sanka.g4 by ANTLR 4.5.1
 
     package sanka.antlr4;
 
@@ -309,16 +309,6 @@ public interface SankaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStatement(SankaParser.StatementContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SankaParser#blockAsStatement}.
-	 * @param ctx the parse tree
-	 */
-	void enterBlockAsStatement(SankaParser.BlockAsStatementContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SankaParser#blockAsStatement}.
-	 * @param ctx the parse tree
-	 */
-	void exitBlockAsStatement(SankaParser.BlockAsStatementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SankaParser#variableDeclaration}.
 	 * @param ctx the parse tree

@@ -1,13 +1,12 @@
 package sanka;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import sanka.ClassDefinition.FieldDefinition;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.AssignableContext;
+import sanka.antlr4.SankaParser.BlockContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.ForControlContext;
 import sanka.antlr4.SankaParser.ForIncrementContext;
@@ -23,9 +22,9 @@ public class StatementDefinition {
     ExpressionDefinition lhsExpression;
     String name;
     ExpressionDefinition expression;
-    StatementDefinition[] block;
-    StatementDefinition statement1;
-    StatementDefinition statement2;
+    BlockDefinition block;
+    BlockDefinition elseBlock;
+    StatementDefinition[] forStatements;
 
     void parse(StatementContext ctx) {
         this.ctx = ctx;
@@ -52,16 +51,6 @@ public class StatementDefinition {
             evaluateVariableAssignment(this.ctx.variableAssignment());
             return;
         }
-        if (this.ctx.blockAsStatement() != null) {
-            this.statementType = SankaLexer.LBRACE;
-            List<StatementContext> statements = this.ctx.blockAsStatement().block().statement();
-            this.block = new StatementDefinition[statements.size()];
-            for (int idx = 0; idx < this.block.length; idx++) {
-                this.block[idx] = new StatementDefinition();
-                this.block[idx].evaluate(statements.get(idx));
-            }
-            return;
-        }
         if (this.ctx.getChildCount() == 2) {
             ParseTree child0 = this.ctx.getChild(0);
             ParseTree child1 = this.ctx.getChild(1);
@@ -76,27 +65,30 @@ public class StatementDefinition {
         switch (this.statementType) {
         case SankaLexer.IF:
             evaluateBooleanExpression(this.ctx.parExpression().expression());
-            this.statement1 = new StatementDefinition();
-            this.statement1.evaluate(this.ctx.statement(0));
-            if (this.ctx.statement(1) != null) {
-                this.statement2 = new StatementDefinition();
-                this.statement2.evaluate(this.ctx.statement(1));
+            this.block = new BlockDefinition();
+            this.block.evaluate(this.ctx.block(0));
+            if (this.ctx.block(1) != null) {
+                this.elseBlock = new BlockDefinition();
+                this.elseBlock.evaluate(this.ctx.block(1));
             }
             return;
         case SankaLexer.WHILE:
             evaluateBooleanExpression(this.ctx.parExpression().expression());
-            this.statement1 = new StatementDefinition();
-            this.statement1.evaluate(this.ctx.statement(0));
+            this.block = new BlockDefinition();
+            this.block.evaluate(this.ctx.block(0));
             return;
         case SankaLexer.FOR:
-            evaluateFor(this.ctx.forControl(), this.ctx.statement(0));
+            evaluateFor(this.ctx.forControl(), this.ctx.block(0));
             return;
         case SankaLexer.SWITCH:
             env.printError(this.ctx, "switch support not implemented");
             return;
         case SankaLexer.RETURN:
             if (this.ctx.expression() == null) {
-                // check void
+                TypeDefinition desired = env.currentMethod.returnType;
+                if (!desired.isVoidType()) {
+                    env.printError(this.ctx, "method must return a value of type " + desired);
+                }
                 return;
             }
             this.expression = new ExpressionDefinition();
@@ -114,6 +106,12 @@ public class StatementDefinition {
         case SankaLexer.SEMI:
             return;
         }
+        if (this.ctx.block(0) != null) {
+            this.statementType = SankaLexer.LBRACE;
+            this.block = new BlockDefinition();
+            this.block.evaluate(this.ctx.block(0));
+            return;
+        }
         env.printError(this.ctx, "unrecognized statement");
     }
 
@@ -124,7 +122,7 @@ public class StatementDefinition {
         Environment env = Environment.getInstance();
         this.statementType = SankaLexer.VAR;
         this.name = vc.Identifier().getText();
-        if (env.symbolTable.containsKey(this.name)) {
+        if (env.symbolTable.get(this.name) != null) {
             env.printError(vc, "variable " + this.name + " declared twice");
         }
         if (vc.expression() == null) {
@@ -176,27 +174,27 @@ public class StatementDefinition {
                 return;
             }
             if (type.arrayCount > 0) {
-                env.printError(assignment,
-                        "array type " + type + ": cannot modify fields (" + this.name + ")");
+                env.printError(assignment, "array type " + type +
+                        ": cannot modify fields (" + this.name + ")");
                 return;
             }
             if (type.isPrimitiveType) {
-                env.printError(assignment,
-                        "primitive type " + type + ": cannot modify fields (" + this.name + ")");
+                env.printError(assignment, "primitive type " + type +
+                        ": cannot modify fields (" + this.name + ")");
                 return;
             }
             ClassDefinition classdef = env.getClassDefinition(type);
             if (classdef == null) {
-                env.printError(assignment, "type " + type + " undefined");
+                env.printError(assignment, "class " + type + " undefined");
                 return;
             }
             FieldDefinition fielddef = classdef.fieldMap.get(this.name);
             if (fielddef == null) {
-                env.printError(assignment, "type " + type + " does not have field " + this.name);
+                env.printError(assignment, "class " + type + " does not have field " + this.name);
                 return;
             }
             if (fielddef.isPrivate && classdef != env.currentClass) {
-                env.printError(assignment, "type " + type + " field " + this.name +
+                env.printError(assignment, "class " + type + " field " + this.name +
                         " is private");
             }
             if (this.statementType == SankaLexer.EQUAL) {
@@ -223,7 +221,7 @@ public class StatementDefinition {
         if (this.statementType == SankaLexer.EQUAL) {
             if (varType.isNullType()) {
                 varType = this.expression.type;
-                env.symbolTable.put(this.name, varType);
+                env.symbolTable.promote(this.name, varType);
             }
             if (!varType.isCompatible(this.expression.type)) {
                 env.printError(assignment, "incompatible types: " + this.expression.type +
@@ -267,37 +265,37 @@ public class StatementDefinition {
     /**
      * Evaluate a "for" statement.
      */
-    void evaluateFor(ForControlContext forControl, StatementContext statementCtx) {
+    void evaluateFor(ForControlContext forControl, BlockContext blockCtx) {
         if (forControl.enhancedForControl() != null) {
             return;
         }
-        this.block = new StatementDefinition[3];
+        this.forStatements = new StatementDefinition[2];
         ForInitContext forInit = forControl.forInit();
         if (forInit != null) {
-            this.block[0] = new StatementDefinition();
+            this.forStatements[0] = new StatementDefinition();
             if (forInit.variableDeclaration() != null) {
-                this.block[0].evaluateVariableDeclaration(forInit.variableDeclaration());
+                this.forStatements[0].evaluateVariableDeclaration(forInit.variableDeclaration());
             }
             else if (forInit.variableAssignment() != null) {
-                this.block[0].evaluateVariableAssignment(forInit.variableAssignment());
+                this.forStatements[0].evaluateVariableAssignment(forInit.variableAssignment());
             }
             else if (forInit.expression() != null) {
-                this.block[0].evaluateExpressionStatement(forInit.expression());
+                this.forStatements[0].evaluateExpressionStatement(forInit.expression());
             }
         }
         evaluateBooleanExpression(forControl.expression());
         ForIncrementContext forIncrement = forControl.forIncrement();
         if (forIncrement != null) {
-            this.block[1] = new StatementDefinition();
+            this.forStatements[1] = new StatementDefinition();
             if (forIncrement.variableAssignment() != null) {
-                this.block[1].evaluateVariableAssignment(forIncrement.variableAssignment());
+                this.forStatements[1].evaluateVariableAssignment(forIncrement.variableAssignment());
             }
             else if (forIncrement.expression() != null) {
-                this.block[1].evaluateExpressionStatement(forIncrement.expression());
+                this.forStatements[1].evaluateExpressionStatement(forIncrement.expression());
             }
         }
-        this.block[2] = new StatementDefinition();
-        this.block[2].evaluate(statementCtx);
+        this.block = new BlockDefinition();
+        this.block.evaluate(blockCtx);
     }
 
     /**
@@ -311,10 +309,17 @@ public class StatementDefinition {
         case SankaLexer.CONST:
             break;
         case SankaLexer.VAR:
+            builder = new StringBuilder();
             if (this.expression == null) {
+                TypeDefinition type = env.symbolTable.get(this.name);
+                if (type != null && !type.isNullType()) {
+                     builder.append(type.translateSpace());
+                     builder.append(this.name);
+                     builder.append(" = 0;");
+                     env.print(builder.toString());
+                }
                 return;
             }
-            builder = new StringBuilder();
             builder.append(this.expression.type.translateSpace());
             builder.append(this.name);
             builder.append(";");
@@ -330,14 +335,8 @@ public class StatementDefinition {
             }
             return;
         case SankaLexer.LBRACE:
-            env.print("{");
-            env.level++;
-            for (StatementDefinition statementdef : this.block) {
-                statementdef.translate();
-            }
-            env.level--;
-            env.print("}");
-            break;
+            this.block.translate(true);
+            return;
         case SankaLexer.EQUAL:
         case SankaLexer.INC:
         case SankaLexer.DEC:
@@ -391,19 +390,19 @@ public class StatementDefinition {
             builder.append(") {");
             env.print(builder.toString());
             env.level++;
-            translateStatementInBlock(this.statement1);
+            this.block.translate(false);
             env.level--;
-            if (this.statementType == SankaLexer.IF && this.statement2 != null) {
+            if (this.statementType == SankaLexer.IF && this.elseBlock != null) {
                 env.print("} else {");
                 env.level++;
-                translateStatementInBlock(this.statement2);
+                this.elseBlock.translate(false);
                 env.level--;
             }
             env.print("}");
             return;
         case SankaLexer.FOR:
-            if (this.block[0] != null) {
-                this.block[0].translate();
+            if (this.forStatements[0] != null) {
+                this.forStatements[0].translate();
             }
             builder = new StringBuilder();
             builder.append("while (1) {");
@@ -414,9 +413,9 @@ public class StatementDefinition {
             builder.append(this.expression.translate(null));
             builder.append(") break;");
             env.print(builder.toString());
-            translateStatementInBlock(this.block[2]);
-            if (this.block[1] != null) {
-                this.block[1].translate();
+            this.block.translate(false);
+            if (this.forStatements[1] != null) {
+                this.forStatements[1].translate();
             }
             env.level--;
             env.print("}");
@@ -446,16 +445,6 @@ public class StatementDefinition {
         case SankaLexer.SEMI:
             env.print(";");
             return;
-        }
-    }
-
-    void translateStatementInBlock(StatementDefinition body) {
-        if (body.statementType == SankaLexer.LBRACE) {
-            for (StatementDefinition statementdef : body.block) {
-                statementdef.translate();
-            }
-        } else {
-            body.translate();
         }
     }
 }

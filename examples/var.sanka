@@ -13,7 +13,7 @@ class Class {
                 if (x == podo) {
                     break;
                 }
-                if (x == "podo") {
+                if (x == "string") {
                     break;
                 }
             }
@@ -23,5 +23,16 @@ class Class {
                 x = podo;
             }
         }
+        if (true) {
+            var y = 1;
+            print("hello", y);
+        }
+        if (true) {
+            var y = "hello";
+            print(y, 1);
+        }
+    }
+
+    void print(String s, int i) {
     }
 }

@@ -134,9 +134,9 @@ class ExpressionDefinition {
             }
         }
         if (primary.Identifier() != null) {
-            if (env.symbolTable.containsKey(this.name)) {
+            this.type = env.symbolTable.get(this.name);
+            if (this.type != null) {
                 this.expressionType = ExpressionType.IDENTIFIER;
-                this.type = env.symbolTable.get(this.name);
                 return;
             }
             this.method = env.currentClass.getMethod(this.name);
@@ -326,7 +326,7 @@ class ExpressionDefinition {
         if (this.expression1.type.arrayCount == 0) {
             classdef = env.getClassDefinition(this.expression1.type);
             if (classdef == null) {
-                env.printError(expr, "type " + this.expression1.type + " undefined");
+                env.printError(expr, "class " + this.expression1.type + " undefined");
                 return;
             }
         } else {
@@ -337,7 +337,7 @@ class ExpressionDefinition {
         if (fielddef == null) {
              this.method = classdef.getMethod(this.name);
              if (this.method == null) {
-                 env.printError(expr, "type " + this.type + " does not have field " + this.name);
+                 env.printError(expr, "class " + this.type + " does not have field " + this.name);
                  return;
              }
              this.type = TypeDefinition.METHOD_TYPE;
@@ -347,7 +347,7 @@ class ExpressionDefinition {
             isPrivate = fielddef.isPrivate;
         }
         if (isPrivate && classdef != env.currentClass) {
-            env.printError(expr, "type " + this.expression1.type + " field " + this.name +
+            env.printError(expr, "class " + this.expression1.type + " field " + this.name +
                     " is private");
         }
     }

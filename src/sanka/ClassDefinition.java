@@ -145,11 +145,9 @@ class ClassDefinition {
             field.type.evaluate();
         }
         if (this.constructor != null) {
-            env.symbolTable = new TreeMap<>();
             this.constructor.evaluate();
         }
         for (MethodDefinition method : this.methodList) {
-            env.symbolTable = new TreeMap<>();
             method.evaluate();
         }
     }

@@ -105,20 +105,24 @@ class TypeDefinition {
         return this.isPrimitiveType && this.arrayCount == 0 && this.name.equals("null");
     }
 
+    boolean isVoidType() {
+        return this.isPrimitiveType && this.arrayCount == 0 && this.name.equals("void");
+    }
+
     boolean isBooleanType() {
         return this.isPrimitiveType && this.arrayCount == 0 && this.name.equals("boolean");
     }
 
     boolean isIntegralType() {
         return this.isPrimitiveType && this.arrayCount == 0 &&
-                (this.name.equals("int") || this.name.equals("long"));
+                (this.name.equals("int") || this.name.equals("long") || this.name.equals("short"));
     }
 
     boolean isNumericType() {
         return this.isPrimitiveType && this.arrayCount == 0 &&
                 (this.name.equals("int") || this.name.equals("long") ||
                         this.name.equals("float") || this.name.equals("double") ||
-                        this.name.equals("char"));
+                        this.name.equals("short") || this.name.equals("char"));
     }
 
     void evaluate() {
@@ -130,7 +134,7 @@ class TypeDefinition {
         for (ClassDefinition classdef : env.classList) {
              if (this.name.equals(classdef.name)) {
                  if (found) {
-                     env.printError(this.parserCtx, "type " + this.name + " in package " +
+                     env.printError(this.parserCtx, "class " + this.name + " in package " +
                              this.packageName + " and " + classdef.packageName);
                         return;
                  }

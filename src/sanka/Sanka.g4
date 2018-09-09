@@ -178,23 +178,19 @@ block
     ;
 
 statement
-    :   blockAsStatement
+    :   block
     |   constDeclaration
     |   variableDeclaration ';'
     |   variableAssignment ';'
-    |   'if' parExpression statement ('else' statement)?
-    |   'for' '(' forControl ')' statement
-    |   'while' parExpression statement
+    |   'if' parExpression block ('else' block)?
+    |   'for' '(' forControl ')' block
+    |   'while' parExpression block
     |   'switch' parExpression '{' switchBlockStatementGroup* switchLabel* '}'
     |   'return' expression? ';'
     |   'break' ';'
     |   'continue' ';'
     |   expression ';'
     |   ';'
-    ;
-
-blockAsStatement
-    :   block
     ;
 
 variableDeclaration
