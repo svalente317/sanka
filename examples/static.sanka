@@ -1,0 +1,30 @@
+// -*- mode: Java; -*-
+
+package syntax;
+
+class Class {
+
+    static String s1 = "s1";
+    static String s2;
+    const s3 = "s3";
+    String s4; //  = "s4";
+
+    // static String s5 = 1;
+    static int i1 = 2; // 1 + 1;
+    const i2 = 2; // 1 + 1;
+
+    void method() {
+        this.i1 = this.i1 + 1;
+        this.i2 = this.i2 + 1;
+        if (this.s1 == this.s3) {
+            doNothing();
+        }
+        if (this.i1 == this.i2) {
+            doNothing();
+        }
+    }
+
+    void doNothing() {
+    }
+}
+

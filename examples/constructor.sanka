@@ -1,0 +1,15 @@
+// -*- mode: Java; -*-
+
+class Happy {
+    int sum;
+
+    Happy(int i1, int i2) {
+        this.sum = i1 + i2;
+    }
+}
+
+class Puppy {
+    Happy method() {
+        return new Happy(1, 2);
+    }
+}
