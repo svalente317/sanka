@@ -44,6 +44,13 @@ short doArithmetic(short s1, short s2) {
 }
 ~~~
 
+TODO: I don't like casting. I want Sanka to feel familiar to C and
+Java programmers, but I'm considering dropping casts from the
+language, and using this syntax instead:
+~~~
+    return new short(s1 + s2);
+~~~
+
 Of course, in any arithmetic operation, if one of the operands is a
 `long`, then the other one is promoted to `long`, and the result is
 `long`.
@@ -150,7 +157,7 @@ An array can be initialized with a number of items or with a sequence
 of items:
 ~~~
     var arr1 = new String[1];
-    var arr2 = new String{"hello", "world", thirdString()};
+    var arr2 = new String[]{"hello", "world", thirdString()};
 ~~~
 
 Arrays use square bracket notation on the left-hand-side to set an
@@ -224,9 +231,9 @@ Null Pointer Exception.
 If you access past the end of an array, then it will die with an Out
 Of Bounds Exception. For example:
 ~~~
-    var arr = new int[2]; # valid indexes are [0] and [1]
-    var value = arr[2];   # Dies at runtime.
-    var value2 = arr[-1]; # Also dies at runtime.
+    var arr = new int[2]; // valid indexes are [0] and [1]
+    var value = arr[2];   // Dies at runtime.
+    var value2 = arr[-1]; // Also dies at runtime.
 ~~~
 
 If you define a map with String as the key type, and you add a key of
@@ -239,8 +246,8 @@ map, then the map returns the "default" value, which is the value of
 new elements in a new array. For example:
 ~~~
     var map1 = new int[int];
-    var value1 = map1[17];    # Now value1 == 0
+    var value1 = map1[17];   // Now value1 == 0
 
     var map2 = new String[String];
-    var value2 = map["seventeen"];  # Now value2 == null
+    var value2 = map["seventeen"];  // Now value2 == null
 ~~~

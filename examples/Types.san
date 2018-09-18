@@ -1,0 +1,50 @@
+// -*- mode: Java; -*-
+
+class UserDefinedClass {}
+
+class Types {
+    short doArithmetic(short s1, short s2) {
+        return (short)(s1 + s2);
+    }
+
+    void promoter(byte b, short s, int i, long lg) {
+        if (lg > 0) {
+            promoter(0, b, s, i);
+        }
+    }
+
+    boolean chars() {
+        var v1 = 'a';
+        var v2 = (byte) 65;
+        return v1 == v2;
+    }
+
+    String stringinit() {
+        var s1 = "Hello, world!";
+        var arr = new byte[]{1, 2, 3};
+        var s2 = new String(arr);
+        return s1 + s2;
+    }
+    
+    int stringcompare(String s1, String s2) {
+        if (s1 < s2) {
+            return -1;
+        }
+        if (s1 > s2) {
+            return 1;
+        }
+        if (s1 == s2) {
+            return 0;
+        }
+        return 0;
+    }
+
+    void arrays() {
+        var arr1 = new int[1];
+        var arr2 = new String[1];
+        var arr3 = new UserDefinedClass[1];
+        var arr4 = new String[]{"hello", "world", stringinit()};
+        arr2[0] = arr4[2];
+    }
+}
+
