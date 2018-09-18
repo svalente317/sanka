@@ -1,4 +1,4 @@
-## Sanka Builtin Types
+# Sanka Builtin Types
 
 Sanka has ten builtin types:
 * 1 boolean
@@ -9,7 +9,7 @@ Sanka has ten builtin types:
 The first seven (1 boolean, 4 integral, and 2 floating point) are called
 the primitive types. Also called the scalar types.
 
-# Boolean
+## Boolean
 
 The type `boolean` can have values `false` and `true`. Boolean is a
 distinct type; it is not an alias for `int`. There is no automatic
@@ -17,7 +17,7 @@ conversion from `int` to `boolean` or vice-versa. In an `if` statement
 or a `while` or `for` statement, the condition must be a boolean
 expression.
 
-# Integral Types
+## Integral Types
 
 There are four integral types: `byte`, `short`, `int`, and `long`.
 They are signed types of 8, 16, 32, and 64 bits, respectively.
@@ -59,14 +59,14 @@ void promoter(byte b, short s, int i, long lg) {
 }
 ~~~
 
-# Floating Point Types
+## Floating Point Types
 
 There are two floating point types: `float` and `double`. They are
 signed 32 and 64 bit types that work as they do in C. Something about
 two's complement? And I think that floats are promoted to double for
 arithmetic? I should care more about this.
 
-# Character Type
+## Character Type
 
 Sanka does not have a character type. However, it does recognize ascii
 characters as integer literals. For example, this statement:
@@ -78,7 +78,7 @@ is equivalent to this statement:
     var v = (byte) 65;
 ~~~
 
-# Class Types
+## Class Types
 
 Sanka has three builtin non-scalar types. All three of these blur the
 line between "language features" and "class-library features". All
@@ -93,7 +93,7 @@ special code in the translator for them.) Thus, these classes have
 power and efficiency that they could not have if they were built
 entirely in the class library.
 
-# String
+## String
 
 A `String` is an immutable sequence of bytes. A String can be
 initialized from a series of ascii characters in quotes:
@@ -132,7 +132,7 @@ The `+` operator joins two strings into a new string.
 * Support adding strings to instances of user-defined classes by
   implicitly calling `toString()`?
 
-# Array
+## Array
 
 An array is a mutable sequence of items of a type. As in C and Java,
 arrays support primitive types, and builtin and user-defined classes:
@@ -168,7 +168,7 @@ unlike in Java, the size of an array can change after it is created.
 Of course, the arithmetic operators and the comparison operators are
 meaningless on arrays, just as they are on user-defined classes.
 
-# Map
+## Map
 
 The builtin map class is a lot like the builtin array class. A map is
 also a mutable collection of items of a type (primitive type or class
@@ -199,7 +199,7 @@ fully-ordered.
 The map class has a set of methods including `size()`, `contains()`,
 etc.
 
-# Errors
+## Errors
 
 When you try to access a field of any object that is null, whether the
 object's type is a String or an array or a user-defined type or etc.,
