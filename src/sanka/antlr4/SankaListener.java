@@ -1,4 +1,4 @@
-// Generated from src/sanka/Sanka.g4 by ANTLR 4.5.1
+// Generated from Sanka.g4 by ANTLR 4.5.1
 
     package sanka.antlr4;
 
@@ -49,36 +49,6 @@ public interface SankaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypeDeclaration(SankaParser.TypeDeclarationContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SankaParser#methodModifier}.
-	 * @param ctx the parse tree
-	 */
-	void enterMethodModifier(SankaParser.MethodModifierContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SankaParser#methodModifier}.
-	 * @param ctx the parse tree
-	 */
-	void exitMethodModifier(SankaParser.MethodModifierContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SankaParser#variableModifier}.
-	 * @param ctx the parse tree
-	 */
-	void enterVariableModifier(SankaParser.VariableModifierContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SankaParser#variableModifier}.
-	 * @param ctx the parse tree
-	 */
-	void exitVariableModifier(SankaParser.VariableModifierContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SankaParser#fieldModifier}.
-	 * @param ctx the parse tree
-	 */
-	void enterFieldModifier(SankaParser.FieldModifierContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SankaParser#fieldModifier}.
-	 * @param ctx the parse tree
-	 */
-	void exitFieldModifier(SankaParser.FieldModifierContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SankaParser#classDeclaration}.
 	 * @param ctx the parse tree
@@ -159,6 +129,16 @@ public interface SankaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFieldDeclaration(SankaParser.FieldDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SankaParser#fieldModifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterFieldModifier(SankaParser.FieldModifierContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#fieldModifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitFieldModifier(SankaParser.FieldModifierContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SankaParser#constructorDeclaration}.
 	 * @param ctx the parse tree

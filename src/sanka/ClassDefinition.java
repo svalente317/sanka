@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-
+import sanka.ExpressionDefinition.ExpressionType;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.ClassBodyDeclarationContext;
 import sanka.antlr4.SankaParser.ClassDeclarationContext;
+import sanka.antlr4.SankaParser.ConstDeclarationContext;
+import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.FieldDeclarationContext;
 import sanka.antlr4.SankaParser.FieldModifierContext;
 
@@ -20,6 +21,9 @@ class ClassDefinition {
         boolean isPrivate;
         boolean isStatic;
         boolean isInline;
+        boolean isConst;
+        ExpressionContext expression;
+        ExpressionDefinition value;
     }
 
     boolean isImport;
@@ -49,6 +53,9 @@ class ClassDefinition {
             return;
         }
         for (ClassBodyDeclarationContext item : ctx.classBody().classBodyDeclaration()) {
+            if (item.constDeclaration() != null) {
+                parseConstDeclaration(item.constDeclaration());
+            }
             if (item.fieldDeclaration() != null) {
                 parseFields(item.fieldDeclaration());
             }
@@ -96,7 +103,20 @@ class ClassDefinition {
         return null;
     }
 
-    private void parseFields(FieldDeclarationContext ctx) {
+    void parseConstDeclaration(ConstDeclarationContext ctx) {
+        String name = ctx.Identifier().getText();
+        FieldDefinition field = new FieldDefinition();
+        field.isStatic = true;
+        field.isConst = true;
+        field.expression = ctx.expression();
+        FieldDefinition prev = this.fieldMap.put(name, field);
+        if (prev != null) {
+            Environment env = Environment.getInstance();
+            env.printError(ctx, "class " + this.name + " field " + name + " declared twice");
+        }
+    }
+
+    void parseFields(FieldDeclarationContext ctx) {
         boolean isPrivate = false;
         boolean isStatic = false;
         boolean isInline = false;
@@ -114,19 +134,23 @@ class ClassDefinition {
                 }
             }
         }
-        for (TerminalNode item : ctx.Identifier()) {
-            String name = item.getText();
-            FieldDefinition field = new FieldDefinition();
-            field.type = new TypeDefinition();
-            field.type.parse(ctx.typeType());
-            field.isPrivate = isPrivate;
-            field.isStatic = isStatic;
-            field.isInline = isInline;
-            FieldDefinition prev = this.fieldMap.put(name, field);
-            if (prev != null) {
-                Environment env = Environment.getInstance();
-                env.printError(ctx, "class " + this.name + " field " + name + " declared twice");
-            }
+        String name = ctx.Identifier().getText();
+        FieldDefinition field = new FieldDefinition();
+        field.type = new TypeDefinition();
+        field.type.parse(ctx.typeType());
+        field.isPrivate = isPrivate;
+        field.isStatic = isStatic;
+        field.isInline = isInline;
+        FieldDefinition prev = this.fieldMap.put(name, field);
+        if (prev != null) {
+            Environment env = Environment.getInstance();
+            env.printError(ctx, "class " + this.name + " field " + name + " declared twice");
+        }
+        field.expression = ctx.expression();
+        if (field.expression != null && !field.isStatic) {
+            Environment env = Environment.getInstance();
+            env.printError(ctx, "only static fields may have initial values outside " +
+                    "the constructor.");
         }
     }
 
@@ -142,7 +166,19 @@ class ClassDefinition {
         Environment env = Environment.getInstance();
         env.currentClass = this;
         for (FieldDefinition field : this.fieldMap.values()) {
-            field.type.evaluate();
+            if (field.expression != null) {
+                field.value = new ExpressionDefinition();
+                field.value.evaluate(field.expression);
+                if (field.value.expressionType != ExpressionType.LITERAL) {
+                    env.printError(field.expression, "initial value must be simple constant");
+                }
+                if (field.isConst) {
+                    field.type = field.value.type;
+                } else if (!field.type.isCompatible(field.value.type)) {
+                     env.printError(field.expression, "incompatible types: " +
+                             field.type + " cannot be converted to " + field.type);
+                }
+            }
         }
         if (this.constructor != null) {
             this.constructor.evaluate();
@@ -152,8 +188,16 @@ class ClassDefinition {
         }
     }
 
-    void translate() {
+    TypeDefinition toTypeDefinition() {
+        TypeDefinition type = new TypeDefinition();
+        type.packageName = this.packageName;
+        type.name = this.name;
+        return type;
+    }
+
+    void translateHeader() {
         Environment env = Environment.getInstance();
+        env.typeList.clear();
         env.print("struct " + this.name + " {");
         env.level++;
         for (Map.Entry<String, FieldDefinition> entry : this.fieldMap.entrySet()) {
@@ -161,18 +205,68 @@ class ClassDefinition {
             if (field.isStatic) {
                 continue;
             }
+            env.addType(field.type);
             env.print(field.type.translateSpace() + entry.getKey() + ";");
         }
         env.level--;
         env.print("};");
+        for (Map.Entry<String, FieldDefinition> entry : this.fieldMap.entrySet()) {
+            FieldDefinition field = entry.getValue();
+            if (field.isStatic && !field.isConst) {
+                StringBuilder builder = new StringBuilder();
+                builder.append("extern ");
+                env.addType(field.type);
+                builder.append(field.type.translateSpace());
+                builder.append(TranslationUtils.translateClassItem(this.name, entry.getKey()));
+                builder.append(";");
+                env.print(builder.toString());
+            }
+        }
         if (this.constructor != null) {
             this.constructor.returnType = TypeDefinition.VOID_TYPE;
-            env.print("");
-            this.constructor.translate(this.name);
+            this.constructor.translate(this, true);
         }
         for (MethodDefinition method : this.methodList) {
-            env.print("");
-            method.translate(this.name);
+            method.translate(this, true);
+        }
+    }
+
+    void translate() {
+        Environment env = Environment.getInstance();
+        env.typeList.clear();
+        boolean printedSomething = false;
+        for (Map.Entry<String, FieldDefinition> entry : this.fieldMap.entrySet()) {
+            FieldDefinition field = entry.getValue();
+            if (field.isStatic && !field.isConst) {
+                StringBuilder builder = new StringBuilder();
+                env.addType(field.type);
+                builder.append(field.type.translateSpace());
+                builder.append(TranslationUtils.translateClassItem(this.name, entry.getKey()));
+                builder.append(" = ");
+                if (field.value == null) {
+                    builder.append(field.type.isPrimitiveType && field.type.arrayCount == 0 ?
+                            "0" : "NULL");
+                } else {
+                    builder.append(field.value.translate(null));
+                }
+                builder.append(";");
+                env.print(builder.toString());
+                printedSomething = true;
+            }
+        }
+        if (this.constructor != null) {
+            if (printedSomething) {
+                env.print("");
+            }
+            this.constructor.translate(this, false);
+            printedSomething = true;
+        }
+        for (MethodDefinition method : this.methodList) {
+            if (printedSomething) {
+                env.print("");
+            }
+            method.translate(this, false);
+            printedSomething = true;
         }
     }
 }

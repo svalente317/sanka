@@ -130,6 +130,11 @@ public class StatementDefinition {
         } else {
             this.expression = new ExpressionDefinition();
             this.expression.evaluate(vc.expression());
+            if (this.expression.type != null) {
+                if (this.expression.type.isVoidType()) {
+                    env.printError(vc, "variable may not have type void");
+                }
+            }
             env.symbolTable.put(this.name, this.expression.type);
         }
     }
@@ -313,13 +318,15 @@ public class StatementDefinition {
             if (this.expression == null) {
                 TypeDefinition type = env.symbolTable.get(this.name);
                 if (type != null && !type.isNullType()) {
-                     builder.append(type.translateSpace());
-                     builder.append(this.name);
-                     builder.append(" = 0;");
-                     env.print(builder.toString());
+                    env.addType(type);
+                    builder.append(type.translateSpace());
+                    builder.append(this.name);
+                    builder.append(" = 0;");
+                    env.print(builder.toString());
                 }
                 return;
             }
+            env.addType(this.expression.type);
             builder.append(this.expression.type.translateSpace());
             builder.append(this.name);
             builder.append(";");
@@ -426,8 +433,12 @@ public class StatementDefinition {
             builder = new StringBuilder();
             builder.append("return");
             if (this.expression != null) {
-                builder.append(" ");
-                builder.append(this.expression.translate(null));
+                if (this.expression.type.isVoidType()) {
+                    this.expression.translate(null);
+                } else {
+                    builder.append(" ");
+                    builder.append(this.expression.translate(null));
+                }
             }
             builder.append(";");
             env.print(builder.toString());

@@ -1,67 +1,89 @@
 package sanka;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-
-class Environment {
-
-    List<ClassDefinition> classList;
-    String currentPackage;
-    int errorCount = 0;
-
-    ClassDefinition currentClass;
-    MethodDefinition currentMethod;
-    SymbolTable symbolTable;
-
-    int level = 0;
-    int tmpVariableCount = 0;
-
-    Environment() {
-        this.classList = new LinkedList<>();
-        this.symbolTable = new SymbolTable();
+class TranslationUtils {
+    /**
+     * @return the translated C name of a static field, constructor, or method.
+     */
+    static String translateClassItem(String className, String itemName) {
+        return className + "__" + itemName;
     }
 
-    void printError(ParserRuleContext ctx, String error) {
-        int line = ctx.getStart().getLine();
-        System.out.println("" + line + ": " + error);
-        this.errorCount++;
-    }
-
-    void print(String text) {
-        for (int i = 0; i < this.level; i++) {
-            System.out.print("    ");
+    /**
+     * Write Class.h and/or Class.c files in the output directory.
+     */
+    static void translateClass(ClassDefinition classdef, boolean isHeader) throws IOException {
+        Environment env = Environment.getInstance();
+        File tmpfile = File.createTempFile("sankaclass", "txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(tmpfile));
+        env.setWriter(writer);
+        if (isHeader) {
+            classdef.translateHeader();
+        } else {
+            classdef.translate();
         }
-        System.out.println(text);
-    }
+        writer.close();
+        writer = null;
+        env.setWriter(null);
 
-    ClassDefinition getClassDefinition(TypeDefinition typeDefinition) {
-        if (typeDefinition.name == null) {
-            return null;
+        // TODO append prefix directory
+        String suffix = isHeader ? ".h" : ".c";
+        String filename = classdef.name + suffix;
+        File destFile;
+        String symbol;
+        if (classdef.packageName != null) {
+            String path = classdef.packageName.replace("\\.", File.separator);
+            File packageDirectory = new File(path);
+            packageDirectory.mkdirs();
+            destFile = new File(packageDirectory, filename);
+            symbol = classdef.packageName.replace("\\.", "_") + "_" + classdef.name;
+        } else {
+            destFile = new File(filename);
+            symbol = classdef.name;
         }
-        for (ClassDefinition classdef : this.classList) {
-            boolean samePackage = classdef.packageName == null ?
-                    typeDefinition.packageName == null :
-                        classdef.packageName.equals(typeDefinition.packageName);
-            if (samePackage && classdef.name.equals(typeDefinition.name)) {
-                return classdef;
+        writer = new BufferedWriter(new FileWriter(destFile));
+        env.setWriter(writer);
+        if (isHeader) {
+            symbol = symbol + "_h_INCLUDED";
+            env.print("#ifndef " + symbol);
+            env.print("#define " + symbol + " 1");
+            env.print("");
+            env.typeList.remove(classdef.toTypeDefinition());
+        } else {
+            env.print("#include <sanka_header.h>");
+            env.typeList.add(classdef.toTypeDefinition());
+        }
+        for (TypeDefinition type : env.typeList) {
+            String dirName = "";
+            if (type.packageName != null) {
+                dirName = type.packageName.replace("\\.", "/") + "/";
             }
+            env.print("#include <" + dirName + type.name + ".h>");
         }
-        return null;
+        env.print("");
+        copyFileContents(tmpfile, writer);
+        if (isHeader) {
+            env.print("");
+            env.print("#endif");
+        }
+        writer.close();
+        writer = null;
+        env.setWriter(null);
+        tmpfile.delete();
     }
 
-    String getTmpVariable() {
-        this.tmpVariableCount++;
-        return "tmp" + this.tmpVariableCount;
-    }
-
-    static Environment instance = null;
-
-    static Environment getInstance() {
-        if (instance == null) {
-            instance = new Environment();
-        }
-        return instance;
+    static void copyFileContents(File src, BufferedWriter writer) throws IOException {
+        int length = (int) src.length();
+        char[] contents = new char[length];
+        BufferedReader reader = new BufferedReader(new FileReader(src));
+        reader.read(contents);
+        reader.close();
+        writer.write(contents);
     }
 }

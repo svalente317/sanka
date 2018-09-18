@@ -1,6 +1,4 @@
-* Support static fields and static methods
-
-* support const variable declaration and generation
+* Generate correct code for assignment to static field
 
 * Translate CONTINUE statement
 
@@ -30,7 +28,7 @@
 
 * Support parameterized types
 
-* Support class field and method with same name?
+* Support class field and method with same name? Or generate error?
 
 * Correctly import String class
 
@@ -38,16 +36,11 @@
 
 * Allow multiple constructors with different signatures?
 
-* Support inline fields:
-  1. Evaluate pass - check restrictions in var def and assign
-  2. Translate pass - everywhere
+* Support inline fields
 
-* Support dot-dot-dot functions:
-  1. Evaluate pass - check types
-  2. Translate pass - generate code in function definition
-  3. Translate pass - generate code when calling function
+* Support dot-dot-dot functions?
 
-* Support switch statements - byte, char, short, int, String
+* Support switch statements
 
 * support enhanced for statement
 
@@ -64,3 +57,22 @@
 * Support initialization of 2d array
 
 * Support "var x, y;"
+
+* Support fields "int x, y;"
+
+* Error if instance field accessed in static method
+
+* Support static field initialized to literal array
+
+* Generates bad C code for: static String s = "literal";
+
+* evaluate binary expression of two literals should produce
+  a single literal.
+
+* Support special binary operations for String: plus, equals, etc.
+
+* static fields without initial values should be initialized to zero
+
+* const fields (not local variables)
+
+* const local variables (not fields)

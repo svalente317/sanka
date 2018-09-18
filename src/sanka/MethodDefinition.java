@@ -5,11 +5,11 @@ import java.util.List;
 
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.BlockContext;
+import sanka.antlr4.SankaParser.FieldModifierContext;
 import sanka.antlr4.SankaParser.FormalParameterContext;
 import sanka.antlr4.SankaParser.FormalParameterListContext;
 import sanka.antlr4.SankaParser.FormalParametersContext;
 import sanka.antlr4.SankaParser.MethodDeclarationContext;
-import sanka.antlr4.SankaParser.MethodModifierContext;
 import sanka.antlr4.SankaParser.StatementContext;
 import sanka.antlr4.SankaParser.TypeTypeContext;
 
@@ -35,14 +35,14 @@ class MethodDefinition {
     }
 
     void parse(MethodDeclarationContext ctx) {
-        parse(ctx.methodModifier(), ctx.typeType(), ctx.Identifier().getText(),
+        parse(ctx.fieldModifier(), ctx.typeType(), ctx.Identifier().getText(),
                 ctx.formalParameters(), ctx.block());
     }
 
-    void parse(List<MethodModifierContext> methodModifier, TypeTypeContext returnTypeCtx,
+    void parse(List<FieldModifierContext> fieldModifier, TypeTypeContext returnTypeCtx,
             String name, FormalParametersContext formalParameters, BlockContext block) {
-        if (methodModifier != null) {
-            for (MethodModifierContext item : methodModifier) {
+        if (fieldModifier != null) {
+            for (FieldModifierContext item : fieldModifier) {
                 int modifier = item.getStart().getType();
                 if (modifier == SankaLexer.PRIVATE) {
                     this.isPrivate = true;
@@ -92,9 +92,7 @@ class MethodDefinition {
         Environment env = Environment.getInstance();
         env.currentMethod = this;
         env.symbolTable.push(null);
-        this.returnType.evaluate();
         for (ParameterDefinition param : this.parameters) {
-            param.type.evaluate();
             env.symbolTable.put(param.name, param.type);
         }
         for (StatementDefinition stmtdef : this.body) {
@@ -103,25 +101,43 @@ class MethodDefinition {
         this.endSymbols = env.symbolTable.pop();
     }
 
-    String parametersToString(String className) {
-        // Instead of hardcoding "struct" here, we could convert
-        // ClassDefinition -> TypeDefinition -> translate().
-        String code = "struct " + className + " *this";
-        if (this.parameters == null || this.parameters.isEmpty()) {
-            return code;
-        }
-        for (ParameterDefinition param : this.parameters) {
-            code = code + ", " + param.type.translateSpace() + param.name;
-        }
-        return code;
-    }
-
-    void translate(String className) {
+    void translate(ClassDefinition classdef, boolean isHeader) {
         Environment env = Environment.getInstance();
         env.symbolTable.push(this.endSymbols);
-        String tag = this.isStatic ? "static " : "";
-        env.print(tag + this.returnType.translateSpace() + translatedName(className) +
-                "(" + parametersToString(className) + ") {");
+        StringBuilder builder = new StringBuilder();
+        if (this.isPrivate) {
+            builder.append("/* private */ ");
+        }
+        env.addType(this.returnType);
+        builder.append(this.returnType.translateSpace());
+        builder.append(TranslationUtils.translateClassItem(classdef.name, this.name));
+        builder.append("(");
+        boolean needComma = false;
+        if (!this.isStatic) {
+            // Instead of hardcoding "struct" here, we could convert
+            // ClassDefinition -> TypeDefinition -> translate().
+            builder.append("struct " + classdef.name + " *this");
+            needComma = true;
+        }
+        if (this.parameters != null) {
+            for (ParameterDefinition param : this.parameters) {
+                if (needComma) {
+                    builder.append(", ");
+                }
+                env.addType(param.type);
+                builder.append(param.type.translateSpace());
+                builder.append(param.name);
+                needComma = true;
+            }
+        }
+        builder.append(")");
+        if (isHeader) {
+            builder.append(";");
+            env.print(builder.toString());
+            return;
+        }
+        builder.append(" {");
+        env.print(builder.toString());
         env.level++;
         for (StatementDefinition stmtdef : this.body) {
             stmtdef.translate();
@@ -129,9 +145,5 @@ class MethodDefinition {
         env.level--;
         env.print("}");
         env.symbolTable.pop();
-    }
-
-    String translatedName(String className) {
-        return className + "__" + this.name;
     }
 }

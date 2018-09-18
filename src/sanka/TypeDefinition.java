@@ -10,7 +10,7 @@ import sanka.antlr4.SankaParser.ClassOrInterfaceTypeContext;
 import sanka.antlr4.SankaParser.PrimitiveTypeContext;
 import sanka.antlr4.SankaParser.TypeTypeContext;
 
-class TypeDefinition {
+class TypeDefinition implements Comparable<TypeDefinition> {
 
     static final TypeDefinition NULL_TYPE = new TypeDefinition("null");
     static final TypeDefinition VOID_TYPE = new TypeDefinition("void");
@@ -99,6 +99,14 @@ class TypeDefinition {
                 this.name = ids.get(idCount-1).getText();
             }
         }
+        if (this.isPrimitiveType || this.packageName != null || this.name == null) {
+            return;
+        }
+        Environment env = Environment.getInstance();
+        this.packageName = env.classPackageMap.get(this.name);
+        if (this.packageName == null) {
+            this.packageName = env.currentPackage;
+        }
     }
 
     boolean isNullType() {
@@ -125,23 +133,8 @@ class TypeDefinition {
                         this.name.equals("short") || this.name.equals("char"));
     }
 
-    void evaluate() {
-        if (this.isPrimitiveType || this.packageName != null || this.name == null) {
-            return;
-        }
-        Environment env = Environment.getInstance();
-        boolean found = false;
-        for (ClassDefinition classdef : env.classList) {
-             if (this.name.equals(classdef.name)) {
-                 if (found) {
-                     env.printError(this.parserCtx, "class " + this.name + " in package " +
-                             this.packageName + " and " + classdef.packageName);
-                        return;
-                 }
-                 this.packageName = classdef.packageName;
-                 found = true;
-             }
-         }
+    boolean isStringType() {
+        return this.arrayCount == 0 && this.packageName == null && this.name.equals("String");
     }
 
     /**
@@ -196,5 +189,37 @@ class TypeDefinition {
             return null;
         }
         return "struct " + this.name;
+    }
+
+    @Override
+    public int compareTo(TypeDefinition that) {
+        if (this.isPrimitiveType && !that.isPrimitiveType) {
+            return -1;
+        }
+        if (!this.isPrimitiveType && that.isPrimitiveType) {
+            return 1;
+        }
+        if (this.packageName != null && that.packageName == null) {
+            return -1;
+        }
+        if (this.packageName == null && that.packageName != null) {
+            return 1;
+        }
+        if (this.packageName != null && that.packageName != null) {
+            int value = this.packageName.compareTo(that.packageName);
+            if (value != 0) {
+                return value;
+            }
+        }
+        int value = this.name.compareTo(that.name);
+        if (value != 0) {
+            return value;
+        }
+        return Integer.compare(this.arrayCount, that.arrayCount);
+    }
+
+    @Override
+    public boolean equals(Object that) {
+        return this.compareTo((TypeDefinition) that) == 0;
     }
 }

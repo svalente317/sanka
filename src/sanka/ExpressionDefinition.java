@@ -30,6 +30,7 @@ class ExpressionDefinition {
     ExpressionDefinition expression1;
     ExpressionDefinition expression2;
     MethodDefinition method;
+    boolean isStatic;
     ExpressionDefinition[] argList;
     String translatedThis;
 
@@ -174,7 +175,6 @@ class ExpressionDefinition {
         CreatedNameContext namectx = creator.createdName();
         this.type = new TypeDefinition();
         this.type.parse(namectx.primitiveType(), namectx.classOrInterfaceType());
-        this.type.evaluate();
         ClassDefinition classdef = null;
         if (!this.type.isPrimitiveType) {
             classdef = env.getClassDefinition(this.type);
@@ -344,7 +344,11 @@ class ExpressionDefinition {
              isPrivate = this.method.isPrivate;
         } else {
             this.type = fielddef.type;
+            this.isStatic = fielddef.isStatic;
             isPrivate = fielddef.isPrivate;
+            if (fielddef.isConst) {
+                // TODO replace all of this with fielddef.value
+            }
         }
         if (isPrivate && classdef != env.currentClass) {
             env.printError(expr, "class " + this.expression1.type + " field " + this.name +
@@ -550,7 +554,7 @@ class ExpressionDefinition {
         ClassDefinition classdef = env.getClassDefinition(this.type);
         if (classdef.constructor != null) {
             builder2 = new StringBuilder();
-            builder2.append(classdef.constructor.translatedName(classdef.name));
+            builder2.append(TranslationUtils.translateClassItem(classdef.name, classdef.name));
             builder2.append("(");
             builder2.append(variableName);
             if (this.argList != null) {
@@ -598,10 +602,11 @@ class ExpressionDefinition {
             env.print("NULLCHECK(" + text + ");");
         }
         if (this.type == TypeDefinition.METHOD_TYPE) {
-            // Generate the C function name. MethodDefinition has code to generate the
-            // C constructor name. Move both blocks of code to TranslationUtils.
             this.translatedThis = text;
-            return this.expression1.type.name + "__" + this.name;
+            return TranslationUtils.translateClassItem(this.expression1.type.name, this.name);
+        }
+        if (this.isStatic) {
+            return TranslationUtils.translateClassItem(this.expression1.type.name, this.name);
         }
         return text + "->" + this.name;
     }
@@ -619,7 +624,7 @@ class ExpressionDefinition {
             env.print(builder.toString());
             builder.setLength(0);
             builder.append("if (");
-            if (operator.equals("||")) {
+            if (this.operator.equals("||")) {
                 builder.append("!");
             }
             builder.append(variableName);
@@ -671,18 +676,27 @@ class ExpressionDefinition {
     String translateFunctionCall(String variableName) {
         Environment env = Environment.getInstance();
         StringBuilder builder = new StringBuilder();
-        if (variableName == null) {
-            builder.append(this.type.translateSpace());
-            variableName = env.getTmpVariable();
+        if (!this.type.isVoidType()) {
+            if (variableName == null) {
+                builder.append(this.type.translateSpace());
+                variableName = env.getTmpVariable();
+            }
+            builder.append(variableName);
+            builder.append(" = ");
         }
-        builder.append(variableName);
-        builder.append(" = ");
         builder.append(this.expression1.translate(null));
         builder.append("(");
-        builder.append(this.expression1.translatedThis);
+        boolean needComma = false;
+        if (!this.expression1.method.isStatic) {
+            builder.append(this.expression1.translatedThis);
+            needComma = true;
+        }
         for (ExpressionDefinition arg : this.argList) {
-            builder.append(", ");
+            if (needComma) {
+                builder.append(", ");
+            }
             builder.append(arg.translate(null));
+            needComma = true;
         }
         builder.append(");");
         env.print(builder.toString());

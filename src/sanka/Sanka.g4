@@ -55,20 +55,6 @@ typeDeclaration
     |   interfaceDeclaration
     ;
 
-methodModifier
-    :   'private'
-    |   'static'
-    ;
-
-variableModifier
-    :   'inline'
-    ;
-
-fieldModifier
-    :   variableModifier
-    |   methodModifier
-    ;
-
 classDeclaration
     :   'class' Identifier typeParameters? classBody
     ;
@@ -102,7 +88,13 @@ constDeclaration
     ;
 
 fieldDeclaration
-    :   fieldModifier* typeType Identifier (',' Identifier)* ';'
+    :   fieldModifier* typeType Identifier ('=' expression)? ';'
+    ;
+
+fieldModifier
+    :   'private'
+    |   'static'
+    |   'inline'
     ;
 
 constructorDeclaration
@@ -111,7 +103,7 @@ constructorDeclaration
     ;
 
 methodDeclaration
-    :   methodModifier* (typeType|'void') Identifier formalParameters
+    :   fieldModifier* (typeType|'void') Identifier formalParameters
         block
     ;
 
@@ -122,7 +114,7 @@ interfaceBodyDeclaration
     ;
 
 interfaceMethodDeclaration
-    :   methodModifier* (typeType|'void') Identifier formalParameters
+    :   fieldModifier* (typeType|'void') Identifier formalParameters
         ';'
     ;
 
@@ -194,7 +186,7 @@ statement
     ;
 
 variableDeclaration
-    :   variableModifier* 'var' Identifier ('=' expression)?
+    :   ('inline')? 'var' Identifier ('=' expression)?
     ;
 
 variableAssignment

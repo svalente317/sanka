@@ -1,4 +1,4 @@
-// Generated from src/sanka/Sanka.g4 by ANTLR 4.5.1
+// Generated from Sanka.g4 by ANTLR 4.5.1
 
     package sanka.antlr4;
 
@@ -61,42 +61,6 @@ public class SankaBaseListener implements SankaListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTypeDeclaration(SankaParser.TypeDeclarationContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterMethodModifier(SankaParser.MethodModifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitMethodModifier(SankaParser.MethodModifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterVariableModifier(SankaParser.VariableModifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitVariableModifier(SankaParser.VariableModifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterFieldModifier(SankaParser.FieldModifierContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitFieldModifier(SankaParser.FieldModifierContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -193,6 +157,18 @@ public class SankaBaseListener implements SankaListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFieldDeclaration(SankaParser.FieldDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterFieldModifier(SankaParser.FieldModifierContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFieldModifier(SankaParser.FieldModifierContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
