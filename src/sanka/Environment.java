@@ -50,7 +50,7 @@ class Environment {
         }
         for (ClassDefinition classdef : this.classList) {
             boolean samePackage = classdef.packageName == null ?
-            		packageName == null : classdef.packageName.equals(packageName);
+                    packageName == null : classdef.packageName.equals(packageName);
             if (samePackage && classdef.name.equals(name)) {
                 return classdef;
             }

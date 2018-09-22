@@ -1,0 +1,54 @@
+// -*- mode: Java; -*-
+
+package sanka;
+import sanka.Value;
+
+class ValueMap {
+    ValueMap() {
+    }
+
+    Value getKey() {
+        return null;
+    }
+
+    boolean getBoolean(String key) {
+        return false;
+    }
+
+    int getInt(String key) {
+        return 0;
+    }
+
+    double getDouble(String key) {
+        return 0.0;
+    }
+
+    String getString(String key) {
+        return null;
+    }
+
+    Value[] getArray(String key) {
+        return null;
+    }
+
+    ValueMap getValueMap(String key) {
+        return null;
+    }
+
+    Value put(String key, Value value) {
+        return null;
+    }
+
+    Value delete(String key) {
+        return null;
+    }
+
+    String toJson() {
+        return null;
+    }
+
+    int circular1() {
+        var v = new Value();
+        return v.circular2();
+    }
+}

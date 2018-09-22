@@ -63,12 +63,12 @@ class Translator {
             return;
         }
         for (TypeDeclarationContext item : ctx.typeDeclaration()) {
-        	if (item.classDeclaration() != null) {
-        		ClassDefinition classdef = new ClassDefinition();
-        		classdef.packageName = env.currentPackage;
-        		classdef.name = item.classDeclaration().Identifier().getText();
-        		env.classList.add(classdef);
-        	}
+            if (item.classDeclaration() != null) {
+                ClassDefinition classdef = new ClassDefinition();
+                classdef.packageName = env.currentPackage;
+                classdef.name = item.classDeclaration().Identifier().getText();
+                env.classList.add(classdef);
+            }
         }
     }
 
@@ -87,11 +87,11 @@ class Translator {
             return;
         }
         for (TypeDeclarationContext item : ctx.typeDeclaration()) {
-        	if (item.classDeclaration() != null) {
-        		String name = item.classDeclaration().Identifier().getText();
-        		ClassDefinition classdef = env.getClassDefinition(env.currentPackage, name);
-        		classdef.parse(item.classDeclaration());
-        	}
+            if (item.classDeclaration() != null) {
+                String name = item.classDeclaration().Identifier().getText();
+                ClassDefinition classdef = env.getClassDefinition(env.currentPackage, name);
+                classdef.parse(item.classDeclaration());
+            }
         }
     }
 

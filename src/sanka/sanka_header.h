@@ -1,22 +1,9 @@
 #include <stdlib.h>
-#include <string.h>
-
-struct String {
-    char *data;
-    int length;
-};
 
 struct array {
     void *data;
     int length;
 };
-
-static inline struct String *STRINGLITERAL(char *cp) {
-    struct String *s = malloc(sizeof(struct String));
-    s->data = cp;
-    s->length = strlen(cp);
-    return s;
-}
 
 static inline struct array *NEWARRAY(int length, int size) {
     struct array *a = malloc(sizeof(struct array));
@@ -36,9 +23,8 @@ static inline void DIVISIONCHECK(long d) {
 }
 
 static inline void BOUNDSCHECK(struct array *a, int idx) {
-	NULLCHECK(a);
+    NULLCHECK(a);
     if (idx < 0 || idx >= a->length) PANIC("array bounds error");
 }
 
 #define ARRCAST(e, t) ((t*)e->data)
-

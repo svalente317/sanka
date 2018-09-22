@@ -26,6 +26,10 @@ public class StatementDefinition {
     BlockDefinition elseBlock;
     StatementDefinition[] forStatements;
 
+    /**
+     * Pass 1 (of 3): Parse the statement. Actually, ignore the statement, because pass 1
+     * just builds the class's list of fields and methods.
+     */
     void parse(StatementContext ctx) {
         this.ctx = ctx;
     }
@@ -35,6 +39,10 @@ public class StatementDefinition {
         evaluate();
     }
 
+    /**
+     * Pass 2 (of 3): Evaluate the statement. Calculate the type of all expressions
+     * in the statement, and report compile-time errors.
+     */
     void evaluate() {
         Environment env = Environment.getInstance();
         this.statementType = this.ctx.getStart().getType();
@@ -245,8 +253,8 @@ public class StatementDefinition {
     }
 
     /**
-     * Evaluate an expression as a standalone statement. Use BOOLEAN as the statement type simply because
-     * it's a constant that's available for usage.
+     * Evaluate an expression as a standalone statement. Use BOOLEAN as the statement type
+     * simply because it's a constant that's available for usage.
      */
     void evaluateExpressionStatement(ExpressionContext expr) {
         this.statementType = SankaLexer.BOOLEAN;
