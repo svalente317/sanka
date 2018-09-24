@@ -2,12 +2,9 @@ package sanka;
 
 import java.util.List;
 
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import sanka.antlr4.SankaParser.ClassOrInterfaceTypeContext;
-import sanka.antlr4.SankaParser.PrimitiveTypeContext;
 import sanka.antlr4.SankaParser.TypeTypeContext;
 
 class TypeDefinition implements Comparable<TypeDefinition> {
@@ -15,23 +12,27 @@ class TypeDefinition implements Comparable<TypeDefinition> {
     static final TypeDefinition NULL_TYPE = new TypeDefinition("null");
     static final TypeDefinition VOID_TYPE = new TypeDefinition("void");
     static final TypeDefinition BOOLEAN_TYPE = new TypeDefinition("boolean");
-    static final TypeDefinition CHAR_TYPE = new TypeDefinition("char");
+    static final TypeDefinition BYTE_TYPE = new TypeDefinition("byte");
     static final TypeDefinition INT_TYPE = new TypeDefinition("int");
     static final TypeDefinition DOUBLE_TYPE = new TypeDefinition("double");
     static final TypeDefinition METHOD_TYPE = new TypeDefinition("method");
     static final TypeDefinition STRING_TYPE = new TypeDefinition("String");
 
-    ParserRuleContext parserCtx;
     boolean isPrimitiveType;
     String packageName;
     String name;
-    int arrayCount;
+    TypeDefinition arrayOf;
+    TypeDefinition keyType;
 
     TypeDefinition() {
     }
 
     private TypeDefinition(String name) {
-        this.isPrimitiveType = !name.equals("String");
+        if (!name.equals("String")) {
+            this.isPrimitiveType = true;
+        } else {
+            this.packageName = "sanka.lang";
+        }
         this.name = name;
     }
 
@@ -40,54 +41,46 @@ class TypeDefinition implements Comparable<TypeDefinition> {
         copy.isPrimitiveType = this.isPrimitiveType;
         copy.packageName = this.packageName;
         copy.name = this.name;
-        copy.arrayCount = this.arrayCount;
+        copy.arrayOf = this.arrayOf == null ? null : this.arrayOf.copy();
+        copy.keyType = this.keyType;
         return copy;
     }
 
     @Override
     public String toString() {
-        String text = "undefined";
-        if (this.name != null) {
-            if (this.packageName != null) {
-                text = this.packageName + "." + this.name;
-            } else {
-                text = this.name;
-            }
+        if (this.keyType != null) {
+            return this.arrayOf.toString() + "[" + this.keyType.toString() + "]";
         }
-        if (this.arrayCount > 0) {
-            for (int i = 0; i < this.arrayCount; i++) {
-                text += "[]";
-            }
+        if (this.arrayOf != null) {
+            return this.arrayOf.toString() + "[]";
         }
-        return text;
+        if (this.name == null) {
+            return "null";
+        }
+        if (this.packageName != null) {
+            return this.packageName + "." + this.name;
+        }
+        return this.name;
     }
 
     void parse(TypeTypeContext ctx) {
-        Environment env = Environment.getInstance();
-        parse(ctx.primitiveType(), ctx.classOrInterfaceType());
-        int childCount = ctx.getChildCount();
-        if (childCount > 1) {
-            // Verify that all remaining tokens are [].
-            for (int i = 1; i < childCount; i+= 2) {
-                String ls = ctx.getChild(i).getText();
-                String rs = ctx.getChild(i+1).getText();
-                if (!(ls.equals("[") && rs.equals("]"))) {
-                    env.printError(ctx, "unrecognized type");
-                }
-                this.arrayCount++;
+        List<TypeTypeContext> subctx = ctx.typeType();
+        if (subctx != null && !subctx.isEmpty()) {
+            this.arrayOf = new TypeDefinition();
+            this.arrayOf.parse(subctx.get(0));
+            if (subctx.size() > 1) {
+                this.keyType = new TypeDefinition();
+                this.keyType.parse(subctx.get(1));
             }
+            return;
         }
-    }
-
-    void parse(PrimitiveTypeContext primitiveCtx, ClassOrInterfaceTypeContext classCtx) {
-        this.parserCtx = primitiveCtx;
-        if (primitiveCtx != null) {
-            Token token = primitiveCtx.getStart();
+        if (ctx.primitiveType() != null) {
+            Token token = ctx.primitiveType().getStart();
             this.isPrimitiveType = true;
             this.name = token.getText();
         }
-        if (classCtx != null) {
-            List<TerminalNode> ids = classCtx.Identifier();
+        if (ctx.classOrInterfaceType() != null) {
+            List<TerminalNode> ids = ctx.classOrInterfaceType().Identifier();
             int idCount = ids.size();
             if (idCount == 1) {
                 this.name = ids.get(0).getText();
@@ -110,31 +103,31 @@ class TypeDefinition implements Comparable<TypeDefinition> {
     }
 
     boolean isNullType() {
-        return this.isPrimitiveType && this.arrayCount == 0 && this.name.equals("null");
+        return this.isPrimitiveType && this.name.equals("null");
     }
 
     boolean isVoidType() {
-        return this.isPrimitiveType && this.arrayCount == 0 && this.name.equals("void");
+        return this.isPrimitiveType && this.name.equals("void");
     }
 
     boolean isBooleanType() {
-        return this.isPrimitiveType && this.arrayCount == 0 && this.name.equals("boolean");
+        return this.isPrimitiveType && this.name.equals("boolean");
     }
 
     boolean isIntegralType() {
-        return this.isPrimitiveType && this.arrayCount == 0 &&
+        return this.isPrimitiveType &&
                 (this.name.equals("int") || this.name.equals("long") || this.name.equals("short"));
     }
 
     boolean isNumericType() {
-        return this.isPrimitiveType && this.arrayCount == 0 &&
+        return this.isPrimitiveType &&
                 (this.name.equals("int") || this.name.equals("long") ||
                         this.name.equals("float") || this.name.equals("double") ||
-                        this.name.equals("short") || this.name.equals("char"));
+                        this.name.equals("short") || this.name.equals("byte"));
     }
 
     boolean isStringType() {
-        return this.arrayCount == 0 && this.packageName == null && this.name.equals("String");
+        return this.equals(STRING_TYPE);
     }
 
     /**
@@ -153,10 +146,33 @@ class TypeDefinition implements Comparable<TypeDefinition> {
             return true;
         }
         if (that.isNullType()) {
-            return this.isNullType() || !this.isPrimitiveType || this.arrayCount > 0;
+            // Match null and non-primitive classes and arrays and maps.
+            return this.isNullType() || !this.isPrimitiveType;
         }
-        if (this.arrayCount != that.arrayCount) {
-            return false;
+        if (this.arrayOf != null) {
+            if (that.arrayOf == null) {
+                return false;
+            }
+            // With arrays and maps, there's no promotion.
+            // If the parameter is an array of ints, then the expression must be
+            // an array of ints. An array of shorts is not a match.
+            // That's why this function is not recursive.
+            if (!this.arrayOf.equals(that.arrayOf)) {
+                return false;
+            }
+            if (this.keyType != null) {
+                if (that.keyType == null) {
+                    return false;
+                }
+                if (!this.keyType.equals(that.keyType)) {
+                    return false;
+                }
+            } else {
+                if (that.keyType != null) {
+                    return false;
+                }
+            }
+            return true;
         }
         if (this.isPrimitiveType != that.isPrimitiveType) {
             return false;
@@ -167,11 +183,20 @@ class TypeDefinition implements Comparable<TypeDefinition> {
     }
 
     String translate() {
-        if (this.arrayCount > 0) {
+        if (this.keyType != null) {
+            return "struct rb_table *";
+        }
+        if (this.arrayOf != null) {
             return "struct array *";
         }
         if (this.isPrimitiveType) {
-            return this.name.equals("boolean") ? "int" : this.name;
+            if (this.name.equals("boolean")) {
+                return "int";
+            }
+            if (this.name.equals("byte")) {
+                return "char";
+            }
+            return this.name;
         }
         return "struct " + this.name + " *";
     }
@@ -182,8 +207,11 @@ class TypeDefinition implements Comparable<TypeDefinition> {
     }
 
     String translateDereference() {
-        if (this.arrayCount > 1) {
-            return "struct array *";
+        if (this.keyType != null) {
+            return "struct rb_table";
+        }
+        if (this.arrayOf != null) {
+            return this.arrayOf.translate();
         }
         if (this.isPrimitiveType) {
             return null;
@@ -191,35 +219,42 @@ class TypeDefinition implements Comparable<TypeDefinition> {
         return "struct " + this.name;
     }
 
+    static private <T> int compareObjects(Comparable<T> o1, T o2) {
+        if (o1 == null && o2 == null) {
+            return 0;
+        }
+        if (o1 == null) {
+            return -1;
+        }
+        if (o2 == null) {
+            return 1;
+        }
+        return o1.compareTo(o2);
+    }
+
     @Override
     public int compareTo(TypeDefinition that) {
-        if (this.isPrimitiveType && !that.isPrimitiveType) {
-            return -1;
-        }
-        if (!this.isPrimitiveType && that.isPrimitiveType) {
-            return 1;
-        }
-        if (this.packageName != null && that.packageName == null) {
-            return -1;
-        }
-        if (this.packageName == null && that.packageName != null) {
-            return 1;
-        }
-        if (this.packageName != null && that.packageName != null) {
-            int value = this.packageName.compareTo(that.packageName);
-            if (value != 0) {
-                return value;
-            }
-        }
-        int value = this.name.compareTo(that.name);
+        int value = compareObjects(this.packageName, that.packageName);
         if (value != 0) {
             return value;
         }
-        return Integer.compare(this.arrayCount, that.arrayCount);
+        value = compareObjects(this.name, that.name);
+        if (value != 0) {
+            return value;
+        }
+        value = compareObjects(this.arrayOf, that.arrayOf);
+        if (value != 0) {
+            return value;
+        }
+        return compareObjects(this.keyType, that.keyType);
     }
 
     @Override
     public boolean equals(Object that) {
         return this.compareTo((TypeDefinition) that) == 0;
+    }
+
+    TypeDefinition baseType() {
+        return this.arrayOf == null ? this : this.arrayOf.baseType();
     }
 }

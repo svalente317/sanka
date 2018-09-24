@@ -162,6 +162,11 @@ class ClassDefinition {
         return classdef;
     }
 
+    static ClassDefinition mapClassDefinition() {
+        ClassDefinition classdef = new ClassDefinition();
+        return classdef;
+    }
+
     void evaluate() {
         Environment env = Environment.getInstance();
         env.currentClass = this;
@@ -244,8 +249,7 @@ class ClassDefinition {
                 builder.append(TranslationUtils.translateClassItem(this.name, entry.getKey()));
                 builder.append(" = ");
                 if (field.value == null) {
-                    builder.append(field.type.isPrimitiveType && field.type.arrayCount == 0 ?
-                            "0" : "NULL");
+                    builder.append(field.type.isPrimitiveType ? "0" : "NULL");
                 } else {
                     builder.append(field.value.translate(null));
                 }

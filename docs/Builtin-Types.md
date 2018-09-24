@@ -251,3 +251,32 @@ new elements in a new array. For example:
     var map2 = new String[String];
     var value2 = map["seventeen"];  // Now value2 == null
 ~~~
+
+## Multi-Dimensional Arrays
+
+Sanka does not support creating two-dimensional arrays (matrices) as a
+single contiguous block of memory. Instead, create an array of arrays.
+~~~
+    var matrix = new int[][3];
+    matrix[0] = new int[7];
+    matrix[1] = new int[7];
+    matrix[2] = new int[7];
+~~~
+
+The first line reads as: "matrix is an array with three elements where
+each element has type `int[]`."
+
+This syntax may seem backwards to you. You may expect the 3 to be in
+the first set of brackets (as it is in Java) rather then the
+last. However, consider that Sanka supports maps of arrays of maps of
+arrays of maps, etc. For example:
+~~~
+   var x = new int[][int][][String][3];
+~~~
+
+This reads as: "x is an array with three elements where each element
+is a map. The map has key type String and value type
+`int[][int][]`. That value type is an array where each element has
+type `int[][int]`. That value type is a map... etc."
+
+Just strip off the components from right to left.

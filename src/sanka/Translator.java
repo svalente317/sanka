@@ -53,12 +53,6 @@ class Translator {
         if (ctx.packageDeclaration() != null) {
             env.currentPackage = ctx.packageDeclaration().qualifiedName().getText();
         }
-        env.classPackageMap.clear();
-        if (ctx.importDeclaration() != null) {
-            for (ImportDeclarationContext item : ctx.importDeclaration()) {
-                ImportManager.getInstance().parse(item.qualifiedName());
-            }
-        }
         if (ctx.typeDeclaration() == null) {
             return;
         }
@@ -74,10 +68,15 @@ class Translator {
 
     void parse(CompilationUnitContext ctx) {
         Environment env = Environment.getInstance();
+        env.classPackageMap.clear();
+        for (ClassDefinition classdef : env.classList) {
+            if (classdef.packageName != null && classdef.packageName.equals("sanka.lang")) {
+                env.classPackageMap.put(classdef.name, classdef.packageName);
+            }
+        }
         if (ctx.packageDeclaration() != null) {
             env.currentPackage = ctx.packageDeclaration().qualifiedName().getText();
         }
-        env.classPackageMap.clear();
         if (ctx.importDeclaration() != null) {
             for (ImportDeclarationContext item : ctx.importDeclaration()) {
                 ImportManager.getInstance().doImport(item.qualifiedName());

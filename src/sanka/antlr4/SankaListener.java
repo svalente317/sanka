@@ -430,16 +430,6 @@ public interface SankaListener extends ParseTreeListener {
 	 */
 	void exitCreator(SankaParser.CreatorContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SankaParser#createdName}.
-	 * @param ctx the parse tree
-	 */
-	void enterCreatedName(SankaParser.CreatedNameContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SankaParser#createdName}.
-	 * @param ctx the parse tree
-	 */
-	void exitCreatedName(SankaParser.CreatedNameContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SankaParser#arrayCreatorRest}.
 	 * @param ctx the parse tree
 	 */

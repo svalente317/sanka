@@ -1,6 +1,5 @@
 package sanka;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -9,7 +8,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import sanka.ClassDefinition.FieldDefinition;
 import sanka.MethodDefinition.ParameterDefinition;
 import sanka.antlr4.SankaParser.ArrayCreatorRestContext;
-import sanka.antlr4.SankaParser.CreatedNameContext;
 import sanka.antlr4.SankaParser.CreatorContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.ExpressionListContext;
@@ -19,7 +17,7 @@ import sanka.antlr4.SankaParser.PrimaryContext;
 class ExpressionDefinition {
 
     static enum ExpressionType {
-        LITERAL, IDENTIFIER, NEW_INSTANCE, NEW_ARRAY_WITH_VALUES, NEW_ARRAY_WITH_LENGTHS,
+        LITERAL, IDENTIFIER, NEW_INSTANCE, NEW_ARRAY_WITH_VALUES, NEW_ARRAY, NEW_MAP,
         UNARY, FIELD_ACCESS, BINARY, ARRAY_ACCESS, FUNCTION_CALL, TERNARY
     };
 
@@ -118,7 +116,7 @@ class ExpressionDefinition {
                 return;
             }
             if (literal.CharacterLiteral() != null) {
-                this.type = TypeDefinition.CHAR_TYPE;
+                this.type = TypeDefinition.BYTE_TYPE;
                 return;
             }
             if (literal.BooleanLiteral() != null) {
@@ -172,9 +170,8 @@ class ExpressionDefinition {
      */
     void evaluateCreator(CreatorContext creator) {
         Environment env = Environment.getInstance();
-        CreatedNameContext namectx = creator.createdName();
         this.type = new TypeDefinition();
-        this.type.parse(namectx.primitiveType(), namectx.classOrInterfaceType());
+        this.type.parse(creator.typeType());
         ClassDefinition classdef = null;
         if (!this.type.isPrimitiveType) {
             classdef = env.getClassDefinition(this.type);
@@ -207,50 +204,44 @@ class ExpressionDefinition {
      * Evaluate the array part of an expression like "new Class[x]" or "new Class[]{...}".
      */
     void evaluateArrayCreator(ArrayCreatorRestContext ctx) {
-        Environment env = Environment.getInstance();
-        if (ctx.expression() == null) {
-            // Case 1: Count the number of [] pairs, and then evaluate the optional
-            // list of expressions as the array's value.
-            this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
-            int childCount = ctx.getChildCount();
-            for (int i = 0; i < childCount; i+= 2) {
-                String ls = ctx.getChild(i).getText();
-                String rs = ctx.getChild(i+1).getText();
-                if (ls.equals("[") && rs.equals("]")) {
-                    this.type.arrayCount++;
-                } else if (!ls.equals("{")) {
-                    env.printError(ctx, "unrecognized array creator");
-                }
-            }
+        if (ctx.expression() != null) {
+            this.expressionType = ExpressionType.NEW_ARRAY;
+            TypeDefinition arrayType = new TypeDefinition();
+            arrayType.arrayOf = this.type;
+            this.type = arrayType;
+            this.expression1 = new ExpressionDefinition();
+            this.expression1.evaluate(ctx.expression());
+            checkIntegralType(ctx.expression(), this.expression1.type);
             return;
         }
-        // Case 2: Count the number of [] pairs, and also evaluate the lengths
-        // of the first one or more arrays.
-        this.expressionType = ExpressionType.NEW_ARRAY_WITH_LENGTHS;
-        int childCount = ctx.getChildCount();
-        List<ExpressionDefinition> arrayLengths = new ArrayList<>();
-        for (int i = 0; i < childCount; i++) {
-            String ls = ctx.getChild(i).getText();
-            if (!ls.equals("[")) {
-                env.printError(ctx, "unrecognized array creator");
-                break;
-            }
-            i++;
-            if (ctx.getChild(i) instanceof ExpressionContext) {
-                ExpressionDefinition arrayLength = new ExpressionDefinition();
-                arrayLength.evaluate((ExpressionContext) ctx.getChild(i));
-                arrayLengths.add(arrayLength);
-                i++;
-            }
-            String rs = ctx.getChild(i).getText();
-            if (!rs.equals("]")) {
-                env.printError(ctx, "unrecognized array creator");
-                break;
-            }
-            this.type.arrayCount++;
+        if (ctx.typeType() != null) {
+            this.expressionType = ExpressionType.NEW_MAP;
+            TypeDefinition mapType = new TypeDefinition();
+            mapType.arrayOf = this.type;
+            this.type = mapType;
+            mapType.keyType = new TypeDefinition();
+            mapType.keyType.parse(ctx.typeType());
+            checkMapKeyType(ctx.typeType(), mapType.keyType);
+            return;
         }
-        this.argList = arrayLengths.toArray(new ExpressionDefinition[0]);
-        return;
+        this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
+        if (ctx.expressionList() != null) {
+            List<ExpressionContext> exprList = ctx.expressionList().expression();
+            this.argList = new ExpressionDefinition[exprList.size()];
+            for (int idx = 0; idx < this.argList.length; idx++) {
+                this.argList[idx] = new ExpressionDefinition();
+                this.argList[idx].evaluate(exprList.get(idx));
+            }
+        } else {
+            this.argList = new ExpressionDefinition[0];
+        }
+        Environment env = Environment.getInstance();
+        for (ExpressionDefinition arg : this.argList) {
+            if (!this.type.isCompatible(arg.type)) {
+                env.printError(ctx.expressionList(), "incompatible types: " + arg.type +
+                        " cannot be converted to " + this.type);
+            }
+        }
     }
 
     /**
@@ -279,6 +270,15 @@ class ExpressionDefinition {
             if (!type.isNumericType()) {
                 Environment env = Environment.getInstance();
                 env.printError(ctx, "expression type must be a numeric type");
+            }
+        }
+    }
+
+    void checkMapKeyType(ParserRuleContext ctx, TypeDefinition type) {
+        if (type != null) {
+            if (!(type.isStringType() || type.isIntegralType())) {
+                Environment env = Environment.getInstance();
+                env.printError(ctx, "invalid type for map key: " + type);
             }
         }
     }
@@ -323,14 +323,16 @@ class ExpressionDefinition {
         // This is similar code to the code in StatementDefinition.java
         // when the field access is the LHS of the statement.
         ClassDefinition classdef;
-        if (this.expression1.type.arrayCount == 0) {
+        if (this.expression1.type.arrayOf == null) {
             classdef = env.getClassDefinition(this.expression1.type);
             if (classdef == null) {
                 env.printError(expr, "class " + this.expression1.type + " undefined");
                 return;
             }
-        } else {
+        } else if (this.expression1.type.keyType == null) {
             classdef = ClassDefinition.arrayClassDefinition();
+        } else {
+            classdef = ClassDefinition.mapClassDefinition();
         }
         FieldDefinition fielddef = classdef.fieldMap.get(this.name);
         boolean isPrivate;
@@ -403,18 +405,20 @@ class ExpressionDefinition {
         if (this.expression1.type == null || this.expression2.type == null) {
             return;
         }
-        if (this.expression1.type.arrayCount == 0) {
-            env.printError(expr, "expression of type " + this.expression1.type +
-                    " cannot be used as an array");
+        if (this.expression1.type.arrayOf == null) {
+            env.printError(expr, "array required, but " + this.expression1.type + " found");
             return;
         }
-        if (!this.expression2.type.isIntegralType()) {
-            env.printError(expr, "array index must be an int, not type " +
-                    this.expression2.type);
+        TypeDefinition keyType = this.expression1.type.keyType;
+        if (keyType == null) {
+            keyType = TypeDefinition.INT_TYPE;
+        }
+        if (!keyType.isCompatible(this.expression2.type)) {
+            env.printError(expr, "incompatible types: " + this.expression2.type +
+                    " cannot be converted to " + keyType);
             return;
         }
-        this.type = this.expression1.type.copy();
-        this.type.arrayCount--;
+        this.type = this.expression1.type.arrayOf;
     }
 
     void evaluateFunctionCall(ExpressionContext expr, ExpressionListContext argumentList) {
@@ -501,9 +505,11 @@ class ExpressionDefinition {
         case NEW_INSTANCE:
             return translateNewInstance(variableName);
         case NEW_ARRAY_WITH_VALUES:
-            break;
-        case NEW_ARRAY_WITH_LENGTHS:
-            return translateNewArrayWithLengths(variableName);
+            return translateNewArrayWithValues(variableName);
+        case NEW_ARRAY:
+            return translateNewArray(variableName);
+        case NEW_MAP:
+            return translateNewMap(variableName);
         case UNARY:
             return translateUnary();
         case FIELD_ACCESS:
@@ -524,7 +530,7 @@ class ExpressionDefinition {
         if (this.type == TypeDefinition.INT_TYPE || this.type == TypeDefinition.DOUBLE_TYPE) {
             return this.name;
         }
-        if (this.type == TypeDefinition.CHAR_TYPE) {
+        if (this.type == TypeDefinition.BYTE_TYPE) {
             return this.name;
         }
         if (this.type == TypeDefinition.BOOLEAN_TYPE) {
@@ -572,7 +578,11 @@ class ExpressionDefinition {
         return variableName;
     }
 
-    String translateNewArrayWithLengths(String variableName) {
+    String translateNewArrayWithValues(String variableName) {
+        return "not implemented";
+    }
+
+    String translateNewArray(String variableName) {
         Environment env = Environment.getInstance();
         StringBuilder builder = new StringBuilder();
         if (variableName == null) {
@@ -581,12 +591,27 @@ class ExpressionDefinition {
         }
         builder.append(variableName);
         builder.append(" = NEWARRAY(");
-        builder.append(this.argList[0].translate(null));
+        builder.append(this.expression1.translate(null));
         builder.append(", sizeof(");
-        TypeDefinition itemType = this.type.copy();
-        itemType.arrayCount--;
-        builder.append(itemType.translate());
+        builder.append(this.expression1.type.translate());
         builder.append("));");
+        env.print(builder.toString());
+        return variableName;
+    }
+
+    String translateNewMap(String variableName) {
+        Environment env = Environment.getInstance();
+        StringBuilder builder = new StringBuilder();
+        if (variableName == null) {
+            builder.append(this.type.translateSpace());
+            variableName = env.getTmpVariable();
+        }
+        builder.append(variableName);
+        builder.append(" = rb_create(");
+        if (this.type.keyType.isStringType()) {
+            builder.append("strcmp");
+        }
+        builder.append(");");
         env.print(builder.toString());
         return variableName;
     }
@@ -669,8 +694,13 @@ class ExpressionDefinition {
         Environment env = Environment.getInstance();
         String text1 = this.expression1.translate(null);
         String text2 = this.expression2.translate(null);
-        env.print("BOUNDSCHECK(" + text1 + ", " + text2 + ");");
-        return "ARRCAST(" + text1 + ", " + this.type.translate() + ")[" + text2 + "]";
+        if (this.expression1.type.keyType == null) {
+            env.print("BOUNDSCHECK(" + text1 + ", " + text2 + ");");
+            return "ARRCAST(" + text1 + ", " + this.type.translate() + ")[" + text2 + "]";
+        } else {
+            env.print("NULLCHECK(" + text1 + ");");
+            return "MAPGET(" + text1 + ", " + text2 + ", " + this.type.translate() + ")";
+        }
     }
 
     String translateFunctionCall(String variableName) {

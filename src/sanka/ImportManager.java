@@ -4,14 +4,6 @@ import sanka.antlr4.SankaParser.QualifiedNameContext;
 
 public class ImportManager {
     /**
-     * Add an entry to ClassPackageMap indicating that the given short name refers to
-     * the given qualified name.
-     */
-    void parse(QualifiedNameContext ctx) {
-
-    }
-
-    /**
      * Find the sanka source file for the given class. Read the structure of the file -
      * the class's public fields and methods. Store the class in env.classList.
      *

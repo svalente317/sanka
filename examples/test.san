@@ -9,7 +9,6 @@ class Podo {
 }
 
 class Class {
-
     Podo podoField;
     int localInt;
 
@@ -43,5 +42,12 @@ class Class {
 
     boolean subMethod(int z) {
         return z == 0;
+    }
+
+    void useMap() {
+        var m1 = new Podo[class int];
+        var m2 = new double[class String];
+        var p = m1[method(0)];
+        var d = m2["hello"];
     }
 }

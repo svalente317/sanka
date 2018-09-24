@@ -15,6 +15,19 @@ class TranslationUtils {
         return className + "__" + itemName;
     }
 
+    static String replaceDot(String s, char ch) {
+        int prev = 0;
+        while (true) {
+            int idx = s.indexOf('.', prev);
+            if (idx < 0) {
+                break;
+            }
+            s = s.substring(0, idx) + ch + s.substring(idx+1);
+            prev = idx+1;
+        }
+        return s;
+    }
+
     /**
      * Write Class.h and/or Class.c files in the output directory.
      */
@@ -38,11 +51,11 @@ class TranslationUtils {
         File destFile;
         String symbol;
         if (classdef.packageName != null) {
-            String path = classdef.packageName.replace("\\.", File.separator);
+            String path = replaceDot(classdef.packageName, File.separatorChar);
             File packageDirectory = new File(path);
             packageDirectory.mkdirs();
             destFile = new File(packageDirectory, filename);
-            symbol = classdef.packageName.replace("\\.", "_") + "_" + classdef.name;
+            symbol = replaceDot(classdef.packageName, '_') + "_" + classdef.name;
         } else {
             destFile = new File(filename);
             symbol = classdef.name;
@@ -62,7 +75,7 @@ class TranslationUtils {
         for (TypeDefinition type : env.typeList) {
             String dirName = "";
             if (type.packageName != null) {
-                dirName = type.packageName.replace("\\.", "/") + "/";
+                dirName = replaceDot(type.packageName, '/') + "/";
             }
             env.print("#include <" + dirName + type.name + ".h>");
         }

@@ -1,0 +1,51 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+
+import sanka.io.FileReader;
+
+class WordMap {
+
+    private int[String] map;
+
+    WordMap() {
+        this.map = new int[class String];
+    }
+
+    /**
+     * Read the file. Each line in the file has a single word.
+     * For each word, record its first line in the file.
+     */
+    void processFile(String filename) {
+        var reader = new FileReader(filename);
+        var count = 0;
+        while (true) {
+            var word = reader.readline();
+            if (word == null) {
+                break;
+            }
+            count++;
+            if (!this.map.contains(word)) {
+                this.map[word] = count;
+            }
+        }
+        reader.close();
+    }
+
+    /**
+     * Print the words and their first line numbers.
+     */
+    void printWords() {
+        for (var key, value : this.map) {
+            System.print(key + " " + value);
+        }
+    }
+
+    /**
+     * Run the program.
+     */
+    static void main(String[] args) {
+        var wordmap = new WordMap();
+        wordmap.processFile(args[0]);
+        wordmap.printWords();
+    }
+}

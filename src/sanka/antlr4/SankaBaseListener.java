@@ -522,18 +522,6 @@ public class SankaBaseListener implements SankaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCreatedName(SankaParser.CreatedNameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitCreatedName(SankaParser.CreatedNameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterArrayCreatorRest(SankaParser.ArrayCreatorRestContext ctx) { }
 	/**
 	 * {@inheritDoc}

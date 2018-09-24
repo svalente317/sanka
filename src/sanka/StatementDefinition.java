@@ -95,7 +95,8 @@ public class StatementDefinition {
             if (this.ctx.expression() == null) {
                 TypeDefinition desired = env.currentMethod.returnType;
                 if (!desired.isVoidType()) {
-                    env.printError(this.ctx, "method must return a value of type " + desired);
+                    env.printError(this.ctx, "incompatible types: missing return value " +
+                            "of type " + desired);
                 }
                 return;
             }
@@ -131,7 +132,8 @@ public class StatementDefinition {
         this.statementType = SankaLexer.VAR;
         this.name = vc.Identifier().getText();
         if (env.symbolTable.get(this.name) != null) {
-            env.printError(vc, "variable " + this.name + " declared twice");
+            env.printError(vc, "variable " + this.name + " is already defined in method " +
+                    env.currentMethod.name + "()");
         }
         if (vc.expression() == null) {
             env.symbolTable.put(this.name, TypeDefinition.NULL_TYPE);
@@ -186,14 +188,12 @@ public class StatementDefinition {
             if (type == null) {
                 return;
             }
-            if (type.arrayCount > 0) {
-                env.printError(assignment, "array type " + type +
-                        ": cannot modify fields (" + this.name + ")");
+            if (type.arrayOf != null) {
+                env.printError(assignment, "class " + type + " does not have field " + this.name);
                 return;
             }
             if (type.isPrimitiveType) {
-                env.printError(assignment, "primitive type " + type +
-                        ": cannot modify fields (" + this.name + ")");
+                env.printError(assignment, type + " cannot be dereferenced");
                 return;
             }
             ClassDefinition classdef = env.getClassDefinition(type);
@@ -355,6 +355,7 @@ public class StatementDefinition {
         case SankaLexer.EQUAL:
         case SankaLexer.INC:
         case SankaLexer.DEC:
+            // TODO map
             builder = new StringBuilder();
             text = null;
             if (this.lhsExpression != null) {

@@ -119,8 +119,10 @@ interfaceMethodDeclaration
     ;
 
 typeType
-    :   classOrInterfaceType ('[' ']')*
-    |   primitiveType ('[' ']')*
+    :   classOrInterfaceType
+    |   primitiveType
+    |   typeType '[' ']'
+    |   typeType '[' typeType ']'
     ;
 
 classOrInterfaceType
@@ -133,7 +135,6 @@ typeArguments
 
 primitiveType
     :   'boolean'
-    |   'char'
     |   'byte'
     |   'short'
     |   'int'
@@ -270,17 +271,13 @@ primary
     ;
 
 creator
-    :   createdName (arrayCreatorRest | classCreatorRest)
-    ;
-
-createdName
-    :   classOrInterfaceType
-    |   primitiveType
+    :   typeType (arrayCreatorRest | classCreatorRest)
     ;
 
 arrayCreatorRest
-    :   '[' ']' ('[' ']')* '{' expressionList? '}'
-    |   '[' expression ']' ('[' expression ']')* ('[' ']')*
+    :   '[' ']' '{' expressionList? '}'
+    |   '[' expression ']'
+    |   '[' 'class' typeType ']'
     ;
 
 classCreatorRest
@@ -304,7 +301,6 @@ BOOLEAN       : 'boolean';
 BREAK         : 'break';
 BYTE          : 'byte';
 CASE          : 'case';
-CHAR          : 'char';
 CLASS         : 'class';
 CONST         : 'const';
 CONTINUE      : 'continue';

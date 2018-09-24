@@ -89,6 +89,7 @@ class Environment {
     }
 
     void addType(TypeDefinition type) {
+        type = type.baseType();
         if (!type.isPrimitiveType) {
             this.typeList.add(type);
         }
