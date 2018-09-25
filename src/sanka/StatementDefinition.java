@@ -355,10 +355,13 @@ public class StatementDefinition {
         case SankaLexer.EQUAL:
         case SankaLexer.INC:
         case SankaLexer.DEC:
-            // TODO map
             builder = new StringBuilder();
             text = null;
             if (this.lhsExpression != null) {
+                if (this.lhsExpression.isMapAccess()) {
+                    translateMapAssignment();
+                    return;
+                }
                 // Set builder to either "LHS[idx]" or "LHS->field".
                 text = this.lhsExpression.translate(null);
                 builder.append(text);
@@ -466,5 +469,22 @@ public class StatementDefinition {
             env.print(";");
             return;
         }
+    }
+
+    void translateMapAssignment() {
+        Environment env = Environment.getInstance();
+        ExpressionDefinition ts = this.lhsExpression;
+        String text1 = ts.expression1.translate(null);
+        String text2 = ts.expression2.translate(null);
+        env.print("NULLCHECK(" + text1 + ");");
+        if (ts.expression1.type.keyType.isStringType()) {
+            env.print("NULLCHECK(" + text2 + ");");
+        }
+        String valueName = env.getTmpVariable();
+        env.print("union rb_value " + valueName + ";");
+        // TODO inc and dec
+        String field = ExpressionDefinition.typeToMapFieldName(this.expression.type);
+        env.print(valueName + "." + field + " = " + this.expression.translate(null) + ";");
+        env.print("rb_put(" + text1 + ", (union rb_key) " + text2 + ", " + valueName + ", 0);");
     }
 }

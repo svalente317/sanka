@@ -1,0 +1,8 @@
+// -*- mode: Java; -*-
+package sanka.io;
+
+class FileReader {
+    int open(String filename) {}
+    String readline() {}
+    int close() {}
+}

@@ -12,7 +12,8 @@ class TranslationUtils {
      * @return the translated C name of a static field, constructor, or method.
      */
     static String translateClassItem(String className, String itemName) {
-        return className + "__" + itemName;
+        String s = className + "__" + itemName;
+        return s;
     }
 
     static String replaceDot(String s, char ch) {

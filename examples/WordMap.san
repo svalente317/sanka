@@ -15,8 +15,13 @@ class WordMap {
      * Read the file. Each line in the file has a single word.
      * For each word, record its first line in the file.
      */
-    void processFile(String filename) {
-        var reader = new FileReader(filename);
+    void readFromFile(String filename) {
+        var reader = new FileReader();
+        var status = reader.open(filename);
+        if (status != 0) {
+            System.print(filename + ": " + System.strerror(status));
+            return;
+        }
         var count = 0;
         while (true) {
             var word = reader.readline();
@@ -24,28 +29,35 @@ class WordMap {
                 break;
             }
             count++;
-            if (!this.map.contains(word)) {
-                this.map[word] = count;
-            }
+            // if (!this.map.contains(word)) {
+            this.map[word] = count;
         }
         reader.close();
     }
 
     /**
-     * Print the words and their first line numbers.
+     * Read the file. Each line in the file has a single word.
+     * Print the line number where the word was found in the first file.
      */
-    void printWords() {
-        for (var key, value : this.map) {
-            System.print(key + " " + value);
+    void printWords(String filename) {
+        var reader = new FileReader();
+        reader.open(filename);
+        while (true) {
+            var word = reader.readline();
+            if (word == null) {
+                break;
+            }
+            System.print(word + " " + this.map[word]);
         }
+        reader.close();
     }
 
     /**
      * Run the program.
      */
     static void main(String[] args) {
-        var wordmap = new WordMap();
-        wordmap.processFile(args[0]);
-        wordmap.printWords();
+        var wordMap = new WordMap();
+        wordMap.readFromFile(args[0]);
+        wordMap.printWords(args[1]);
     }
 }

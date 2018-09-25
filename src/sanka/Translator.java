@@ -39,7 +39,8 @@ class Translator {
      * Pass 1: Parse each class. For each class, note the defined methods and signatures.
      */
     void parse(List<CompilationUnitContext> contextList) {
-        Builtins.importBuiltins();
+        ImportManager.getInstance().doImport(null, Environment.SANKA_LANG, "String");
+        ImportManager.getInstance().doImport(null, Environment.SANKA_LANG, "System");
         for (CompilationUnitContext ctx : contextList) {
             parseClassNames(ctx);
         }
@@ -68,12 +69,7 @@ class Translator {
 
     void parse(CompilationUnitContext ctx) {
         Environment env = Environment.getInstance();
-        env.classPackageMap.clear();
-        for (ClassDefinition classdef : env.classList) {
-            if (classdef.packageName != null && classdef.packageName.equals("sanka.lang")) {
-                env.classPackageMap.put(classdef.name, classdef.packageName);
-            }
-        }
+        env.classPackageMap = env.baseClassPackageMap();
         if (ctx.packageDeclaration() != null) {
             env.currentPackage = ctx.packageDeclaration().qualifiedName().getText();
         }

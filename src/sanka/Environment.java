@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 class Environment {
+    public static final String SANKA_LANG = "sanka.lang";
 
     // Pass 1.
     List<ClassDefinition> classList;
@@ -31,12 +32,24 @@ class Environment {
 
     Environment() {
         this.classList = new LinkedList<>();
-        this.classPackageMap = new TreeMap<>();
         this.symbolTable = new SymbolTable();
         this.typeList = new TreeSet<>();
     }
 
     // Pass 1
+
+    /**
+     * The classes in the sanka.lang package are pre-imported.
+     */
+    Map<String, String> baseClassPackageMap() {
+        Map<String, String> cpm = new TreeMap<>();
+        for (ClassDefinition classdef : this.classList) {
+            if (classdef.packageName != null && classdef.packageName.equals(SANKA_LANG)) {
+                cpm.put(classdef.name, classdef.packageName);
+            }
+        }
+        return cpm;
+    }
 
     void printError(ParserRuleContext ctx, String error) {
         int line = ctx == null ? 0 : ctx.getStart().getLine();

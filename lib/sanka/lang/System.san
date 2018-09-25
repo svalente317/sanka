@@ -1,0 +1,7 @@
+// -*- mode: Java; -*-
+package sanka.lang;
+
+class System {
+    static void print(String text) {}
+    static String strerror(int errno) {}
+}

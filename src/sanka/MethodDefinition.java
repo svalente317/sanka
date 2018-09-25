@@ -15,7 +15,7 @@ import sanka.antlr4.SankaParser.TypeTypeContext;
 
 class MethodDefinition {
 
-    class ParameterDefinition {
+    static class ParameterDefinition {
         TypeDefinition type;
         String name;
         boolean dotdotdot;

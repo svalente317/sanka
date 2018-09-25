@@ -1,6 +1,5 @@
 // -*- mode: Java; -*-
-
-package syntax;
+package sanka.examples;
 
 class Podo {
     int intField;
@@ -47,7 +46,10 @@ class Class {
     void useMap() {
         var m1 = new Podo[class int];
         var m2 = new double[class String];
+        var m3 = new short[class int];
+        var str = "hello";
         var p = m1[method(0)];
-        var d = m2["hello"];
+        var d = m2[str];
+        var s = m3[9999];
     }
 }

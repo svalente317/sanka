@@ -26,18 +26,16 @@
 
 #include <stddef.h>
 
-typedef int rb_comparison_func (const void *rb_a, const void *rb_b);
-
 #ifndef RB_MAX_HEIGHT
 #define RB_MAX_HEIGHT 48
 #endif
 
 struct rb_table
   {
-    struct rb_node *rb_root;          /* Tree's root. */
-    rb_comparison_func *rb_compare;   /* Comparison function. */
-    size_t rb_count;                  /* Number of items in tree. */
-    unsigned long rb_generation;      /* Generation number. */
+    struct rb_node *rb_root;
+    size_t rb_count;
+    unsigned long rb_generation;
+    short use_strcmp;
 };
 
 enum rb_color
@@ -49,7 +47,7 @@ enum rb_color
 union rb_key
   {
     int i;
-    const void *vp;
+    const char *cp;
   };
 
 union rb_value
@@ -70,7 +68,7 @@ struct rb_node
   };
 
 
-struct rb_table *rb_create (rb_comparison_func *);
+struct rb_table *rb_create (short);
 int rb_find(const struct rb_table *, union rb_key, union rb_value *);
 int rb_put(struct rb_table *, union rb_key, union rb_value, union rb_value *);
 int rb_delete(struct rb_table *, union rb_key, union rb_value *);

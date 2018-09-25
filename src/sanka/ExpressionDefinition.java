@@ -17,8 +17,9 @@ import sanka.antlr4.SankaParser.PrimaryContext;
 class ExpressionDefinition {
 
     static enum ExpressionType {
-        LITERAL, IDENTIFIER, NEW_INSTANCE, NEW_ARRAY_WITH_VALUES, NEW_ARRAY, NEW_MAP,
-        UNARY, FIELD_ACCESS, BINARY, ARRAY_ACCESS, FUNCTION_CALL, TERNARY
+        LITERAL, IDENTIFIER, CLASS_IDENTIFIER, NEW_INSTANCE, NEW_ARRAY_WITH_VALUES,
+        NEW_ARRAY, NEW_MAP, UNARY, FIELD_ACCESS, BINARY, ARRAY_ACCESS, FUNCTION_CALL,
+        TERNARY
     };
 
     ExpressionType expressionType;
@@ -144,6 +145,16 @@ class ExpressionDefinition {
                 this.type = TypeDefinition.METHOD_TYPE;
                 this.expression1 = new ExpressionDefinition();
                 this.expression1.evaluateThis();
+                return;
+            }
+            if (env.classPackageMap.containsKey(this.name)) {
+                // Type is void because this expression has no value when evaluated
+                // as part of an arithmetic operation, function call, etc.
+                // It must be followed by a field access, or else it is a compile-time error.
+                // TODO Find classes in the current package?
+                // Or fully-qualified class names that have not been imported?
+                this.expressionType = ExpressionType.CLASS_IDENTIFIER;
+                this.type = TypeDefinition.VOID_TYPE;
                 return;
             }
             env.printError(primary, "undefined variable: " + this.name);
@@ -287,7 +298,7 @@ class ExpressionDefinition {
      * If one of these types could be promoted to be stored in a variable of the other type,
      * then return the storage type.
      */
-    TypeDefinition promoteType(TypeDefinition type1, TypeDefinition type2) {
+    private TypeDefinition promoteType(TypeDefinition type1, TypeDefinition type2) {
         if (type1.isCompatible(type2)) {
             return type1;
         }
@@ -324,7 +335,13 @@ class ExpressionDefinition {
         // when the field access is the LHS of the statement.
         ClassDefinition classdef;
         if (this.expression1.type.arrayOf == null) {
-            classdef = env.getClassDefinition(this.expression1.type);
+            if (this.expression1.expressionType == ExpressionType.CLASS_IDENTIFIER) {
+                String className = this.expression1.name;
+                String packageName = env.classPackageMap.get(className);
+                classdef = env.getClassDefinition(packageName, className);
+            } else {
+                classdef = env.getClassDefinition(this.expression1.type);
+            }
             if (classdef == null) {
                 env.printError(expr, "class " + this.expression1.type + " undefined");
                 return;
@@ -339,33 +356,47 @@ class ExpressionDefinition {
         if (fielddef == null) {
              this.method = classdef.getMethod(this.name);
              if (this.method == null) {
-                 env.printError(expr, "class " + this.type + " does not have field " + this.name);
+                 env.printError(expr, "class " + this.expression1.type +
+                         " does not have field " + this.name);
                  return;
              }
              this.type = TypeDefinition.METHOD_TYPE;
+             this.isStatic = this.method.isStatic;
              isPrivate = this.method.isPrivate;
         } else {
             this.type = fielddef.type;
             this.isStatic = fielddef.isStatic;
             isPrivate = fielddef.isPrivate;
-            if (fielddef.isConst) {
-                // TODO replace all of this with fielddef.value
-            }
         }
         if (isPrivate && classdef != env.currentClass) {
             env.printError(expr, "class " + this.expression1.type + " field " + this.name +
                     " is private");
         }
+        if (this.expression1.expressionType == ExpressionType.CLASS_IDENTIFIER) {
+            if (!this.isStatic) {
+                env.printError(expr, "non-static field " + this.name +
+                        " cannot be referenced from a static context");
+            }
+        }
     }
 
     void evaluateBinaryOp(ExpressionContext lhs, ExpressionContext rhs) {
+        Environment env = Environment.getInstance();
         this.expressionType = ExpressionType.BINARY;
         this.expression1 = new ExpressionDefinition();
         this.expression1.evaluate(lhs);
         this.expression2 = new ExpressionDefinition();
         this.expression2.evaluate(rhs);
         if (this.expression1.type != null && this.expression2.type != null) {
-            if (this.operator.equals("*") || this.operator.equals("/") ||
+            if (this.operator.equals("+") && this.expression1.type.isStringType()) {
+                if (!(this.expression2.type.isStringType() ||
+                        this.expression2.type.isPrimitiveType)) {
+                    env.printError(rhs, "incompatible types: " + this.expression2.type +
+                         " cannot be converted to " + this.expression1.type);
+                }
+                this.type = TypeDefinition.STRING_TYPE;
+            }
+            else if (this.operator.equals("*") || this.operator.equals("/") ||
                     this.operator.equals("+") || this.operator.equals("-")) {
                 checkNumericType(lhs, this.expression1.type);
                 checkNumericType(rhs, this.expression2.type);
@@ -373,8 +404,15 @@ class ExpressionDefinition {
             }
             else if (this.operator.equals("<=") || this.operator.equals(">=") ||
                     this.operator.equals("<") || this.operator.equals(">")) {
-                checkNumericType(lhs, this.expression1.type);
-                checkNumericType(rhs, this.expression2.type);
+                if (this.expression1.type.isStringType()) {
+                    if (!this.expression2.type.isStringType()) {
+                        env.printError(rhs, "incompatible types: " + this.expression2.type +
+                             " cannot be converted to " + this.expression1.type);
+                    }
+                } else {
+                    checkNumericType(lhs, this.expression1.type);
+                    checkNumericType(rhs, this.expression2.type);
+                }
                 this.type = TypeDefinition.BOOLEAN_TYPE;
             }
             else if (this.operator.equals("%") || this.operator.equals("<<") ||
@@ -390,6 +428,7 @@ class ExpressionDefinition {
                 this.type = this.expression1.type;
             }
             else if (this.operator.equals("==") || this.operator.equals("!=")) {
+                // TODO check compatible types?
                 this.type = TypeDefinition.BOOLEAN_TYPE;
             }
         }
@@ -486,6 +525,11 @@ class ExpressionDefinition {
         this.type = exprdef2.type;
     }
 
+    boolean isMapAccess() {
+        return this.expressionType == ExpressionType.ARRAY_ACCESS &&
+                this.expression1.type.keyType != null;
+    }
+
     // --------------------------------------------------------------------------------
 
     /**
@@ -502,6 +546,8 @@ class ExpressionDefinition {
             return translateLiteral();
         case IDENTIFIER:
             return this.name;
+        case CLASS_IDENTIFIER:
+            return this.name;
         case NEW_INSTANCE:
             return translateNewInstance(variableName);
         case NEW_ARRAY_WITH_VALUES:
@@ -517,7 +563,7 @@ class ExpressionDefinition {
         case BINARY:
             return translateBinary();
         case ARRAY_ACCESS:
-            return translateArrayAccess();
+            return translateArrayAccess(variableName);
         case FUNCTION_CALL:
             return translateFunctionCall(variableName);
         case TERNARY:
@@ -537,7 +583,7 @@ class ExpressionDefinition {
             return this.name.equals("true") ? "1" : (this.name.equals("false") ? "0" : "error");
         }
         if (this.type == TypeDefinition.STRING_TYPE) {
-            return "STRINGLITERAL(" + this.name + ")";
+            return this.name;
         }
         if (this.type == TypeDefinition.NULL_TYPE) {
             return "NULL";
@@ -608,9 +654,7 @@ class ExpressionDefinition {
         }
         builder.append(variableName);
         builder.append(" = rb_create(");
-        if (this.type.keyType.isStringType()) {
-            builder.append("strcmp");
-        }
+        builder.append(this.type.keyType.isStringType() ? "1" : "0");
         builder.append(");");
         env.print(builder.toString());
         return variableName;
@@ -622,16 +666,18 @@ class ExpressionDefinition {
 
     String translateFieldAccess() {
         Environment env = Environment.getInstance();
-        String text = this.expression1.translate(null);
-        if (!text.equals("this")) {
-            env.print("NULLCHECK(" + text + ");");
+        boolean isClassAccess = this.expression1.expressionType == ExpressionType.CLASS_IDENTIFIER;
+        String text = null;
+        if (!isClassAccess) {
+            text = this.expression1.translate(null);
+            if (!text.equals("this")) {
+                env.print("NULLCHECK(" + text + ");");
+            }
         }
-        if (this.type == TypeDefinition.METHOD_TYPE) {
+        if (this.isStatic || this.type == TypeDefinition.METHOD_TYPE) {
             this.translatedThis = text;
-            return TranslationUtils.translateClassItem(this.expression1.type.name, this.name);
-        }
-        if (this.isStatic) {
-            return TranslationUtils.translateClassItem(this.expression1.type.name, this.name);
+            String className = isClassAccess ? this.expression1.name : this.expression1.type.name;
+            return TranslationUtils.translateClassItem(className, this.name);
         }
         return text + "->" + this.name;
     }
@@ -690,17 +736,50 @@ class ExpressionDefinition {
         }
     }
 
-    String translateArrayAccess() {
+    String translateArrayAccess(String variableName) {
         Environment env = Environment.getInstance();
         String text1 = this.expression1.translate(null);
         String text2 = this.expression2.translate(null);
         if (this.expression1.type.keyType == null) {
             env.print("BOUNDSCHECK(" + text1 + ", " + text2 + ");");
             return "ARRCAST(" + text1 + ", " + this.type.translate() + ")[" + text2 + "]";
-        } else {
-            env.print("NULLCHECK(" + text1 + ");");
-            return "MAPGET(" + text1 + ", " + text2 + ", " + this.type.translate() + ")";
         }
+        env.print("NULLCHECK(" + text1 + ");");
+        if (this.expression1.type.keyType.isStringType()) {
+            env.print("NULLCHECK(" + text2 + ");");
+        }
+        if (variableName == null) {
+            variableName = env.getTmpVariable();
+            env.print(this.type.translateSpace() + variableName + ";");
+        }
+        String valueName = env.getTmpVariable();
+        env.print("union rb_value " + valueName + ";");
+        env.print("if (rb_find(" + text1 + ", (union rb_key) " + text2 + ", &" + valueName + ")) {");
+        env.level++;
+        env.print(variableName + " = " + valueName + "." + typeToMapFieldName(this.type) + ";");
+        env.level--;
+        env.print("} else {");
+        env.level++;
+        env.print(variableName + " = 0;");
+        env.level--;
+        env.print("}");
+        return variableName;
+    }
+
+    static String typeToMapFieldName(TypeDefinition type) {
+        if (!type.isPrimitiveType) {
+            return "vp";
+        }
+        if (type.equals(TypeDefinition.LONG_TYPE)) {
+            return "ln";
+        }
+        if (type.equals(TypeDefinition.DOUBLE_TYPE)) {
+            return "d";
+        }
+        if (type.equals(TypeDefinition.FLOAT_TYPE)) {
+            return "f";
+        }
+        return "i";
     }
 
     String translateFunctionCall(String variableName) {

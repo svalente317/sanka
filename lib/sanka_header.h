@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "rb.h"
 
 struct array {
     void *data;
@@ -14,7 +15,7 @@ static inline struct array *NEWARRAY(int length, int size) {
 
 extern void PANIC(const char *);
 
-static inline void NULLCHECK(void *vp) {
+static inline void NULLCHECK(const void *vp) {
     if (vp == NULL) PANIC("null pointer error");
 }
 

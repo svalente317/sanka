@@ -28,11 +28,8 @@
 
 extern void PANIC(const char *);
 
-/* Creates and returns a new table
-   with comparison function |compare|.
-   Returns |NULL| if memory allocation failed. */
 struct rb_table *
-rb_create (rb_comparison_func *compare)
+rb_create (short use_strcmp)
 {
   struct rb_table *tree;
 
@@ -41,21 +38,21 @@ rb_create (rb_comparison_func *compare)
     PANIC("out of memory error");
 
   tree->rb_root = NULL;
-  tree->rb_compare = compare;
   tree->rb_count = 0;
   tree->rb_generation = 0;
+  tree->use_strcmp = use_strcmp;
 
   return tree;
 }
 
 static inline int
-COMPARE(const struct rb_table *tree, union rb_key lhs, union rb_key rhs)
+rb_compare(const struct rb_table *tree, union rb_key lhs, union rb_key rhs)
 {
-  if (tree->rb_compare == NULL)
+  if (!tree->use_strcmp)
     {
       return lhs.i < rhs.i ? -1 : (lhs.i > rhs.i ? +1 : 0);
     }
-  return tree->rb_compare (lhs.vp, rhs.vp);
+  return strcmp (lhs.cp, rhs.cp);
 }
 
 int
@@ -66,7 +63,7 @@ rb_find (const struct rb_table *tree, union rb_key key,
 
   for (p = tree->rb_root; p != NULL; )
     {
-      int cmp = COMPARE(tree, key, p->rb_key);
+      int cmp = rb_compare(tree, key, p->rb_key);
       if (cmp < 0)
         p = p->rb_link[0];
       else if (cmp > 0)
@@ -97,10 +94,11 @@ rb_put (struct rb_table *tree, union rb_key key, union rb_value value,
   k = 1;
   for (p = tree->rb_root; p != NULL; p = p->rb_link[da[k - 1]])
     {
-      int cmp = COMPARE(tree, key, p->rb_key);
+      int cmp = rb_compare(tree, key, p->rb_key);
       if (cmp == 0)
         {
-          *pvp = p->rb_value;
+          if (pvp)
+            *pvp = p->rb_value;
           p->rb_value = value;
           return 1;
         }
@@ -209,7 +207,7 @@ rb_delete (struct rb_table *tree, union rb_key key,
   k = 0;
   p = (struct rb_node *) &tree->rb_root;
   for (cmp = -1; cmp != 0;
-       cmp = COMPARE(tree, key, p->rb_key))
+       cmp = rb_compare(tree, key, p->rb_key))
     {
       int dir = cmp > 0;
 

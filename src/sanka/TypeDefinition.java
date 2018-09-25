@@ -14,6 +14,8 @@ class TypeDefinition implements Comparable<TypeDefinition> {
     static final TypeDefinition BOOLEAN_TYPE = new TypeDefinition("boolean");
     static final TypeDefinition BYTE_TYPE = new TypeDefinition("byte");
     static final TypeDefinition INT_TYPE = new TypeDefinition("int");
+    static final TypeDefinition LONG_TYPE = new TypeDefinition("long");
+    static final TypeDefinition FLOAT_TYPE = new TypeDefinition("float");
     static final TypeDefinition DOUBLE_TYPE = new TypeDefinition("double");
     static final TypeDefinition METHOD_TYPE = new TypeDefinition("method");
     static final TypeDefinition STRING_TYPE = new TypeDefinition("String");
@@ -31,7 +33,7 @@ class TypeDefinition implements Comparable<TypeDefinition> {
         if (!name.equals("String")) {
             this.isPrimitiveType = true;
         } else {
-            this.packageName = "sanka.lang";
+            this.packageName = Environment.SANKA_LANG;
         }
         this.name = name;
     }
@@ -198,6 +200,9 @@ class TypeDefinition implements Comparable<TypeDefinition> {
             }
             return this.name;
         }
+        if (this.isStringType()) {
+            return "const char *";
+        }
         return "struct " + this.name + " *";
     }
 
@@ -213,7 +218,7 @@ class TypeDefinition implements Comparable<TypeDefinition> {
         if (this.arrayOf != null) {
             return this.arrayOf.translate();
         }
-        if (this.isPrimitiveType) {
+        if (this.isPrimitiveType || this.isStringType()) {
             return null;
         }
         return "struct " + this.name;

@@ -1,0 +1,6 @@
+// -*- mode: Java; -*-
+package sanka.lang;
+
+class String {
+    int length() {}
+}

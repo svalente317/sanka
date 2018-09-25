@@ -248,11 +248,7 @@ class ClassDefinition {
                 builder.append(field.type.translateSpace());
                 builder.append(TranslationUtils.translateClassItem(this.name, entry.getKey()));
                 builder.append(" = ");
-                if (field.value == null) {
-                    builder.append(field.type.isPrimitiveType ? "0" : "NULL");
-                } else {
-                    builder.append(field.value.translate(null));
-                }
+                builder.append(field.value == null ? "0" : field.value.translate(null));
                 builder.append(";");
                 env.print(builder.toString());
                 printedSomething = true;
