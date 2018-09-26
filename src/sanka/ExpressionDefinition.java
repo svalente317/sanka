@@ -1,5 +1,6 @@
 package sanka;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -561,7 +562,7 @@ class ExpressionDefinition {
         case FIELD_ACCESS:
             return translateFieldAccess();
         case BINARY:
-            return translateBinary();
+            return translateBinary(variableName);
         case ARRAY_ACCESS:
             return translateArrayAccess(variableName);
         case FUNCTION_CALL:
@@ -682,12 +683,14 @@ class ExpressionDefinition {
         return text + "->" + this.name;
     }
 
-    String translateBinary() {
+    String translateBinary(String variableName) {
         Environment env = Environment.getInstance();
         if (this.operator.equals("&&") || this.operator.equals("||")) {
             StringBuilder builder = new StringBuilder();
-            String variableName = env.getTmpVariable();
-            builder.append("int ");
+            if (variableName == null) {
+                builder.append(this.type.translateSpace());
+                variableName = env.getTmpVariable();
+            }
             builder.append(variableName);
             builder.append(" = ");
             builder.append(this.expression1.translate(null));
@@ -707,6 +710,9 @@ class ExpressionDefinition {
             env.level--;
             env.print("}");
             return variableName;
+        }
+        if (this.operator.equals("+") && this.type.isStringType()) {
+            return translateStringAdd(variableName);
         }
         String text1 = this.expression1.translate(null);
         String text2 = this.expression2.translate(null);
@@ -756,7 +762,8 @@ class ExpressionDefinition {
         env.print("union rb_value " + valueName + ";");
         env.print("if (rb_find(" + text1 + ", (union rb_key) " + text2 + ", &" + valueName + ")) {");
         env.level++;
-        env.print(variableName + " = " + valueName + "." + typeToMapFieldName(this.type) + ";");
+        env.print(variableName + " = " + valueName + "." +
+                TranslationUtils.typeToMapFieldName(this.type) + ";");
         env.level--;
         env.print("} else {");
         env.level++;
@@ -764,22 +771,6 @@ class ExpressionDefinition {
         env.level--;
         env.print("}");
         return variableName;
-    }
-
-    static String typeToMapFieldName(TypeDefinition type) {
-        if (!type.isPrimitiveType) {
-            return "vp";
-        }
-        if (type.equals(TypeDefinition.LONG_TYPE)) {
-            return "ln";
-        }
-        if (type.equals(TypeDefinition.DOUBLE_TYPE)) {
-            return "d";
-        }
-        if (type.equals(TypeDefinition.FLOAT_TYPE)) {
-            return "f";
-        }
-        return "i";
     }
 
     String translateFunctionCall(String variableName) {
@@ -838,6 +829,43 @@ class ExpressionDefinition {
         setTextToVariable(text, variableName);
         env.level--;
         env.print("}");
+        return variableName;
+    }
+
+    /**
+     * Recursively build the list of expressions being added.
+     */
+    static void
+    addLeftAndRightToList(List<ExpressionDefinition> exprList, ExpressionDefinition expr) {
+        if (expr.expressionType == ExpressionType.BINARY && expr.operator.equals("+")) {
+            addLeftAndRightToList(exprList, expr.expression1);
+            addLeftAndRightToList(exprList, expr.expression2);
+        } else {
+            exprList.add(expr);
+        }
+    }
+
+    String translateStringAdd(String variableName) {
+        Environment env = Environment.getInstance();
+        List<ExpressionDefinition> exprList = new ArrayList<>();
+        addLeftAndRightToList(exprList, this);
+        String arrayName = env.getTmpVariable();
+        env.print("char *" + arrayName + "[" + exprList.size() + "];");
+        for (int idx = 0; idx < exprList.size(); idx++) {
+            String text = TranslationUtils.translateToString(exprList.get(idx));
+            env.print(arrayName + "[" + idx + "]" + " = " + text + ";");
+        }
+        StringBuilder builder = new StringBuilder();
+        if (variableName == null) {
+            builder.append(this.type.translateSpace());
+            variableName = env.getTmpVariable();
+        }
+        builder.append(variableName);
+        builder.append(" = STRING_ADD(");
+        builder.append(arrayName);
+        builder.append(", " + exprList.size());
+        builder.append(");");
+        env.print(builder.toString());
         return variableName;
     }
 }

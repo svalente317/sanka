@@ -4,4 +4,7 @@
     <javac srcdir="src" destdir="bin" debug="on"
            classpath="/usr/share/java/antlr4-runtime.jar"/>
   </target>
+  <target name="jar" depends="compile">
+    <jar destfile="bin/sanka.jar" basedir="bin" includes="sanka/**"/>
+  </target>
 </project>

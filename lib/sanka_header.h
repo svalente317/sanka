@@ -14,6 +14,8 @@ static inline struct array *NEWARRAY(int length, int size) {
 }
 
 extern void PANIC(const char *);
+extern char *STRING_ADD(char **, int);
+extern void LONG_TO_STRING(long, char *);
 
 static inline void NULLCHECK(const void *vp) {
     if (vp == NULL) PANIC("null pointer error");

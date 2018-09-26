@@ -100,4 +100,50 @@ class TranslationUtils {
         reader.close();
         writer.write(contents);
     }
+
+    /**
+     * Hardcode information about "union rb_value" in rb.h. If you change rb.h, then change
+     * this too.
+     */
+    static String typeToMapFieldName(TypeDefinition type) {
+        if (!type.isPrimitiveType) {
+            return "vp";
+        }
+        if (type.equals(TypeDefinition.LONG_TYPE)) {
+            return "ln";
+        }
+        if (type.equals(TypeDefinition.DOUBLE_TYPE)) {
+            return "d";
+        }
+        if (type.equals(TypeDefinition.FLOAT_TYPE)) {
+            return "f";
+        }
+        return "i";
+    }
+
+    /**
+     * Generate code that puts a string representation of the given primitive on the stack.
+     * The string does not go on the heap because it's part of a string add operation, so
+     * it's completely transient.
+     * (The result of the string add will be permanent, unlike the pieces of the string add.)
+     */
+    static String translateToString(ExpressionDefinition expr) {
+        Environment env = Environment.getInstance();
+        String text = expr.translate(null);
+        if (expr.type.equals(TypeDefinition.STRING_TYPE)) {
+            return text;
+        }
+        if (expr.type.equals(TypeDefinition.BOOLEAN_TYPE)) {
+            return "(" + text + " ? \"true\" : \"false\")";
+        }
+        if (expr.type.isIntegralType()) {
+            int size = expr.type.equals(TypeDefinition.LONG_TYPE) ? 22 : 12;
+            String variableName = env.getTmpVariable();
+            env.print("char " + variableName + "[" + size + "];");
+            env.print("LONG_TO_STRING(" + text + ", " + variableName + ");");
+            return variableName;
+        }
+        // TODO float and double
+        return "not_implemented";
+    }
 }

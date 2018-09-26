@@ -483,7 +483,7 @@ public class StatementDefinition {
         String valueName = env.getTmpVariable();
         env.print("union rb_value " + valueName + ";");
         // TODO inc and dec
-        String field = ExpressionDefinition.typeToMapFieldName(this.expression.type);
+        String field = TranslationUtils.typeToMapFieldName(this.expression.type);
         env.print(valueName + "." + field + " = " + this.expression.translate(null) + ";");
         env.print("rb_put(" + text1 + ", (union rb_key) " + text2 + ", " + valueName + ", 0);");
     }
