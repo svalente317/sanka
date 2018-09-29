@@ -42,7 +42,7 @@ bin/sanka.jar:
 bin/sanka.sh:
 	echo '#!/bin/sh' > $@
 	echo exec java -cp ${PREFIX}/share/sanka.jar:$(ANTLR_RUNTIME) \
-	sanka/Translator '"$$@"' >> $@
+	sanka/Translator -I ${PREFIX}/include '"$$@"' >> $@
 	chmod 755 $@
 
 bin/libsankaruntime.a: $(OBJS)

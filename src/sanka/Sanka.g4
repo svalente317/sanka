@@ -217,7 +217,7 @@ forIncrement
     ;
 
 enhancedForControl
-    :   'var'? Identifier ':' expression
+    :   'var' Identifier (',' Identifier)? ':' expression
     ;
 
 /** Matches cases then statements, both of which are mandatory.

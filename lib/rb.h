@@ -74,4 +74,16 @@ int rb_put(struct rb_table *, union rb_key, union rb_value, union rb_value *);
 int rb_delete(struct rb_table *, union rb_key, union rb_value *);
 #define rb_count(table) ((size_t) (table)->rb_count)
 
+struct rb_traverser
+  {
+    struct rb_table *rb_table;
+    struct rb_node *rb_node;
+    struct rb_node *rb_stack[RB_MAX_HEIGHT];
+    size_t rb_height;
+    unsigned long rb_generation;
+  };
+
+void rb_t_init (struct rb_traverser *trav, struct rb_table *tree);
+int rb_t_next (struct rb_traverser *trav, union rb_key *kp, union rb_value *vp);
+
 #endif /* rb.h */

@@ -13,7 +13,7 @@ class WordMap {
 
     /**
      * Read the file. Each line in the file has a single word.
-     * For each word, record its first line in the file.
+     * For each word, record its last line in the file.
      */
     void readFromFile(String filename) {
         var reader = new FileReader();
@@ -29,7 +29,6 @@ class WordMap {
                 break;
             }
             count++;
-            // if (!this.map.contains(word)) {
             this.map[word] = count;
         }
         reader.close();
@@ -53,11 +52,21 @@ class WordMap {
     }
 
     /**
+     * Print the keys and values in the map, sorted by key.
+     */
+    void printMap() {
+        for (var key, value : this.map) {
+            System.print(key + ": " + value);
+        }
+    }
+
+    /**
      * Run the program.
      */
     static void main(String[] args) {
         var wordMap = new WordMap();
         wordMap.readFromFile(args[0]);
         wordMap.printWords(args[1]);
+        wordMap.printMap();
     }
 }

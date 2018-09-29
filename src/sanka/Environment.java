@@ -14,6 +14,7 @@ class Environment {
     public static final String SANKA_LANG = "sanka.lang";
 
     // Pass 1.
+    List<String> importPath;
     List<ClassDefinition> classList;
     String currentPackage;
     Map<String, String> classPackageMap;
@@ -37,6 +38,13 @@ class Environment {
     }
 
     // Pass 1
+
+    void addImportPath(String importDir) {
+        if (this.importPath == null) {
+            this.importPath = new LinkedList<>();
+        }
+        this.importPath.add(importDir);
+    }
 
     /**
      * The classes in the sanka.lang package are pre-imported.

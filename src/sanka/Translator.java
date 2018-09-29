@@ -19,7 +19,13 @@ class Translator {
         Environment env = Environment.getInstance();
         Translator translator = new Translator();
         List<CompilationUnitContext> contextList = new ArrayList<>();
-        for (String filename: argv) {
+        for (int idx = 0; idx < argv.length; idx++) {
+            String filename = argv[idx];
+            if (filename.equals("-I")) {
+                idx++;
+                env.addImportPath(argv[idx]);
+                continue;
+            }
             SankaLexer lexer = new SankaLexer(new ANTLRFileStream(filename));
             SankaParser parser = new SankaParser(new CommonTokenStream(lexer));
             contextList.add(parser.compilationUnit());

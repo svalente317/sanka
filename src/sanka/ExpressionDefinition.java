@@ -31,6 +31,7 @@ class ExpressionDefinition {
     ExpressionDefinition expression2;
     MethodDefinition method;
     boolean isStatic;
+    TypeDefinition identifiedClass;
     ExpressionDefinition[] argList;
     String translatedThis;
 
@@ -148,7 +149,8 @@ class ExpressionDefinition {
                 this.expression1.evaluateThis();
                 return;
             }
-            if (env.classPackageMap.containsKey(this.name)) {
+            String packageName = env.classPackageMap.get(this.name);
+            if (packageName != null) {
                 // Type is void because this expression has no value when evaluated
                 // as part of an arithmetic operation, function call, etc.
                 // It must be followed by a field access, or else it is a compile-time error.
@@ -156,6 +158,7 @@ class ExpressionDefinition {
                 // Or fully-qualified class names that have not been imported?
                 this.expressionType = ExpressionType.CLASS_IDENTIFIER;
                 this.type = TypeDefinition.VOID_TYPE;
+                this.identifiedClass = new TypeDefinition(packageName, this.name);
                 return;
             }
             env.printError(primary, "undefined variable: " + this.name);
@@ -337,9 +340,7 @@ class ExpressionDefinition {
         ClassDefinition classdef;
         if (this.expression1.type.arrayOf == null) {
             if (this.expression1.expressionType == ExpressionType.CLASS_IDENTIFIER) {
-                String className = this.expression1.name;
-                String packageName = env.classPackageMap.get(className);
-                classdef = env.getClassDefinition(packageName, className);
+                classdef = env.getClassDefinition(this.expression1.identifiedClass);
             } else {
                 classdef = env.getClassDefinition(this.expression1.type);
             }
@@ -669,7 +670,9 @@ class ExpressionDefinition {
         Environment env = Environment.getInstance();
         boolean isClassAccess = this.expression1.expressionType == ExpressionType.CLASS_IDENTIFIER;
         String text = null;
-        if (!isClassAccess) {
+        if (isClassAccess) {
+            env.addType(this.expression1.identifiedClass);
+        } else {
             text = this.expression1.translate(null);
             if (!text.equals("this")) {
                 env.print("NULLCHECK(" + text + ");");
@@ -760,16 +763,10 @@ class ExpressionDefinition {
         }
         String valueName = env.getTmpVariable();
         env.print("union rb_value " + valueName + ";");
-        env.print("if (rb_find(" + text1 + ", (union rb_key) " + text2 + ", &" + valueName + ")) {");
-        env.level++;
-        env.print(variableName + " = " + valueName + "." +
-                TranslationUtils.typeToMapFieldName(this.type) + ";");
-        env.level--;
-        env.print("} else {");
-        env.level++;
-        env.print(variableName + " = 0;");
-        env.level--;
-        env.print("}");
+        String valueField = valueName + "." + TranslationUtils.typeToMapFieldName(this.type);
+        env.print(valueField + " = 0;");
+        env.print("rb_find(" + text1 + ", (union rb_key) " + text2 + ", &" + valueName + ");");
+        env.print(variableName + " = " + valueField + ";");
         return variableName;
     }
 

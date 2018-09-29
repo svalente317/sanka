@@ -389,3 +389,68 @@ rb_delete (struct rb_table *tree, union rb_key key,
   tree->rb_generation++;
   return 1;
 }
+
+void
+rb_t_init (struct rb_traverser *trav, struct rb_table *tree)
+{
+  trav->rb_table = tree;
+  trav->rb_node = NULL;
+  trav->rb_height = 0;
+  trav->rb_generation = tree->rb_generation;
+}
+
+int
+rb_t_next (struct rb_traverser *trav, union rb_key *kp, union rb_value *vp)
+{
+  if (trav->rb_table == NULL)
+    {
+      return 0;
+    }
+  // if (trav->rb_generation != trav->rb_table->rb_generation)
+  // trav_refresh (trav);
+  struct rb_node *x = trav->rb_node;
+  if (x == NULL)
+    {
+      x = trav->rb_table->rb_root;
+      if (x == NULL)
+        {
+          return 0;
+        }
+      while (x->rb_link[0] != NULL)
+        {
+          trav->rb_stack[trav->rb_height++] = x;
+          x = x->rb_link[0];
+        }
+      trav->rb_node = x;
+    }
+  else if (x->rb_link[1] != NULL)
+    {
+      trav->rb_stack[trav->rb_height++] = x;
+      x = x->rb_link[1];
+      while (x->rb_link[0] != NULL)
+        {
+          trav->rb_stack[trav->rb_height++] = x;
+          x = x->rb_link[0];
+        }
+    }
+  else
+    {
+      struct rb_node *y;
+      do
+        {
+          if (trav->rb_height == 0)
+            {
+              trav->rb_table = NULL;
+              trav->rb_node = NULL;
+              return 0;
+            }
+          y = x;
+          x = trav->rb_stack[--trav->rb_height];
+        }
+      while (y == x->rb_link[1]);
+    }
+  trav->rb_node = x;
+  *kp = x->rb_key;
+  *vp = x->rb_value;
+  return 1;
+}

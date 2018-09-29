@@ -1,5 +1,8 @@
 package sanka;
 
+import java.util.List;
+
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -7,6 +10,7 @@ import sanka.ClassDefinition.FieldDefinition;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.AssignableContext;
 import sanka.antlr4.SankaParser.BlockContext;
+import sanka.antlr4.SankaParser.EnhancedForControlContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.ForControlContext;
 import sanka.antlr4.SankaParser.ForIncrementContext;
@@ -25,6 +29,7 @@ public class StatementDefinition {
     BlockDefinition block;
     BlockDefinition elseBlock;
     StatementDefinition[] forStatements;
+    String valueName;
 
     /**
      * Pass 1 (of 3): Parse the statement. Actually, ignore the statement, because pass 1
@@ -131,10 +136,7 @@ public class StatementDefinition {
         Environment env = Environment.getInstance();
         this.statementType = SankaLexer.VAR;
         this.name = vc.Identifier().getText();
-        if (env.symbolTable.get(this.name) != null) {
-            env.printError(vc, "variable " + this.name + " is already defined in method " +
-                    env.currentMethod.name + "()");
-        }
+        verifyVariableNotDefined(vc, this.name);
         if (vc.expression() == null) {
             env.symbolTable.put(this.name, TypeDefinition.NULL_TYPE);
         } else {
@@ -146,6 +148,14 @@ public class StatementDefinition {
                 }
             }
             env.symbolTable.put(this.name, this.expression.type);
+        }
+    }
+
+    void verifyVariableNotDefined(ParserRuleContext ctx, String name) {
+        Environment env = Environment.getInstance();
+        if (env.symbolTable.get(name) != null) {
+            env.printError(ctx, "variable " + this.name + " is already defined in method " +
+                    env.currentMethod.name + "()");
         }
     }
 
@@ -280,8 +290,51 @@ public class StatementDefinition {
      */
     void evaluateFor(ForControlContext forControl, BlockContext blockCtx) {
         if (forControl.enhancedForControl() != null) {
-            return;
+            evaluateEnhancedFor(forControl.enhancedForControl());
+        } else {
+            evaluateClassicFor(forControl);
         }
+        this.block = new BlockDefinition();
+        this.block.evaluate(blockCtx);
+    }
+
+    void evaluateEnhancedFor(EnhancedForControlContext forControl) {
+        this.statementType = SankaLexer.COLON;
+        Environment env = Environment.getInstance();
+        List<TerminalNode> vars = forControl.Identifier();
+        this.name = vars.get(0).getText();
+        verifyVariableNotDefined(forControl, this.name);
+        if (vars.size() > 1) {
+            this.valueName = vars.get(1).getText();
+            verifyVariableNotDefined(forControl, this.valueName);
+        }
+        this.expression = new ExpressionDefinition();
+        this.expression.evaluate(forControl.expression());
+        TypeDefinition type = null;
+        TypeDefinition valueType = null;
+        if (this.expression.type != null) {
+            if (this.expression.type.arrayOf == null) {
+                env.printError(forControl, "can only iterate over array or map");
+            }
+            else if (this.expression.type.keyType == null) {
+                type = this.expression.type;
+                if (this.valueName != null) {
+                    env.printError(forControl, "only specify one variable " +
+                            "to iterate over " + type);
+                }
+            }
+            else {
+                type = this.expression.type.keyType;
+                valueType = this.expression.type.arrayOf;
+            }
+        }
+        env.symbolTable.put(this.name, type);
+        if (this.valueName != null) {
+            env.symbolTable.put(this.valueName, valueType);
+        }
+    }
+
+    void evaluateClassicFor(ForControlContext forControl) {
         this.forStatements = new StatementDefinition[2];
         ForInitContext forInit = forControl.forInit();
         if (forInit != null) {
@@ -307,8 +360,6 @@ public class StatementDefinition {
                 this.forStatements[1].evaluateExpressionStatement(forIncrement.expression());
             }
         }
-        this.block = new BlockDefinition();
-        this.block.evaluate(blockCtx);
     }
 
     /**
@@ -439,6 +490,30 @@ public class StatementDefinition {
             env.level--;
             env.print("}");
             return;
+        case SankaLexer.COLON:
+            String traverserVar = env.getTmpVariable();
+            String keyVar = env.getTmpVariable();
+            String valueVar = env.getTmpVariable();
+            env.print("struct rb_traverser " + traverserVar + ";");
+            env.print("union rb_key " + keyVar + ";");
+            env.print("union rb_value " + valueVar + ";");
+            String exprText = this.expression.translate(null);
+            env.print("rb_t_init(&" + traverserVar + ", " + exprText + ");");
+            env.print("while (rb_t_next(&" + traverserVar + ", &" + keyVar + ", &" +
+                    valueVar + ")) {");
+            env.level++;
+            env.print(this.expression.type.keyType.translateSpace() + this.name + ";");
+            String field = TranslationUtils.typeToMapKeyFieldName(this.expression.type.keyType);
+            env.print(this.name +" = " + keyVar + "." + field + ";");
+            if (this.valueName != null) {
+                env.print(this.expression.type.arrayOf.translateSpace() + this.valueName + ";");
+                field = TranslationUtils.typeToMapFieldName(this.expression.type.arrayOf);
+                env.print(this.valueName + " = " + valueVar + "." + field + ";");
+            }
+            this.block.translate(false);
+            env.level--;
+            env.print("}");
+            break;
         case SankaLexer.SWITCH:
             break;
         case SankaLexer.RETURN:

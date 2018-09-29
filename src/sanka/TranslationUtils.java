@@ -121,6 +121,10 @@ class TranslationUtils {
         return "i";
     }
 
+    static String typeToMapKeyFieldName(TypeDefinition type) {
+        return type.equals(TypeDefinition.STRING_TYPE) ? "cp" : "i";
+    }
+
     /**
      * Generate code that puts a string representation of the given primitive on the stack.
      * The string does not go on the heap because it's part of a string add operation, so
@@ -137,10 +141,14 @@ class TranslationUtils {
             return "(" + text + " ? \"true\" : \"false\")";
         }
         if (expr.type.isIntegralType()) {
-            int size = expr.type.equals(TypeDefinition.LONG_TYPE) ? 22 : 12;
             String variableName = env.getTmpVariable();
-            env.print("char " + variableName + "[" + size + "];");
-            env.print("LONG_TO_STRING(" + text + ", " + variableName + ");");
+            if (expr.type.equals(TypeDefinition.LONG_TYPE)) {
+                env.print("char " + variableName + "[22];");
+                env.print("LONG_TO_STRING(" + text + ", " + variableName + ");");
+            } else {
+                env.print("char " + variableName + "[12];");
+                env.print("INT_TO_STRING(" + text + ", " + variableName + ");");
+            }
             return variableName;
         }
         // TODO float and double

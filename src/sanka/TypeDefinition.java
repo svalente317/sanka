@@ -38,6 +38,11 @@ class TypeDefinition implements Comparable<TypeDefinition> {
         this.name = name;
     }
 
+    TypeDefinition(String packageName, String name) {
+        this.packageName = packageName;
+        this.name = name;
+    }
+
     TypeDefinition copy() {
         TypeDefinition copy = new TypeDefinition();
         copy.isPrimitiveType = this.isPrimitiveType;

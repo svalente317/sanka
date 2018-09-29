@@ -1,4 +1,10 @@
+* iterate over arrays
+
+* map.contains(), other methods
+
 * Generate correct code for assignment to static field
+
+* Support "switch" statement
 
 * Translate CONTINUE statement
 
@@ -18,35 +24,25 @@
 
 * Support complex literals - evaluate and translate
 
-* allow inline classes to be null.
+* Support inline fields
 
-* make strings and arrays inline classes.
+* can inline fields be null?
 
-* Support import
+* support "exports" keyword
 
 * Support interface
 
 * Support parameterized types
 
-* Support class field and method with same name? Or generate error?
-
-* Correctly import String class
-
-* Move arrayClassDefinition from ClassDefinition to Builtins
+* Generate error if method name has class name
 
 * Allow multiple constructors with different signatures?
 
-* Support inline fields
-
 * Support dot-dot-dot functions?
 
-* Support switch statements
+* support iteration over map
 
-* support enhanced for statement
-
-* Support expressions with class name (local)
-
-* Support expressions with class name (qualified)
+* Support expressions with qualified class name
 
 * Support "new" with class body - adapter statements
 
@@ -64,15 +60,17 @@
 
 * Support static field initialized to literal array
 
-* Generates bad C code for: static String s = "literal";
-
 * evaluate binary expression of two literals should produce
   a single literal.
 
-* Support special binary operations for String: plus, equals, etc.
+* Support special binary operations for String: equals, etc.
 
 * static fields without initial values should be initialized to zero
 
 * const fields (not local variables)
 
 * const local variables (not fields)
+
+* translate float and double in strings
+
+* map[value]++ increment and decrement in map

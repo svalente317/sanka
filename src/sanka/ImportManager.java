@@ -17,8 +17,6 @@ import sanka.antlr4.SankaParser.QualifiedNameContext;
 import sanka.antlr4.SankaParser.TypeDeclarationContext;
 
 public class ImportManager {
-    public static final String IMPORT_PATH = "/home/svalente/src/sanka/lib";
-
     /**
      * Find the sanka source file for the given class. Read the structure of the file -
      * the class's public fields and methods. Store the class in env.classList.
@@ -50,16 +48,34 @@ public class ImportManager {
         if (env.getClassDefinition(packageName, className) != null) {
             return;
         }
-        String filename = IMPORT_PATH + File.separatorChar +
-                TranslationUtils.replaceDot(packageName, File.separatorChar) +
+        String filename = TranslationUtils.replaceDot(packageName, File.separatorChar) +
                 File.separatorChar + className + ".san";
+        String pathname = null;
+        if (env.importPath == null) {
+            File file = new File(filename);
+            if (file.exists()) {
+                pathname = filename;
+            }
+        } else {
+            for (String importDir : env.importPath) {
+                File file = new File(importDir, filename);
+                if (file.exists()) {
+                    pathname = file.getPath();
+                    break;
+                }
+            }
+        }
+        if (pathname == null) {
+            env.printError(importctx, "class " + packageName + "." + className +
+                    " not found for import");
+            return;
+        }
         SankaLexer lexer = null;
         try {
-            lexer = new SankaLexer(new ANTLRFileStream(filename));
+            lexer = new SankaLexer(new ANTLRFileStream(pathname));
         } catch (IOException ioe) {
             if (importctx != null) {
-                env.printError(importctx, "class " + packageName + "." + className + ": " +
-                        ioe.getMessage());
+                env.printError(importctx, pathname + ": " + ioe);
             }
             return;
         }
