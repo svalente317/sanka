@@ -31,7 +31,7 @@ INCLUDES=rb.h \
 
 CC=		gcc
 DBG=		-g
-CFLAGS=		$(DBG) -Ilib
+CFLAGS=		$(DBG) -Iruntime
 ANTLR_RUNTIME=	/usr/share/java/antlr4-runtime.jar
 
 all:	bin/sanka.jar bin/sanka.sh bin/libsankaruntime.a
@@ -49,19 +49,19 @@ bin/libsankaruntime.a: $(OBJS)
 	rm -f $@
 	ar rc $@ $^
 
-bin/panic.o:		lib/panic.c
+bin/panic.o:		runtime/panic.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-bin/rb.o:		lib/rb.c
+bin/rb.o:		runtime/rb.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-bin/string_add.o:	lib/string_add.c
+bin/string_add.o:	runtime/string_add.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-bin/FileReader.o:	lib/sanka/io/FileReader.c
+bin/FileReader.o:	runtime/sanka/io/FileReader.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-bin/System.o:		lib/sanka/lang/System.c
+bin/System.o:		runtime/sanka/lang/System.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
@@ -73,6 +73,6 @@ install: all
 	mkdir -p $(PREFIX)/lib
 	mkdir -p $(PREFIX)/share
 	cp bin/sanka.sh $(PREFIX)/bin/sanka
-	cd lib; tar cf - $(INCLUDES) | (cd $(PREFIX)/include; tar xf -)
 	cp bin/libsankaruntime.a $(PREFIX)/lib/
 	cp bin/sanka.jar $(PREFIX)/share/
+	cd runtime; tar cf - $(INCLUDES) | (cd $(PREFIX)/include; tar xf -)
