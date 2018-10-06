@@ -19,7 +19,7 @@ interface Calculator {
 
 class User {
     static void operateAndPrint(Calculator calc, int x, int y) {
-        System.print("value=" + calc.operate(x, y));
+        System.println("value=" + calc.operate(x, y));
     }
 
     static void main(String[] args) {
