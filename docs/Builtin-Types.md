@@ -214,7 +214,7 @@ the program dies with a Null Pointer Exception. For example:
 ~~~
     var s = "hello";   // "s" is of type String
     s = null;          // Valid assignment for type String
-    print(s.length);   // Compiler accepts this. Dies at runtime.
+    System.println(s.length);   // Compiler accepts this. Dies at runtime.
 ~~~
 
 The string comparison operators are undefined for the null string. For

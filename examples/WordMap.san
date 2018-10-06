@@ -19,7 +19,7 @@ class WordMap {
         var reader = new FileReader();
         var status = reader.open(filename);
         if (status != 0) {
-            System.print(filename + ": " + System.strerror(status));
+            System.println(filename + ": " + System.strerror(status));
             return;
         }
         var count = 0;
@@ -46,7 +46,7 @@ class WordMap {
             if (word == null) {
                 break;
             }
-            System.print(word + " " + this.map[word]);
+            System.println(word + " " + this.map[word]);
         }
         reader.close();
     }
@@ -56,7 +56,7 @@ class WordMap {
      */
     void printMap() {
         for (var key, value : this.map) {
-            System.print(key + ": " + value);
+            System.println(key + ": " + value);
         }
     }
 
