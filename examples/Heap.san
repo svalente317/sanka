@@ -1,0 +1,171 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+
+class HeapUtils {
+
+    static int logTwo(int n) {
+        var i = 1;
+        n = n >> 1;
+        while (n != 0) {
+            i++;
+            n = n >> 1;
+        }
+        return i;
+    }
+
+    static int twoToTheN(int n) {
+        var i = 1;
+        while (n > 0) {
+            i = i << 1;
+            n--;
+        }
+        return i;
+    }
+
+    static void printProgress(int parent, int n, int x) {
+        System.println("parent = " + parent
+                       + ", n = " + n
+                       + ", x = " + x);
+    }
+
+    static int levelPrintWidth(int level) {
+        var maxElts = twoToTheN(level);
+        return (4 * (maxElts + 1)) - 1;
+    }
+
+    static void indent(int level, int printWidth) {
+        var currentWidth = levelPrintWidth(level);
+        for (var j=0; j < (printWidth - currentWidth) / 2; j++) {
+            System.print(" ");
+        }
+    }
+
+    static void printHeap(Heap h) {
+        var i = 0;
+        var level = 0;
+        var endOfLevel = 0;
+
+        var nLevels = logTwo(h.frontier);
+        var printWidth = levelPrintWidth(nLevels);
+
+        indent(level, printWidth);
+        while (i < h.frontier) {
+            System.print(" " + h.heap[i] + " ");
+            if (i == endOfLevel) {
+                System.println("");
+                level++;
+                endOfLevel = endOfLevel + twoToTheN(level);
+                indent(level, printWidth);
+            }
+            i++;
+        }
+        System.println("\n------------------------");
+    }
+}
+
+class Heap {
+
+    int[] heap;
+    int frontier;
+
+    Heap() {
+        this.heap = new int[100];
+        this.frontier = 0;
+    }
+
+    void add(int x) {
+        this.heap[this.frontier] = x;
+
+        var n = this.frontier;
+        var parent = (n - 1) / 2;
+        while ((parent < n) && (this.heap[parent] > x)) {
+            HeapUtils.printProgress(parent, n, x);
+            this.heap[n] = this.heap[parent];
+            this.heap[parent] = x;
+            n = parent;
+        }
+
+        this.frontier++;
+        System.println("adding " + x);
+        HeapUtils.printHeap(this);
+    }
+
+    int peek() {
+        if (this.frontier == 0) {
+            return -1;
+        }
+        return this.heap[0];
+    }
+
+    int pop() {
+        if (this.frontier == 0) {
+            return -1;
+        }
+        var val = this.heap[0];
+        for (var i = 0; i < this.frontier; i++) {
+            this.heap[i] = this.heap[i + 1];
+        }
+        this.frontier--;
+        return val;
+    }
+
+    boolean isEmpty() {
+        return (this.frontier == 0);
+    }
+}
+
+class HeapTest {
+
+    static void assertTrue(boolean actual) {
+        if (!actual) {
+            System.println("expected true, got false");
+        }
+    }
+
+    static void assertEquals(int expected, int actual) {
+        if (expected != actual) {
+            System.println("expected " + expected + ", got " + actual);
+        }
+    }
+
+    static void test (Heap h) {
+        assertTrue(h.isEmpty());
+        h.add(3);
+        assertTrue(!h.isEmpty());
+        assertEquals(3, h.peek());
+        h.add(5);
+        assertEquals(3, h.peek());
+        assertEquals(3, h.pop());
+        assertEquals(5, h.peek());
+        assertTrue(!h.isEmpty());
+        assertEquals(5, h.pop());
+        assertTrue(h.isEmpty());
+
+        h.add(4);
+        h.add(6);
+        h.add(1);
+        assertEquals(1, h.peek());
+        h.add(10);
+        h.add(12);
+        h.add(3);
+        h.add(9);
+        h.add(14);
+        h.add(11);
+        h.add(2);
+    }
+
+    /**
+     * Run the program.
+     */
+    static void main(String[] args) {
+        var n = 1023;
+        var height = HeapUtils.logTwo(n);
+        System.println("height of " + n + " is " + height);
+        var x = HeapUtils.twoToTheN(height);
+        System.println("two to the " + height + " is " + x);
+
+        var heap = new Heap();
+        HeapTest.test(heap);
+    }
+}
+
