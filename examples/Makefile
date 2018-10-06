@@ -2,7 +2,7 @@ PREFIX=	/opt/sanka
 CC=	gcc
 DBG=	-g
 
-all:	wordmap interface
+all:	wordmap interface heap
 
 OBJS1=	sanka/examples/WordMap.o \
 	main.o
@@ -35,5 +35,20 @@ interface:	$(OBJS2)
 $(CS2): Interface.san
 	sanka $^
 
+OBJS3=	sanka/examples/HeapUtils.o \
+	sanka/examples/Heap.o \
+	sanka/examples/HeapTest.o \
+	main3.o
+
+CS3=	sanka/examples/HeapUtils.c \
+	sanka/examples/Heap.c \
+	sanka/examples/HeapTest.c
+
+heap:	$(OBJS3)
+	$(CC) -o $@ $^ -L$(PREFIX)/lib -lsankaruntime
+
+$(CS3): Heap.san
+	sanka $^
+
 clean:
-	rm -rf wordmap interface *.o *~ sanka
+	rm -rf wordmap interface heap *.o *~ sanka
