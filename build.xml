@@ -5,7 +5,7 @@
     <fileset dir="lib"/>
   </path>
 
-  <target name="resolve" description="retreive dependencies with ivy">
+  <target name="resolve" description="retrieve dependencies with ivy">
     <ivy:retrieve/>
   </target>
 
@@ -15,7 +15,7 @@
            classpathref="classpath"/>
   </target>
 
-  <target name="jar" depends="compile">
+  <target name="jar" depends="resolve, compile">
     <jar destfile="bin/sanka.jar" basedir="bin" includes="sanka/**"/>
   </target>
 </project>

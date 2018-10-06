@@ -32,7 +32,7 @@ INCLUDES=rb.h \
 CC=		gcc
 DBG=		-g
 CFLAGS=		$(DBG) -Iruntime
-ANTLR_RUNTIME=	/usr/share/java/antlr4-runtime.jar
+ANTLR_RUNTIME=	lib/antlr4-runtime-4.5.1.jar
 
 all:	bin/sanka.jar bin/sanka.sh bin/libsankaruntime.a
 
@@ -41,7 +41,7 @@ bin/sanka.jar:
 
 bin/sanka.sh:
 	echo '#!/bin/sh' > $@
-	echo exec java -cp ${PREFIX}/share/sanka.jar:$(ANTLR_RUNTIME) \
+	echo exec java -cp ${PREFIX}/share/sanka.jar:$(PREFIX)/$(ANTLR_RUNTIME) \
 	sanka/Translator -I ${PREFIX}/include '"$$@"' >> $@
 	chmod 755 $@
 
@@ -67,6 +67,9 @@ bin/System.o:		runtime/sanka/lang/System.c
 clean:
 	rm -rf bin *~
 
+allclean:	clean
+	rm -rf $(PREFIX)/*
+
 install: all
 	mkdir -p $(PREFIX)/bin
 	mkdir -p $(PREFIX)/include
@@ -74,5 +77,6 @@ install: all
 	mkdir -p $(PREFIX)/share
 	cp bin/sanka.sh $(PREFIX)/bin/sanka
 	cp bin/libsankaruntime.a $(PREFIX)/lib/
+	cp ${ANTLR_RUNTIME} $(PREFIX)/lib/
 	cp bin/sanka.jar $(PREFIX)/share/
 	cd runtime; tar cf - $(INCLUDES) | (cd $(PREFIX)/include; tar xf -)
