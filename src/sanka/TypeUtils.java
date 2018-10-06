@@ -3,6 +3,8 @@ package sanka;
 import java.util.ArrayList;
 import java.util.List;
 
+import sanka.MethodDefinition.ParameterDefinition;
+
 public class TypeUtils {
     /**
      * Determine if an expression can be promoted to a type.
@@ -51,7 +53,7 @@ public class TypeUtils {
         }
         // Decide if exprClass implements the interface.
         // Should we keep a cache of what classes have matched interfaces?
-        return false;
+        return isInterfaceImplemented(typeClass, exprClass);
     }
 
     /**
@@ -74,19 +76,51 @@ public class TypeUtils {
         return type.equals(exprType) || type.equals(TypeDefinition.DOUBLE_TYPE);
     }
 
-    static void foo(ClassDefinition interfaceDef, ClassDefinition classDef) {
+    /**
+     * @return true if the given class implements all the methods in the given interface
+     */
+    static boolean isInterfaceImplemented(ClassDefinition interfaceDef,
+                                          ClassDefinition classDef) {
         List<String> failureList = new ArrayList<>();
         for (MethodDefinition method : interfaceDef.methodList) {
             MethodDefinition implementer = classDef.getMethod(method.name);
-            if (implementer == null || implementer.isPrivate ||
-                    implementer.isStatic != method.isStatic ||
-                    implementer.parameters.size() != method.parameters.size()) {
+            if (implementer == null ||
+                implementer.isPrivate ||
+                implementer.isStatic != method.isStatic ||
+                !sameParameterList(method.parameters, implementer.parameters)) {
                 failureList.add(method.name);
-                continue;
-            }
-            for (int idx = 0; idx < implementer.parameters.size(); idx++) {
-
             }
         }
+        if (failureList.isEmpty()) {
+            return true;
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("class ");
+        builder.append(classDef.name);
+        builder.append(" does not implement interface ");
+        builder.append(interfaceDef.name);
+        builder.append(" methods:");
+        for (String name : failureList) {
+            builder.append(" ");
+            builder.append(name);
+        }
+        Environment env = Environment.getInstance();
+        env.printError(null, builder.toString());
+        return false;
+    }
+
+    static boolean sameParameterList(List<ParameterDefinition> mp,
+                                     List<ParameterDefinition> ip) {
+        if (mp.size() != ip.size()) {
+            return false;
+        }
+        for (int idx = 0; idx < mp.size(); idx++) {
+            ParameterDefinition p1 = mp.get(idx);
+            ParameterDefinition p2 = ip.get(idx);
+            if (!p1.type.equals(p2.type)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -306,18 +306,6 @@ public class SankaBaseListener implements SankaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLastFormalParameter(SankaParser.LastFormalParameterContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLastFormalParameter(SankaParser.LastFormalParameterContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterQualifiedName(SankaParser.QualifiedNameContext ctx) { }
 	/**
 	 * {@inheritDoc}

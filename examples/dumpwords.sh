@@ -3,7 +3,7 @@
 # Dump a bunch of words to stdout.
 
 tmpfile=/tmp/random$$.html
-wget -q 'https://en.wikipedia.org/wiki/Special:Random' -O $tmpfile
+curl -s -L 'https://en.wikipedia.org/wiki/Special:Random' > $tmpfile
 cat $tmpfile |
     tr " " "\n" |
     grep '^[a-z]*$' |

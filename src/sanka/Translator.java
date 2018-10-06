@@ -76,6 +76,7 @@ class Translator {
                 classdef.packageName = env.currentPackage;
                 classdef.name = name;
                 env.classList.add(classdef);
+                // TODO env.classPackageMap.put(classdef.name, classdef.packageName);
             }
         }
     }

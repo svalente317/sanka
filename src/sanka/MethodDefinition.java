@@ -18,7 +18,6 @@ class MethodDefinition {
     static class ParameterDefinition {
         TypeDefinition type;
         String name;
-        boolean dotdotdot;
     }
 
     boolean isPrivate;
@@ -69,14 +68,6 @@ class MethodDefinition {
                     pd.name = item.Identifier().getText();
                     this.parameters.add(pd);
                 }
-            }
-            if (fpc.lastFormalParameter() != null) {
-                ParameterDefinition pd = new ParameterDefinition();
-                pd.type = new TypeDefinition();
-                pd.type.parse(fpc.lastFormalParameter().typeType());
-                pd.dotdotdot = true;
-                pd.name = fpc.lastFormalParameter().Identifier().getText();
-                this.parameters.add(pd);
             }
         }
         if (block == null) {

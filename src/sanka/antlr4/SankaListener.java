@@ -250,16 +250,6 @@ public interface SankaListener extends ParseTreeListener {
 	 */
 	void exitFormalParameter(SankaParser.FormalParameterContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SankaParser#lastFormalParameter}.
-	 * @param ctx the parse tree
-	 */
-	void enterLastFormalParameter(SankaParser.LastFormalParameterContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SankaParser#lastFormalParameter}.
-	 * @param ctx the parse tree
-	 */
-	void exitLastFormalParameter(SankaParser.LastFormalParameterContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SankaParser#qualifiedName}.
 	 * @param ctx the parse tree
 	 */

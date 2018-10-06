@@ -452,17 +452,15 @@ public class StatementDefinition {
             env.print(builder.toString());
             return;
         case SankaLexer.IF:
-        case SankaLexer.WHILE:
             builder = new StringBuilder();
-            builder.append(this.statementType == SankaLexer.IF ? "if" : "while");
-            builder.append(" (");
+            builder.append("if (");
             builder.append(this.expression.translate(null));
             builder.append(") {");
             env.print(builder.toString());
             env.level++;
             this.block.translate(false);
             env.level--;
-            if (this.statementType == SankaLexer.IF && this.elseBlock != null) {
+            if (this.elseBlock != null) {
                 env.print("} else {");
                 env.level++;
                 this.elseBlock.translate(false);
@@ -470,15 +468,25 @@ public class StatementDefinition {
             }
             env.print("}");
             return;
+        case SankaLexer.WHILE:
+            env.print("while (1) {");
+            env.level++;
+            builder = new StringBuilder();
+            builder.append("if (!");
+            builder.append(this.expression.translate(null));
+            builder.append(") break;");
+            env.print(builder.toString());
+            this.block.translate(false);
+            env.level--;
+            env.print("}");
+            return;
         case SankaLexer.FOR:
             if (this.forStatements[0] != null) {
                 this.forStatements[0].translate();
             }
-            builder = new StringBuilder();
-            builder.append("while (1) {");
-            env.print(builder.toString());
+            env.print("while (1) {");
             env.level++;
-            builder.setLength(0);
+            builder = new StringBuilder();
             builder.append("if (!");
             builder.append(this.expression.translate(null));
             builder.append(") break;");

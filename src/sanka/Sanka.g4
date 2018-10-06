@@ -147,16 +147,11 @@ formalParameters
     ;
 
 formalParameterList
-    :   formalParameter (',' formalParameter)* (',' lastFormalParameter)?
-    |   lastFormalParameter
+    :   formalParameter (',' formalParameter)*
     ;
 
 formalParameter
     :   typeType Identifier
-    ;
-
-lastFormalParameter
-    :   typeType '...' Identifier
     ;
 
 qualifiedName
