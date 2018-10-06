@@ -1,3 +1,5 @@
 /bin/
 /lib/
 /examples/sanka/
+/examples/*.o
+/examples/wordmap
