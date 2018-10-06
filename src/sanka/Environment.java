@@ -49,14 +49,24 @@ class Environment {
     /**
      * The classes in the sanka.lang package are pre-imported.
      */
-    Map<String, String> baseClassPackageMap() {
+    Map<String, String> baseClassPackageMap(boolean includeCurrentPackage) {
         Map<String, String> cpm = new TreeMap<>();
         for (ClassDefinition classdef : this.classList) {
-            if (classdef.packageName != null && classdef.packageName.equals(SANKA_LANG)) {
+            if (isSankaLangPackage(classdef) ||
+                includeCurrentPackage && isCurrentPackage(classdef)) {
                 cpm.put(classdef.name, classdef.packageName);
             }
         }
         return cpm;
+    }
+
+    boolean isSankaLangPackage(ClassDefinition classdef) {
+        return classdef.packageName != null && classdef.packageName.equals(SANKA_LANG);
+    }
+
+    boolean isCurrentPackage(ClassDefinition classdef) {
+        return (this.currentPackage == null ? classdef.packageName == null :
+                this.currentPackage.equals(classdef.packageName));
     }
 
     void printError(ParserRuleContext ctx, String error) {

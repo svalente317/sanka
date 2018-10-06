@@ -76,14 +76,13 @@ class Translator {
                 classdef.packageName = env.currentPackage;
                 classdef.name = name;
                 env.classList.add(classdef);
-                // TODO env.classPackageMap.put(classdef.name, classdef.packageName);
             }
         }
     }
 
     void parse(CompilationUnitContext ctx) {
         Environment env = Environment.getInstance();
-        env.classPackageMap = env.baseClassPackageMap();
+        env.classPackageMap = env.baseClassPackageMap(true);
         if (ctx.packageDeclaration() != null) {
             env.currentPackage = ctx.packageDeclaration().qualifiedName().getText();
         }

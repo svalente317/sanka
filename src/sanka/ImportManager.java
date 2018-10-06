@@ -85,7 +85,7 @@ public class ImportManager {
         String origCurrentPackage = env.currentPackage;
         Map<String, String> origClassPackageMap = env.classPackageMap;
         env.currentPackage = packageName;
-        env.classPackageMap = env.baseClassPackageMap();
+        env.classPackageMap = env.baseClassPackageMap(false);
         for (TypeDeclarationContext item : ctx.typeDeclaration()) {
             if (item.classDeclaration() != null) {
                 ClassDefinition classdef = new ClassDefinition();

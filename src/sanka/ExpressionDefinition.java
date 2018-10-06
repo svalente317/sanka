@@ -149,8 +149,8 @@ class ExpressionDefinition {
                 this.expression1.evaluateThis();
                 return;
             }
-            String packageName = env.classPackageMap.get(this.name);
-            if (packageName != null) {
+            if (env.classPackageMap.containsKey(this.name)) {
+                String packageName = env.classPackageMap.get(this.name);
                 // Type is void because this expression has no value when evaluated
                 // as part of an arithmetic operation, function call, etc.
                 // It must be followed by a field access, or else it is a compile-time error.
