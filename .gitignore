@@ -4,3 +4,4 @@
 /examples/*.o
 /examples/wordmap
 /examples/interface
+/examples/heap
