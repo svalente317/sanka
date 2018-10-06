@@ -13,6 +13,9 @@ import sanka.antlr4.SankaParser.ConstDeclarationContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.FieldDeclarationContext;
 import sanka.antlr4.SankaParser.FieldModifierContext;
+import sanka.antlr4.SankaParser.InterfaceBodyDeclarationContext;
+import sanka.antlr4.SankaParser.InterfaceDeclarationContext;
+import sanka.antlr4.SankaParser.InterfaceMethodDeclarationContext;
 
 class ClassDefinition {
 
@@ -30,7 +33,6 @@ class ClassDefinition {
     boolean isInterface;
     String packageName;
     String name;
-    String[] typeParameters;
     Map<String, FieldDefinition> fieldMap;
     List<String> exports;
     MethodDefinition constructor;
@@ -154,6 +156,34 @@ class ClassDefinition {
         }
     }
 
+    void parseInterface(InterfaceDeclarationContext ctx) {
+        Environment env = Environment.getInstance();
+        this.isInterface = true;
+        this.name = ctx.Identifier().getText();
+        if (ctx.interfaceBody().interfaceBodyDeclaration() == null) {
+            return;
+        }
+        for (InterfaceBodyDeclarationContext item : ctx.interfaceBody().interfaceBodyDeclaration()) {
+            if (item.constDeclaration() != null) {
+                parseConstDeclaration(item.constDeclaration());
+            }
+            if (item.interfaceMethodDeclaration() != null) {
+                MethodDefinition method = new MethodDefinition();
+                InterfaceMethodDeclarationContext im = item.interfaceMethodDeclaration();
+                method.parse(im.fieldModifier(), im.typeType(), im.Identifier().getText(),
+                        im.formalParameters(), null);
+                if (method.isPrivate) {
+                    env.printError(ctx, "interface " + this.name + " methods cannot be private");
+                }
+                if (getMethod(method.name) != null) {
+                    env.printError(ctx, "interface " + this.name + " method " + method.name +
+                            " already defined");
+                }
+                this.methodList.add(method);
+            }
+        }
+    }
+
     static ClassDefinition arrayClassDefinition() {
         ClassDefinition classdef = new ClassDefinition();
         FieldDefinition field = new FieldDefinition();
@@ -179,11 +209,14 @@ class ClassDefinition {
                 }
                 if (field.isConst) {
                     field.type = field.value.type;
-                } else if (!field.type.isCompatible(field.value.type)) {
+                } else if (!TypeUtils.isCompatible(field.type, field.value)) {
                      env.printError(field.expression, "incompatible types: " +
-                             field.type + " cannot be converted to " + field.type);
+                             field.value.type + " cannot be converted to " + field.type);
                 }
             }
+        }
+        if (this.isInterface) {
+            return;
         }
         if (this.constructor != null) {
             this.constructor.evaluate();

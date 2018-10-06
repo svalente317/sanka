@@ -13,6 +13,7 @@ class TypeDefinition implements Comparable<TypeDefinition> {
     static final TypeDefinition VOID_TYPE = new TypeDefinition("void");
     static final TypeDefinition BOOLEAN_TYPE = new TypeDefinition("boolean");
     static final TypeDefinition BYTE_TYPE = new TypeDefinition("byte");
+    static final TypeDefinition SHORT_TYPE = new TypeDefinition("short");
     static final TypeDefinition INT_TYPE = new TypeDefinition("int");
     static final TypeDefinition LONG_TYPE = new TypeDefinition("long");
     static final TypeDefinition FLOAT_TYPE = new TypeDefinition("float");
@@ -110,15 +111,15 @@ class TypeDefinition implements Comparable<TypeDefinition> {
     }
 
     boolean isNullType() {
-        return this.isPrimitiveType && this.name.equals("null");
+        return this.equals(NULL_TYPE);
     }
 
     boolean isVoidType() {
-        return this.isPrimitiveType && this.name.equals("void");
+        return this.equals(VOID_TYPE);
     }
 
     boolean isBooleanType() {
-        return this.isPrimitiveType && this.name.equals("boolean");
+        return this.equals(BOOLEAN_TYPE);
     }
 
     boolean isIntegralType() {
@@ -135,58 +136,6 @@ class TypeDefinition implements Comparable<TypeDefinition> {
 
     boolean isStringType() {
         return this.equals(STRING_TYPE);
-    }
-
-    /**
-     * isCompatible() is part of the evaluate pass.
-     *
-     * "this" is an empty slot with a well defined type, such as a declared
-     * variable, or an object's field, or a method parameter, or a return type.
-     *
-     * "that" is the expression to be stored in the slot, such as the RHS of
-     * an assignment, or an argument to pass to a method, or a value to return.
-     */
-    boolean isCompatible(TypeDefinition that) {
-        if (that == null) {
-            // We've already printed an error. We won't continue to the next pass.
-            // Finish this pass.
-            return true;
-        }
-        if (that.isNullType()) {
-            // Match null and non-primitive classes and arrays and maps.
-            return this.isNullType() || !this.isPrimitiveType;
-        }
-        if (this.arrayOf != null) {
-            if (that.arrayOf == null) {
-                return false;
-            }
-            // With arrays and maps, there's no promotion.
-            // If the parameter is an array of ints, then the expression must be
-            // an array of ints. An array of shorts is not a match.
-            // That's why this function is not recursive.
-            if (!this.arrayOf.equals(that.arrayOf)) {
-                return false;
-            }
-            if (this.keyType != null) {
-                if (that.keyType == null) {
-                    return false;
-                }
-                if (!this.keyType.equals(that.keyType)) {
-                    return false;
-                }
-            } else {
-                if (that.keyType != null) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        if (this.isPrimitiveType != that.isPrimitiveType) {
-            return false;
-        }
-        boolean samePackage = this.packageName == null ? that.packageName == null :
-            this.packageName.equals(that.packageName);
-        return samePackage && this.name.equals(that.name);
     }
 
     String translate() {

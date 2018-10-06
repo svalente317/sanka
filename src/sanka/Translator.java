@@ -64,10 +64,17 @@ class Translator {
             return;
         }
         for (TypeDeclarationContext item : ctx.typeDeclaration()) {
+            String name = null;
             if (item.classDeclaration() != null) {
+                name = item.classDeclaration().Identifier().getText();
+            }
+            if (item.interfaceDeclaration() != null) {
+                name = item.interfaceDeclaration().Identifier().getText();
+            }
+            if (name != null) {
                 ClassDefinition classdef = new ClassDefinition();
                 classdef.packageName = env.currentPackage;
-                classdef.name = item.classDeclaration().Identifier().getText();
+                classdef.name = name;
                 env.classList.add(classdef);
             }
         }
@@ -92,6 +99,11 @@ class Translator {
                 String name = item.classDeclaration().Identifier().getText();
                 ClassDefinition classdef = env.getClassDefinition(env.currentPackage, name);
                 classdef.parse(item.classDeclaration());
+            }
+            if (item.interfaceDeclaration() != null) {
+                String name = item.interfaceDeclaration().Identifier().getText();
+                ClassDefinition classdef = env.getClassDefinition(env.currentPackage, name);
+                classdef.parseInterface(item.interfaceDeclaration());
             }
         }
     }

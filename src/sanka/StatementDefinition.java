@@ -109,7 +109,7 @@ public class StatementDefinition {
             this.expression.evaluate(this.ctx.expression());
             if (this.expression.type != null) {
                 TypeDefinition desired = env.currentMethod.returnType;
-                if (!desired.isCompatible(this.expression.type)) {
+                if (!TypeUtils.isCompatible(desired, this.expression)) {
                     env.printError(this.ctx, "incompatible types: " + this.expression.type +
                             " cannot be converted to " + desired);
                 }
@@ -221,7 +221,7 @@ public class StatementDefinition {
                         " is private");
             }
             if (this.statementType == SankaLexer.EQUAL) {
-                if (!fielddef.type.isCompatible(this.expression.type)) {
+                if (!TypeUtils.isCompatible(fielddef.type, this.expression)) {
                     env.printError(assignment, "incompatible types: " + this.expression.type +
                             " cannot be converted to " + fielddef.type);
                     return;
@@ -246,7 +246,7 @@ public class StatementDefinition {
                 varType = this.expression.type;
                 env.symbolTable.promote(this.name, varType);
             }
-            if (!varType.isCompatible(this.expression.type)) {
+            if (!TypeUtils.isCompatible(varType, this.expression)) {
                 env.printError(assignment, "incompatible types: " + this.expression.type +
                         " cannot be converted to " + varType);
                 return;

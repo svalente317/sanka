@@ -252,7 +252,7 @@ class ExpressionDefinition {
         }
         Environment env = Environment.getInstance();
         for (ExpressionDefinition arg : this.argList) {
-            if (!this.type.isCompatible(arg.type)) {
+            if (!TypeUtils.isCompatible(this.type, arg)) {
                 env.printError(ctx.expressionList(), "incompatible types: " + arg.type +
                         " cannot be converted to " + this.type);
             }
@@ -302,11 +302,11 @@ class ExpressionDefinition {
      * If one of these types could be promoted to be stored in a variable of the other type,
      * then return the storage type.
      */
-    private TypeDefinition promoteType(TypeDefinition type1, TypeDefinition type2) {
-        if (type1.isCompatible(type2)) {
+    private TypeDefinition promoteNumericType(TypeDefinition type1, TypeDefinition type2) {
+        if (TypeUtils.isCompatibleNumeric(type1, type2)) {
             return type1;
         }
-        if (type2.isCompatible(type1)) {
+        if (TypeUtils.isCompatibleNumeric(type2, type1)) {
             return type2;
         }
         return null;
@@ -402,7 +402,7 @@ class ExpressionDefinition {
                     this.operator.equals("+") || this.operator.equals("-")) {
                 checkNumericType(lhs, this.expression1.type);
                 checkNumericType(rhs, this.expression2.type);
-                this.type = promoteType(this.expression1.type, this.expression2.type);
+                this.type = promoteNumericType(this.expression1.type, this.expression2.type);
             }
             else if (this.operator.equals("<=") || this.operator.equals(">=") ||
                     this.operator.equals("<") || this.operator.equals(">")) {
@@ -422,7 +422,7 @@ class ExpressionDefinition {
                     this.operator.equals("^") || this.operator.equals("|")) {
                 checkIntegralType(lhs, this.expression1.type);
                 checkIntegralType(rhs, this.expression2.type);
-                this.type = promoteType(this.expression1.type, this.expression2.type);
+                this.type = promoteNumericType(this.expression1.type, this.expression2.type);
             }
             else if (this.operator.equals("&&") || this.operator.equals("||")) {
                 checkBooleanType(lhs, this.expression1.type);
@@ -454,7 +454,7 @@ class ExpressionDefinition {
         if (keyType == null) {
             keyType = TypeDefinition.INT_TYPE;
         }
-        if (!keyType.isCompatible(this.expression2.type)) {
+        if (!TypeUtils.isCompatible(keyType, this.expression2)) {
             env.printError(expr, "incompatible types: " + this.expression2.type +
                     " cannot be converted to " + keyType);
             return;
@@ -500,7 +500,7 @@ class ExpressionDefinition {
         for (int idx = 0; idx < paramCount; idx++) {
             ParameterDefinition param = method.parameters.get(idx);
             if (param.type != null) {
-                if (!param.type.isCompatible(this.argList[idx].type)) {
+                if (!TypeUtils.isCompatible(param.type, this.argList[idx])) {
                     env.printError(exprList.expression(idx),
                             "incompatible types: " + this.argList[idx].type +
                             " cannot be converted to " + param.type);

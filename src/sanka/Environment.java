@@ -82,6 +82,9 @@ class Environment {
     // Pass 2
 
     ClassDefinition getClassDefinition(TypeDefinition typeDefinition) {
+        if (typeDefinition.isPrimitiveType || typeDefinition.arrayOf != null) {
+            return null;
+        }
         return getClassDefinition(typeDefinition.packageName, typeDefinition.name);
     }
 

@@ -108,8 +108,7 @@ methodDeclaration
     ;
 
 interfaceBodyDeclaration
-    :   'export' Identifier
-    |   constDeclaration
+    :   constDeclaration
     |   interfaceMethodDeclaration
     ;
 

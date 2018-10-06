@@ -1,6 +1,6 @@
 package sanka;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import sanka.antlr4.SankaLexer;
@@ -30,7 +30,7 @@ class MethodDefinition {
     SymbolTable.Frame endSymbols;
 
     MethodDefinition() {
-        this.parameters = new LinkedList<>();
+        this.parameters = new ArrayList<>();
         this.body = null;
     }
 
@@ -78,6 +78,9 @@ class MethodDefinition {
                 pd.name = fpc.lastFormalParameter().Identifier().getText();
                 this.parameters.add(pd);
             }
+        }
+        if (block == null) {
+            return;
         }
         this.body = new StatementDefinition[block.statement().size()];
         int idx = 0;
