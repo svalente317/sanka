@@ -65,6 +65,8 @@ class HeapUtils {
 
 class Heap {
 
+    static int EMPTY_HEAP = -1;
+
     int[] heap;
     int frontier;
 
@@ -106,14 +108,14 @@ class Heap {
 
     int peek() {
         if (this.frontier == 0) {
-            return -1;
+            return Heap.EMPTY_HEAP;
         }
         return this.heap[0];
     }
 
     int pop() {
         if (this.frontier == 0) {
-            return -1;
+            return Heap.EMPTY_HEAP;
         }
         var val = this.heap[0];
         for (var i = 0; i < this.frontier; i++) {
@@ -154,6 +156,7 @@ class HeapTest {
         assertTrue(!h.isEmpty());
         assertEquals(5, h.pop());
         assertTrue(h.isEmpty());
+        assertEquals(Heap.EMPTY_HEAP, h.pop());
 
         h.add(4);
         h.add(6);
