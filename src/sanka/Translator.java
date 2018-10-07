@@ -15,6 +15,11 @@ import sanka.antlr4.SankaParser.TypeDeclarationContext;
 
 class Translator {
 
+    // On an uncaught exception, the system exits with status 1;
+    // don't use that status for a more specific error.
+    public static final int CANNOT_PARSE = 2;
+    public static final int CANNOT_EVALUATE = 3;
+
     public static void main(String[] argv) throws Exception {
         Environment env = Environment.getInstance();
         Translator translator = new Translator();
@@ -32,13 +37,17 @@ class Translator {
         }
         translator.parse(contextList);
         if (env.errorCount > 0) {
-            return;
+            System.exit(CANNOT_PARSE);
         }
         translator.evaluate();
         if (env.errorCount > 0) {
-            return;
+            System.exit(CANNOT_EVALUATE);
         }
         translator.translate();
+    }
+
+    void fail() throws IOException {
+        throw new IOException("cannot parse");
     }
 
     /**
