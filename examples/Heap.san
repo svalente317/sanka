@@ -69,11 +69,25 @@ class Heap {
     int frontier;
 
     Heap() {
-        this.heap = new int[100];
+        // Set low initial value to exercise the resizing
+        this.heap = new int[5];
         this.frontier = 0;
     }
 
+    void ensureHeap() {
+        // TODO: when the language supports this, do:
+        // this.heap.setLength(this.heap.length * 2);
+        if (this.frontier == this.heap.length) {
+            var prev = this.heap;
+            this.heap = new int[this.heap.length * 2];
+            for (var i = 0; i < this.frontier; i++) {
+                this.heap[i] = prev[i];
+            }
+        }
+    }
+
     void add(int x) {
+        this.ensureHeap();
         this.heap[this.frontier] = x;
 
         var n = this.frontier;
