@@ -358,7 +358,7 @@ class ExpressionDefinition {
         if (fielddef == null) {
              this.method = classdef.getMethod(this.name);
              if (this.method == null) {
-                 env.printError(expr, "class " + this.expression1.type +
+                 env.printError(expr, "class " + classdef.name +
                          " does not have field " + this.name);
                  return;
              }
