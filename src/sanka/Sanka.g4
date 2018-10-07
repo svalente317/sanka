@@ -333,7 +333,7 @@ IntegerLiteral
 
 fragment
 DecimalIntegerLiteral
-    :   DecimalNumeral IntegerTypeSuffix?
+    :   UnaryOperator? DecimalNumeral IntegerTypeSuffix?
     ;
 
 fragment
@@ -354,6 +354,11 @@ BinaryIntegerLiteral
 fragment
 IntegerTypeSuffix
     :   [lL]
+    ;
+
+fragment
+UnaryOperator
+    :   [-+]
     ;
 
 fragment
