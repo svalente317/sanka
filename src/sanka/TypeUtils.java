@@ -3,6 +3,7 @@ package sanka;
 import java.util.ArrayList;
 import java.util.List;
 
+import sanka.ExpressionDefinition.ExpressionType;
 import sanka.MethodDefinition.ParameterDefinition;
 
 public class TypeUtils {
@@ -53,7 +54,14 @@ public class TypeUtils {
         }
         // Decide if exprClass implements the interface.
         // Should we keep a cache of what classes have matched interfaces?
-        return isInterfaceImplemented(typeClass, exprClass);
+        if (!isInterfaceImplemented(typeClass, exprClass)) {
+            return false;
+        }
+        ExpressionDefinition copy = expr.copyAndClear();
+        expr.expressionType = ExpressionType.NEW_INSTANCE;
+        expr.type = type;
+        expr.expression1 = copy;
+        return true;
     }
 
     /**

@@ -35,6 +35,34 @@ class ExpressionDefinition {
     ExpressionDefinition[] argList;
     String translatedThis;
 
+    ExpressionDefinition copyAndClear() {
+        ExpressionDefinition copy = new ExpressionDefinition();
+        copy.expressionType = this.expressionType;
+        copy.type = this.type;
+        copy.name = this.name;
+        copy.operator = this.operator;
+        copy.expression1 = this.expression1;
+        copy.expression2 = this.expression2;
+        copy.method = this.method;
+        copy.isStatic = this.isStatic;
+        copy.identifiedClass = this.identifiedClass;
+        copy.argList = this.argList;
+        copy.translatedThis = this.translatedThis;
+
+        this.expressionType = null;
+        this.type = null;
+        this.name = null;
+        this.operator = null;
+        this.expression1 = null;
+        this.expression2 = null;
+        this.method = null;
+        this.isStatic = false;
+        this.identifiedClass = null;
+        this.argList = null;
+        this.translatedThis = null;
+        return copy;
+    }
+
     /**
      * Run expression through pass 2 (of 3). Check for any type errors, and calculate the type
      * of the expression.
@@ -616,6 +644,20 @@ class ExpressionDefinition {
                    builder2.append(", ");
                    builder2.append(arg.translate(null));
                }
+            }
+            builder2.append(");");
+        }
+        if (classdef.isInterface) {
+            String typeName = this.expression1.type.name;
+            builder2 = new StringBuilder();
+            builder2.append(TranslationUtils.translateClassItem(classdef.name, classdef.name));
+            builder2.append("(");
+            builder2.append(variableName);
+            builder2.append(", ");
+            builder2.append(this.expression1.translate(null));
+            for (MethodDefinition method : classdef.methodList) {
+                builder2.append(", ");
+                builder2.append(TranslationUtils.translateClassItem(typeName, method.name));
             }
             builder2.append(");");
         }

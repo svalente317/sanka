@@ -133,11 +133,70 @@ class MethodDefinition {
         builder.append(" {");
         env.print(builder.toString());
         env.level++;
-        for (StatementDefinition stmtdef : this.body) {
-            stmtdef.translate();
+        if (this.body != null) {
+            for (StatementDefinition stmtdef : this.body) {
+                stmtdef.translate();
+            }
+        } else {
+            translateInterfaceBody();
         }
         env.level--;
         env.print("}");
         env.symbolTable.pop();
+    }
+
+    void translateInterface(ClassDefinition classdef) {
+        Environment env = Environment.getInstance();
+        StringBuilder builder = new StringBuilder();
+        env.addType(this.returnType);
+        builder.append(this.returnType.translateSpace());
+        builder.append("(*");
+        builder.append(this.name);
+        builder.append(")(");
+        boolean needComma = false;
+        if (!this.isStatic) {
+            builder.append("void *object");
+            needComma = true;
+        }
+        if (this.parameters != null) {
+            for (ParameterDefinition param : this.parameters) {
+                if (needComma) {
+                    builder.append(", ");
+                }
+                env.addType(param.type);
+                builder.append(param.type.translateSpace());
+                builder.append(param.name);
+                needComma = true;
+            }
+        }
+        builder.append(");");
+        env.print(builder.toString());
+    }
+
+    void translateInterfaceBody() {
+        Environment env = Environment.getInstance();
+        StringBuilder builder = new StringBuilder();
+        if (!this.returnType.isVoidType()) {
+            builder.append("return ");
+        }
+        builder.append("this->");
+        builder.append(this.name);
+        builder.append("(");
+        boolean needComma = false;
+        if (!this.isStatic) {
+            builder.append("this->object");
+            needComma = true;
+        }
+        if (this.parameters != null) {
+            for (ParameterDefinition param : this.parameters) {
+                if (needComma) {
+                    builder.append(", ");
+                }
+                builder.append(param.name);
+                needComma = true;
+            }
+        }
+        builder.append(");");
+        env.print(builder.toString());
     }
 }

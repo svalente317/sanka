@@ -234,6 +234,10 @@ class ClassDefinition {
     }
 
     void translateHeader() {
+        if (this.isInterface) {
+            translateInterfaceHeader();
+            return;
+        }
         Environment env = Environment.getInstance();
         env.typeList.clear();
         env.print("struct " + this.name + " {");
@@ -269,7 +273,46 @@ class ClassDefinition {
         }
     }
 
+    void translateInterfaceHeader() {
+        Environment env = Environment.getInstance();
+        env.typeList.clear();
+        env.print("struct " + this.name + " {");
+        env.level++;
+        env.print("void *object;");
+        for (MethodDefinition method : this.methodList) {
+            method.translateInterface(this);
+        }
+        env.level--;
+        env.print("};");
+        env.print("");
+        StringBuilder builder = makeInterfaceConstructor();
+        builder.append(";");
+        env.print(builder.toString());
+        for (MethodDefinition method : this.methodList) {
+            method.translate(this, true);
+        }
+    }
+
+    StringBuilder makeInterfaceConstructor() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("void ");
+        builder.append(TranslationUtils.translateClassItem(this.name, this.name));
+        builder.append("(");
+        builder.append(toTypeDefinition().translateSpace());
+        builder.append("this, void *object");
+        for (MethodDefinition method : this.methodList) {
+            builder.append(", void *");
+            builder.append(method.name);
+        }
+        builder.append(")");
+        return builder;
+    }
+
     void translate() {
+        if (this.isInterface) {
+            translateInterface();
+            return;
+        }
         Environment env = Environment.getInstance();
         env.typeList.clear();
         boolean printedSomething = false;
@@ -300,6 +343,25 @@ class ClassDefinition {
             }
             method.translate(this, false);
             printedSomething = true;
+        }
+    }
+
+    void translateInterface() {
+        Environment env = Environment.getInstance();
+        env.typeList.clear();
+        StringBuilder builder = makeInterfaceConstructor();
+        builder.append(" {");
+        env.print(builder.toString());
+        env.level++;
+        env.print("this->object = object;");
+        for (MethodDefinition method : this.methodList) {
+            env.print("this->" + method.name + " = " + method.name + ";");
+        }
+        env.level--;
+        env.print("}");
+        for (MethodDefinition method : this.methodList) {
+            env.print("");
+            method.translate(this, false);
         }
     }
 }

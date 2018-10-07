@@ -30,8 +30,6 @@
 
 * support "exports" keyword
 
-* Support interface
-
 * Support parameterized types
 
 * Generate error if method name has class name
@@ -39,8 +37,6 @@
 * Allow multiple constructors with different signatures?
 
 * Support dot-dot-dot functions?
-
-* support iteration over map
 
 * Support expressions with qualified class name
 
@@ -74,3 +70,5 @@
 * translate float and double in strings
 
 * map[value]++ increment and decrement in map
+
+* what if map changes during iteration?
