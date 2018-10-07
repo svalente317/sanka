@@ -78,3 +78,13 @@ void LONG_TO_STRING(long i, char *str) {
     }
     reverse_string(str, len);
 }
+
+struct array *SANKA_ARRAY(int argc, char **argv) {
+    struct array *arr = malloc(sizeof(struct array));
+    arr->data = calloc(argc-1, sizeof(char *));
+    for (int i = 1; i < argc; i++) {
+      ((char **)arr->data)[i-1] = argv[i];
+    }
+    arr->length = argc-1;
+    return arr;
+}

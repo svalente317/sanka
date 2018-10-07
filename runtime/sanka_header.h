@@ -17,6 +17,7 @@ extern void PANIC(const char *);
 extern char *STRING_ADD(char **, int);
 extern void INT_TO_STRING(int, char *);
 extern void LONG_TO_STRING(long, char *);
+extern struct array *SANKA_ARRAY(int, char **);
 
 static inline void NULLCHECK(const void *vp) {
     if (vp == NULL) PANIC("null pointer error");
