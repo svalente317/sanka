@@ -65,8 +65,9 @@ class WordMap {
      */
     static void main(String[] args) {
         var wordMap = new WordMap();
-        wordMap.readFromFile(args[0]);
-        wordMap.printWords(args[1]);
+        // args[0] is the program
+        wordMap.readFromFile(args[1]);
+        wordMap.printWords(args[2]);
         wordMap.printMap();
     }
 }
