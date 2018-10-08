@@ -17,21 +17,40 @@ class Translator {
 
     // On an uncaught exception, the system exits with status 1;
     // don't use that status for a more specific error.
-    public static final int CANNOT_PARSE = 2;
-    public static final int CANNOT_EVALUATE = 3;
+    public static final int INVALID_ARGUMENT = 2;
+    public static final int CANNOT_PARSE = 3;
+    public static final int CANNOT_EVALUATE = 4;
+    public static final int CANNOT_TRANSLATE = 5;
 
     public static void main(String[] argv) throws Exception {
         Environment env = Environment.getInstance();
         Translator translator = new Translator();
         List<CompilationUnitContext> contextList = new ArrayList<>();
+        String mainClass = null;
+        String exeName = null;
         for (int idx = 0; idx < argv.length; idx++) {
-            String filename = argv[idx];
-            if (filename.equals("-I")) {
+            String arg = argv[idx];
+            if (arg.equals("-I")) {
                 idx++;
                 env.addImportPath(argv[idx]);
                 continue;
             }
-            SankaLexer lexer = new SankaLexer(new ANTLRFileStream(filename));
+            if (arg.equals("--main")) {
+                idx++;
+                mainClass = argv[idx];
+                continue;
+            }
+            if (arg.equals("--exe")) {
+                idx++;
+                exeName = argv[idx];
+                continue;
+            }
+            if ((mainClass != null && exeName == null) ||
+                (mainClass == null && exeName != null)) {
+                System.err.println("Specify --main and --exe together");
+                System.exit(INVALID_ARGUMENT);
+            }
+            SankaLexer lexer = new SankaLexer(new ANTLRFileStream(arg));
             SankaParser parser = new SankaParser(new CommonTokenStream(lexer));
             contextList.add(parser.compilationUnit());
         }
@@ -44,10 +63,12 @@ class Translator {
             System.exit(CANNOT_EVALUATE);
         }
         translator.translate();
-    }
-
-    void fail() throws IOException {
-        throw new IOException("cannot parse");
+        if (env.errorCount > 0) {
+            System.exit(CANNOT_TRANSLATE);
+        }
+        if (mainClass != null) {
+            CompileManager.getInstance().compile(mainClass, exeName);
+        }
     }
 
     /**

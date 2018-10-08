@@ -100,10 +100,6 @@ class Environment {
 
     // Pass 3
 
-    void setWriter(BufferedWriter writer) {
-        this.writer = writer;
-    }
-
     void print(String text) {
         String prefix = "";
         for (int i = 0; i < this.level; i++) {

@@ -35,16 +35,14 @@ class TranslationUtils {
     static void translateClass(ClassDefinition classdef, boolean isHeader) throws IOException {
         Environment env = Environment.getInstance();
         File tmpfile = File.createTempFile("sankaclass", "txt");
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tmpfile));
-        env.setWriter(writer);
+        env.writer = new BufferedWriter(new FileWriter(tmpfile));
         if (isHeader) {
             classdef.translateHeader();
         } else {
             classdef.translate();
         }
-        writer.close();
-        writer = null;
-        env.setWriter(null);
+        env.writer.close();
+        env.writer = null;
 
         // TODO append prefix directory
         String suffix = isHeader ? ".h" : ".c";
@@ -61,8 +59,7 @@ class TranslationUtils {
             destFile = new File(filename);
             symbol = classdef.name;
         }
-        writer = new BufferedWriter(new FileWriter(destFile));
-        env.setWriter(writer);
+        env.writer = new BufferedWriter(new FileWriter(destFile));
         if (isHeader) {
             symbol = symbol + "_h_INCLUDED";
             env.print("#ifndef " + symbol);
@@ -81,14 +78,13 @@ class TranslationUtils {
             env.print("#include <" + dirName + type.name + ".h>");
         }
         env.print("");
-        copyFileContents(tmpfile, writer);
+        copyFileContents(tmpfile, env.writer);
         if (isHeader) {
             env.print("");
             env.print("#endif");
         }
-        writer.close();
-        writer = null;
-        env.setWriter(null);
+        env.writer.close();
+        env.writer = null;
         tmpfile.delete();
     }
 
