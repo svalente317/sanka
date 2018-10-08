@@ -14,18 +14,7 @@ class HeapUtils {
     }
 
     static int twoToTheN(int n) {
-        var i = 1;
-        while (n > 0) {
-            i = i << 1;
-            n--;
-        }
-        return i;
-    }
-
-    static void printProgress(int parent, int n, int x) {
-        System.println("parent = " + parent
-                       + ", n = " + n
-                       + ", x = " + x);
+        return 1 << n;
     }
 
     static int levelPrintWidth(int level) {
@@ -95,7 +84,6 @@ class Heap {
         var n = this.frontier;
         var parent = (n - 1) / 2;
         while ((parent < n) && (this.heap[parent] > x)) {
-            HeapUtils.printProgress(parent, n, x);
             this.heap[n] = this.heap[parent];
             this.heap[parent] = x;
             n = parent;
