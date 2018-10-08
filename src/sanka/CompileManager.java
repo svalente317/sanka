@@ -1,6 +1,8 @@
 package sanka;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,38 +18,19 @@ class CompileManager {
             if (classdef.isImport) {
                 continue;
             }
-            List<String> command = new ArrayList<>();
-            command.add(GCC);
-            command.add(DBG);
-            for (String importPath : env.importPath) {
-                command.add("-I" + importPath);
-            }
-            command.add("-I.");
+            // Should use TranslationUtils to get generated file name including $top.
             String filename = TranslationUtils.replaceDot(
                     classdef.packageName, File.separatorChar) +
-                    File.separatorChar + classdef.name;
-            String cfilename = filename + ".c";
-            filename = filename + ".o";
-            command.add("-o");
-            command.add(filename);
-            command.add("-c");
-            command.add(cfilename);
-            int status = executeCommand(command);
-            if (status != 0) {
-                String name = classdef.name;
-                if (classdef.packageName != null) {
-                    name = classdef.packageName + "." + name;
-                }
-                env.printError(null, classdef.name +
-                        ": compiler exited with status " + status);
-            }
-            linkcommand.add(filename);
+                    File.separatorChar + classdef.name + ".c";
+            compileFile(filename, linkcommand);
         }
+        String filename = generateMainFile(mainClass);
+        compileFile(filename, linkcommand);
         if (env.errorCount > 0) {
             return;
         }
         linkcommand.add(0, GCC);
-        // TODO fix this!
+        // TODO Do not hardcode /opt/sanka
         linkcommand.add("-L/opt/sanka/lib");
         linkcommand.add("-lsankaruntime");
         linkcommand.add("-o");
@@ -56,6 +39,27 @@ class CompileManager {
         if (status != 0) {
             env.printError(null, exeName + ": compiler exited with status " + status);
         }
+    }
+
+    void compileFile(String filename, List<String> ofileList) throws Exception {
+        Environment env = Environment.getInstance();
+        List<String> command = new ArrayList<>();
+        command.add(GCC);
+        command.add(DBG);
+        for (String importPath : env.importPath) {
+            command.add("-I" + importPath);
+        }
+        command.add("-I.");
+        String objfilename = filename.substring(0, filename.length()-1) + "o";
+        command.add("-o");
+        command.add(objfilename);
+        command.add("-c");
+        command.add(filename);
+        int status = executeCommand(command);
+        if (status != 0) {
+            env.printError(null, filename + ": compiler exited with status " + status);
+        }
+        ofileList.add(objfilename);
     }
 
     int executeCommand(List<String> command) throws Exception {
@@ -74,6 +78,34 @@ class CompileManager {
             builder.append(arg);
         }
         System.out.println(builder.toString());
+    }
+
+    String generateMainFile(String mainClass) throws Exception {
+        Environment env = Environment.getInstance();
+        String packageName = null;
+        String className = mainClass;
+        int idx = mainClass.lastIndexOf('.');
+        if (idx >= 0) {
+            packageName = mainClass.substring(0,  idx);
+            className = className.substring(idx+1);
+        }
+        File tmpfile = File.createTempFile("main", ".c");
+        env.writer = new BufferedWriter(new FileWriter(tmpfile));
+        env.print(TranslationUtils.INCLUDE_SANKA_HEADER);
+        env.print("#include <" + TranslationUtils.getHeaderFileName(packageName, className) + ">");
+        env.print("");
+        env.print("int main(int argc, char **argv) {");
+        env.level++;
+        env.print("struct array arr;");
+        env.print("arr.data = argv;");
+        env.print("arr.length = argc;");
+        env.print(TranslationUtils.translateClassItem(className, "main") + "(&arr);");
+        env.print("return 0;");
+        env.level--;
+        env.print("}");
+        env.writer.close();
+        env.writer = null;
+        return tmpfile.getAbsolutePath();
     }
 
     static CompileManager instance = null;

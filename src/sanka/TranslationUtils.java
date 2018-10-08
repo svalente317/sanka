@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 class TranslationUtils {
+    static final String INCLUDE_SANKA_HEADER = "#include <sanka_header.h>";
+
     /**
      * @return the translated C name of a static field, constructor, or method.
      */
@@ -67,15 +69,11 @@ class TranslationUtils {
             env.print("");
             env.typeList.remove(classdef.toTypeDefinition());
         } else {
-            env.print("#include <sanka_header.h>");
+            env.print(INCLUDE_SANKA_HEADER);
             env.typeList.add(classdef.toTypeDefinition());
         }
         for (TypeDefinition type : env.typeList) {
-            String dirName = "";
-            if (type.packageName != null) {
-                dirName = replaceDot(type.packageName, '/') + "/";
-            }
-            env.print("#include <" + dirName + type.name + ".h>");
+            env.print("#include <" + getHeaderFileName(type.packageName, type.name) + ">");
         }
         env.print("");
         copyFileContents(tmpfile, env.writer);
@@ -86,6 +84,14 @@ class TranslationUtils {
         env.writer.close();
         env.writer = null;
         tmpfile.delete();
+    }
+
+    static String getHeaderFileName(String packageName, String className) {
+        String dirName = "";
+        if (packageName != null) {
+            dirName = replaceDot(packageName, '/') + "/";
+        }
+        return dirName + className + ".h";
     }
 
     static void copyFileContents(File src, BufferedWriter writer) throws IOException {
