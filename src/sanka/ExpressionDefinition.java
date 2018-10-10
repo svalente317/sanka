@@ -377,7 +377,7 @@ class ExpressionDefinition {
                 return;
             }
         } else if (this.expression1.type.keyType == null) {
-            classdef = ClassDefinition.arrayClassDefinition();
+            classdef = ArrayUtils.arrayClassDefinition(this.expression1.type.arrayOf);
         } else {
             classdef = ClassDefinition.mapClassDefinition();
         }
@@ -680,10 +680,10 @@ class ExpressionDefinition {
             variableName = env.getTmpVariable();
         }
         builder.append(variableName);
-        builder.append(" = NEWARRAY(");
+        builder.append(" = NEW_ARRAY(");
         builder.append(this.expression1.translate(null));
         builder.append(", sizeof(");
-        builder.append(this.expression1.type.translate());
+        builder.append(this.type.arrayOf.translate());
         builder.append("));");
         env.print(builder.toString());
         return variableName;
@@ -722,6 +722,9 @@ class ExpressionDefinition {
         }
         if (this.isStatic || this.type == TypeDefinition.METHOD_TYPE) {
             this.translatedThis = text;
+            if (this.expression1.type.arrayOf != null) {
+                return null;
+            }
             String className = isClassAccess ? this.expression1.name : this.expression1.type.name;
             return TranslationUtils.translateClassItem(className, this.name);
         }
@@ -813,6 +816,10 @@ class ExpressionDefinition {
     }
 
     String translateFunctionCall(String variableName) {
+        if (this.expression1.expressionType == ExpressionType.FIELD_ACCESS &&
+            this.expression1.expression1.type.arrayOf != null) {
+            return ArrayUtils.translateFunctionCall(this, variableName);
+        }
         Environment env = Environment.getInstance();
         StringBuilder builder = new StringBuilder();
         if (!this.type.isVoidType()) {

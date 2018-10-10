@@ -184,14 +184,6 @@ class ClassDefinition {
         }
     }
 
-    static ClassDefinition arrayClassDefinition() {
-        ClassDefinition classdef = new ClassDefinition();
-        FieldDefinition field = new FieldDefinition();
-        field.type = TypeDefinition.INT_TYPE;
-        classdef.fieldMap.put("length", field);
-        return classdef;
-    }
-
     static ClassDefinition mapClassDefinition() {
         ClassDefinition classdef = new ClassDefinition();
         return classdef;

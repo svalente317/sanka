@@ -1,34 +1,44 @@
 #include <stdlib.h>
 #include "rb.h"
 
-struct array {
-    void *data;
-    int length;
-};
-
-static inline struct array *NEWARRAY(int length, int size) {
-    struct array *a = malloc(sizeof(struct array));
-    a->data = calloc(length, size);
-    a->length = length;
-    return a;
-}
+/* Part 1: panic.c -- primitive types, pointers */
 
 extern void PANIC(const char *);
+extern const char *NULL_POINTER_ERROR;
+extern const char *DIVISION_BY_ZERO_ERROR;
+
+static inline void NULLCHECK(const void *vp) {
+    if (vp == NULL) PANIC(NULL_POINTER_ERROR);
+}
+
+static inline void DIVISIONCHECK(long d) {
+    if (d == 0) PANIC(DIVISION_BY_ZERO_ERROR);
+}
+
+/* Part 2: string_add.c */
+
 extern char *STRING_ADD(char **, int);
 extern void INT_TO_STRING(int, char *);
 extern void LONG_TO_STRING(long, char *);
 
-static inline void NULLCHECK(const void *vp) {
-    if (vp == NULL) PANIC("null pointer error");
-}
+/* Part 3: array.c */
 
-static inline void DIVISIONCHECK(long d) {
-    if (d == 0) PANIC("division by zero error");
-}
+struct array {
+    void *data;
+    int length;
+    int alloced;
+};
+
+extern struct array *NEW_ARRAY(int length, int size);
+extern void GROW_ARRAY(struct array *this, int size);
+extern void GROW_AND_MOVE_ARRAY(struct array *this, int idx, int size);
+extern void SHRINK_ARRAY(struct array *this, int idx, int size);
+extern void SET_ARRAY_LENGTH(struct array *this, int length, int size);
+extern const char *ARRAY_BOUNDS_ERROR;
 
 static inline void BOUNDSCHECK(struct array *a, int idx) {
     NULLCHECK(a);
-    if (idx < 0 || idx >= a->length) PANIC("array bounds error");
+    if (idx < 0 || idx >= a->length) PANIC(ARRAY_BOUNDS_ERROR);
 }
 
 #define ARRCAST(e, t) ((t*)e->data)
