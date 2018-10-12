@@ -363,8 +363,6 @@ class ExpressionDefinition {
         if (this.expression1.type == null) {
             return;
         }
-        // This is similar code to the code in StatementDefinition.java
-        // when the field access is the LHS of the statement.
         ClassDefinition classdef;
         if (this.expression1.type.arrayOf == null) {
             if (this.expression1.expressionType == ExpressionType.CLASS_IDENTIFIER) {

@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import sanka.ClassDefinition.FieldDefinition;
+import sanka.ExpressionDefinition.ExpressionType;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.AssignableContext;
 import sanka.antlr4.SankaParser.BlockContext;
@@ -181,6 +182,7 @@ public class StatementDefinition {
                 return;
             }
         }
+        TypeDefinition lhsType = null;
         AssignableContext assignable = assignment.assignable();
         if (assignable.Identifier() == null) {
             // The LHS is made of two expressions: The array and index.
@@ -188,78 +190,44 @@ public class StatementDefinition {
             this.lhsExpression = new ExpressionDefinition();
             this.lhsExpression.evaluateArrayAccess(assignable.expression(0),
                     assignable.expression(1));
-            return;
+            lhsType = this.lhsExpression.type;
         }
-        this.name = assignable.Identifier().getText();
-        if (assignable.expression(0) != null) {
+        else if (assignable.expression(0) != null) {
+            // The LHS is made of two expressions: The context and field.
+            // Read them into a single ExpressionDefinition.
             this.lhsExpression = new ExpressionDefinition();
-            this.lhsExpression.evaluate(assignable.expression(0));
-            TypeDefinition type = this.lhsExpression.type;
-            if (type == null) {
-                return;
-            }
-            if (type.arrayOf != null) {
-                env.printError(assignment, "class " + type + " does not have field " + this.name);
-                return;
-            }
-            if (type.isPrimitiveType) {
-                env.printError(assignment, type + " cannot be dereferenced");
-                return;
-            }
-            ClassDefinition classdef = env.getClassDefinition(type);
-            if (classdef == null) {
-                env.printError(assignment, "class " + type + " undefined");
-                return;
-            }
-            FieldDefinition fielddef = classdef.fieldMap.get(this.name);
-            if (fielddef == null) {
-                env.printError(assignment, "class " + type + " does not have field " + this.name);
-                return;
-            }
-            if (fielddef.isPrivate && classdef != env.currentClass) {
-                env.printError(assignment, "class " + type + " field " + this.name +
-                        " is private");
-            }
-            if (this.statementType == SankaLexer.EQUAL) {
-                if (!TypeUtils.isCompatible(fielddef.type, this.expression)) {
-                    env.printError(assignment, "incompatible types: " + this.expression.type +
-                            " cannot be converted to " + fielddef.type);
-                    return;
-                }
-            } else {
-                if (!fielddef.type.isIntegralType()) {
-                    env.printError(assignment, "incompatible types: " + fielddef.type +
-                            " cannot be incremented");
-                    return;
-                }
-            }
-            // Ok, we allow this field assignment.
-            return;
+            this.lhsExpression.evaluateFieldAccess(assignable.expression(0),
+                    assignable.Identifier());
+            lhsType = this.lhsExpression.type;
         }
-        TypeDefinition varType = env.symbolTable.get(this.name);
-        if (varType == null) {
-            env.printError(assignment, "variable " + this.name + " undefined");
+        else {
+            this.name = assignable.Identifier().getText();
+            lhsType = env.symbolTable.get(this.name);
+            if (lhsType == null) {
+                env.printError(assignment, "variable " + this.name + " undefined");
+                return;
+            }
+            if (this.statementType == SankaLexer.EQUAL && lhsType.isNullType()) {
+                lhsType = this.expression.type;
+                env.symbolTable.promote(this.name, lhsType);
+            }
+        }
+        if (lhsType == null) {
             return;
         }
         if (this.statementType == SankaLexer.EQUAL) {
-            if (varType.isNullType()) {
-                varType = this.expression.type;
-                env.symbolTable.promote(this.name, varType);
-            }
-            if (!TypeUtils.isCompatible(varType, this.expression)) {
+            if (!TypeUtils.isCompatible(lhsType, this.expression)) {
                 env.printError(assignment, "incompatible types: " + this.expression.type +
-                        " cannot be converted to " + varType);
+                        " cannot be converted to " + lhsType);
                 return;
             }
         } else {
-            if (!varType.isIntegralType()) {
-                env.printError(assignment, "incompatible types: " + varType +
+            if (!lhsType.isIntegralType()) {
+                env.printError(assignment, "incompatible types: " + lhsType +
                         " cannot be incremented");
                 return;
             }
         }
-        // Ok, we allow this variable assignment.
-        return;
     }
 
     /**
@@ -317,7 +285,7 @@ public class StatementDefinition {
                 env.printError(forControl, "can only iterate over array or map");
             }
             else if (this.expression.type.keyType == null) {
-                type = this.expression.type;
+                type = this.expression.type.arrayOf;
                 if (this.valueName != null) {
                     env.printError(forControl, "only specify one variable " +
                             "to iterate over " + type);
@@ -414,15 +382,7 @@ public class StatementDefinition {
                     return;
                 }
                 // Set builder to either "LHS[idx]" or "LHS->field".
-                text = this.lhsExpression.translate(null);
-                builder.append(text);
-                if (this.name != null) {
-                    if (!text.equals("this")) {
-                        env.print("NULLCHECK(" + text + ");");
-                    }
-                    builder.append("->");
-                    builder.append(this.name);
-                }
+                builder.append(this.lhsExpression.translate(null));
                 if (this.expression != null) {
                     text = this.expression.translate(null);
                 }
@@ -452,11 +412,11 @@ public class StatementDefinition {
             env.print(builder.toString());
             return;
         case SankaLexer.IF:
-            builder = new StringBuilder();
-            builder.append("if (");
-            builder.append(this.expression.translate(null));
-            builder.append(") {");
-            env.print(builder.toString());
+            text = this.expression.translate(null);
+            if (this.expression.expressionType != ExpressionType.BINARY) {
+                text = "(" + text + ")";
+            }
+            env.print("if " + text + " {");
             env.level++;
             this.block.translate(false);
             env.level--;
@@ -484,21 +444,54 @@ public class StatementDefinition {
             if (this.forStatements[0] != null) {
                 this.forStatements[0].translate();
             }
+            // Optimization TODO:
+            // Generate different code for loops that don't use "continue".
+            text = null;
+            if (this.forStatements[1] != null) {
+                text = env.getTmpVariable();
+                env.print("int " + text + " = 0;");
+            }
             env.print("while (1) {");
             env.level++;
+            if (text != null) {
+                env.print("if (" + text + " != 0) {");
+                env.level++;
+                this.forStatements[1].translate();
+                env.level--;
+                env.print("}");
+                env.print(text + " = 1;");
+            }
             builder = new StringBuilder();
             builder.append("if (!");
             builder.append(this.expression.translate(null));
             builder.append(") break;");
             env.print(builder.toString());
             this.block.translate(false);
-            if (this.forStatements[1] != null) {
-                this.forStatements[1].translate();
-            }
             env.level--;
             env.print("}");
             return;
         case SankaLexer.COLON:
+            TypeDefinition arrayType = this.expression.type;
+            if (arrayType.keyType == null) {
+                String arrayVar = env.getTmpVariable();
+                env.print(arrayType.translateSpace() + arrayVar + ";");
+                text = this.expression.translate(arrayVar);
+                if (!text.equals(arrayVar)) {
+                    env.print(arrayVar + " = " + text + ";");
+                }
+                env.print("NULLCHECK(" + arrayVar + ");");
+                String indexVar = env.getTmpVariable();
+                env.print("for (int " + indexVar + " = 0; " +
+                        indexVar + " < " + arrayVar + "->length; " + indexVar + "++) {");
+                env.level++;
+                env.print(arrayType.arrayOf.translateSpace() + this.name + " = " +
+                         "ARRCAST(" + arrayVar + ", " + arrayType.arrayOf.translate() +
+                         ")[" + indexVar + "];");
+                this.block.translate(false);
+                env.level--;
+                env.print("}");
+                return;
+            }
             String traverserVar = env.getTmpVariable();
             String keyVar = env.getTmpVariable();
             String valueVar = env.getTmpVariable();
@@ -542,6 +535,7 @@ public class StatementDefinition {
             env.print("break;");
             break;
         case SankaLexer.CONTINUE:
+            env.print("continue;");
             break;
         case SankaLexer.BOOLEAN:
             this.expression.translate(null);

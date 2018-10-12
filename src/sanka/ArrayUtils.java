@@ -84,19 +84,19 @@ public class ArrayUtils {
             return null;
         case "delete":
         case "pop":
-        	if (methodName.equals("delete")) {
-        		index = expr.argList[0].translate(null);
-        	} else {
-        		index = arrayName + "->length-1";
-        	}
-        	env.print("BOUNDSCHECK(" + arrayName + ", " + index + ");");
-        	String text = "";
-        	if (variableName == null) {
-        		text = arrayExpr.type.arrayOf.translateSpace();
-        		variableName = env.getTmpVariable();
-        	}
-        	text += variableName + " =  ARRCAST(" + arrayName + ", " + typeName + ")[" +
-        			index + "];";
+            if (methodName.equals("delete")) {
+                index = expr.argList[0].translate(null);
+            } else {
+                index = arrayName + "->length-1";
+            }
+            env.print("BOUNDSCHECK(" + arrayName + ", " + index + ");");
+            String text = "";
+            if (variableName == null) {
+                text = arrayExpr.type.arrayOf.translateSpace();
+                variableName = env.getTmpVariable();
+            }
+            text += variableName + " =  ARRCAST(" + arrayName + ", " + typeName + ")[" +
+                    index + "];";
             env.print(text);
             env.print("SHRINK_ARRAY(" + arrayName + ", " + index + ", sizeof(" + typeName + "));");
             return variableName;
@@ -106,8 +106,8 @@ public class ArrayUtils {
                       ", sizeof(" + typeName + ");");
             return null;
         case "addAll":
-        	// TODO
-        	break;
+            // TODO
+            break;
         }
         env.printError(null, "array method not implemented: " + methodName);
         return null;

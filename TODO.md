@@ -2,21 +2,15 @@
 
 ## High Level Design Issues
 
-* Need garbage collection or reference counting
+* Garbage collection
 
 * Support classes with the same name in different packages
 
 ## Unimplemented features
 
-* iterate over arrays
-
-* generate correct code for assignment to static field
-
 * support inline fields
 
 * support "exports" keyword
-
-* support CONTINUE statement
 
 * support "switch" statement
 
@@ -63,8 +57,6 @@
 * const local variables (not fields)
 
 * translate float and double in strings
-
-* map[value]++ increment and decrement in map
 
 * what if map changes during iteration?
 
