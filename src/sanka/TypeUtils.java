@@ -41,7 +41,7 @@ public class TypeUtils {
             return false;
         }
         if (expr.type.isNumericType()) {
-            return type.isNumericType() && isCompatibleNumeric(type, expr.type);
+            return type.isNumericType() && isCompatibleNumeric(type, expr);
         }
         if (expr.type.isPrimitiveType) {
             return false;
@@ -69,19 +69,29 @@ public class TypeUtils {
      *
      * @return true if the expression can be promoted to the type.
      */
-    static boolean isCompatibleNumeric(TypeDefinition type, TypeDefinition exprType) {
-        if (exprType.equals(TypeDefinition.BYTE_TYPE)) {
+    static boolean isCompatibleNumeric(TypeDefinition type, ExpressionDefinition expr) {
+        if (expr.type.equals(TypeDefinition.BYTE_TYPE)) {
             return true;
         }
-        if (exprType.equals(TypeDefinition.SHORT_TYPE)) {
+        if (expr.type.equals(TypeDefinition.SHORT_TYPE)) {
             return !(type.equals(TypeDefinition.BYTE_TYPE));
         }
-        if (exprType.equals(TypeDefinition.INT_TYPE)) {
+        if (expr.type.equals(TypeDefinition.INT_TYPE)) {
+            if (expr.expressionType == ExpressionType.LITERAL) {
+                if (type.equals(TypeDefinition.BYTE_TYPE) && LiteralUtils.isByte(expr.name)) {
+                    expr.type = TypeDefinition.BYTE_TYPE;
+                    return true;
+                }
+                if (type.equals(TypeDefinition.SHORT_TYPE) && LiteralUtils.isShort(expr.name)) {
+                    expr.type = TypeDefinition.SHORT_TYPE;
+                    return true;
+                }
+            }
             return !(type.equals(TypeDefinition.BYTE_TYPE) ||
                     type.equals(TypeDefinition.SHORT_TYPE));
         }
         // long, float, and double can be converted to themselves and double.
-        return type.equals(exprType) || type.equals(TypeDefinition.DOUBLE_TYPE);
+        return type.equals(expr.type) || type.equals(TypeDefinition.DOUBLE_TYPE);
     }
 
     /**

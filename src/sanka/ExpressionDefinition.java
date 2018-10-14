@@ -139,7 +139,7 @@ class ExpressionDefinition {
             // * character overflow
             LiteralContext literal = primary.literal();
             if (literal.IntegerLiteral() != null) {
-                this.type = TypeDefinition.INT_TYPE;
+                LiteralUtils.evaluateIntegerLiteral(this);
                 return;
             }
             if (literal.FloatingPointLiteral() != null) {
@@ -330,12 +330,10 @@ class ExpressionDefinition {
      * If one of these types could be promoted to be stored in a variable of the other type,
      * then return the storage type.
      */
-    private TypeDefinition promoteNumericType(TypeDefinition type1, TypeDefinition type2) {
-        if (TypeUtils.isCompatibleNumeric(type1, type2)) {
-            return type1;
-        }
-        if (TypeUtils.isCompatibleNumeric(type2, type1)) {
-            return type2;
+    private TypeDefinition promoteNumericType(ExpressionDefinition expr1, ExpressionDefinition expr2) {
+        if (TypeUtils.isCompatibleNumeric(expr1.type, expr2) ||
+            TypeUtils.isCompatibleNumeric(expr2.type, expr1)) {
+            return expr1.type;
         }
         return null;
     }
@@ -428,7 +426,7 @@ class ExpressionDefinition {
                     this.operator.equals("+") || this.operator.equals("-")) {
                 checkNumericType(lhs, this.expression1.type);
                 checkNumericType(rhs, this.expression2.type);
-                this.type = promoteNumericType(this.expression1.type, this.expression2.type);
+                this.type = promoteNumericType(this.expression1, this.expression2);
             }
             else if (this.operator.equals("<=") || this.operator.equals(">=") ||
                     this.operator.equals("<") || this.operator.equals(">")) {
@@ -448,7 +446,7 @@ class ExpressionDefinition {
                     this.operator.equals("^") || this.operator.equals("|")) {
                 checkIntegralType(lhs, this.expression1.type);
                 checkIntegralType(rhs, this.expression2.type);
-                this.type = promoteNumericType(this.expression1.type, this.expression2.type);
+                this.type = promoteNumericType(this.expression1, this.expression2);
             }
             else if (this.operator.equals("&&") || this.operator.equals("||")) {
                 checkBooleanType(lhs, this.expression1.type);
@@ -571,7 +569,7 @@ class ExpressionDefinition {
     String translate(String variableName) {
         switch (this.expressionType) {
         case LITERAL:
-            return translateLiteral();
+            return LiteralUtils.translateLiteral(this);
         case IDENTIFIER:
             return this.name;
         case CLASS_IDENTIFIER:
@@ -598,25 +596,6 @@ class ExpressionDefinition {
             return translateTernary(variableName);
         }
         return null;
-    }
-
-    String translateLiteral() {
-        if (this.type == TypeDefinition.INT_TYPE || this.type == TypeDefinition.DOUBLE_TYPE) {
-            return this.name;
-        }
-        if (this.type == TypeDefinition.BYTE_TYPE) {
-            return this.name;
-        }
-        if (this.type == TypeDefinition.BOOLEAN_TYPE) {
-            return this.name.equals("true") ? "1" : (this.name.equals("false") ? "0" : "error");
-        }
-        if (this.type == TypeDefinition.STRING_TYPE) {
-            return this.name;
-        }
-        if (this.type == TypeDefinition.NULL_TYPE) {
-            return "NULL";
-        }
-        return "error";
     }
 
     String translateNewInstance(String variableName) {
@@ -762,6 +741,12 @@ class ExpressionDefinition {
         }
         String text1 = this.expression1.translate(null);
         String text2 = this.expression2.translate(null);
+        if (this.expression1.type.isStringType()) {
+            String translation = translateStringComparison(text1, text2, this.operator);
+            if (translation != null) {
+                return translation;
+            }
+        }
         if (this.operator.equals("/")) {
             env.print("DIVISIONCHECK(" + text2 + ");");
         }
@@ -773,6 +758,24 @@ class ExpressionDefinition {
         builder.append(" ");
         builder.append(text2);
         builder.append(")");
+        return builder.toString();
+    }
+
+    String translateStringComparison(String text1, String text2, String operator) {
+        if (!(operator.equals("==") || operator.equals("!=") ||
+              operator.equals("<") || operator.equals("<=") ||
+              operator.equals(">") || operator.equals(">="))) {
+            return null;
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("(");
+        builder.append("strcmp(");
+        builder.append(text1);
+        builder.append(", ");
+        builder.append(text2);
+        builder.append(") ");
+        builder.append(operator);
+        builder.append(" 0)");
         return builder.toString();
     }
 

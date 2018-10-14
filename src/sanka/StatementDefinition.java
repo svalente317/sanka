@@ -6,7 +6,6 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import sanka.ClassDefinition.FieldDefinition;
 import sanka.ExpressionDefinition.ExpressionType;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.AssignableContext;

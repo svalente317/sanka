@@ -8,17 +8,13 @@
 
 ## Unimplemented features
 
+* literal folding
+
 * support inline fields
 
 * support "exports" keyword
 
 * support "switch" statement
-
-* Unary and binary ops:
-  * type checking and promotion
-  * special code for string comparison, etc.
-  * special promotion rules for literals
-  * literal folding
 
 * finish implementing string, array, and map builtin methods
 
@@ -31,6 +27,10 @@
 * Do not access "this" or instance method in LHS or RHS in static method
 
 * Improve support for char literals and complex literals
+
+* Type checking in == binary expression
+
+* float to double promotion and demotion
 
 * Support parameterized types
 

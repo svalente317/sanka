@@ -124,14 +124,15 @@ class TypeDefinition implements Comparable<TypeDefinition> {
 
     boolean isIntegralType() {
         return this.isPrimitiveType &&
-                (this.name.equals("int") || this.name.equals("long") || this.name.equals("short"));
+                (this.name.equals("int") || this.name.equals("long") ||
+                 this.name.equals("short") || this.name.equals("byte"));
     }
 
     boolean isNumericType() {
         return this.isPrimitiveType &&
                 (this.name.equals("int") || this.name.equals("long") ||
-                        this.name.equals("float") || this.name.equals("double") ||
-                        this.name.equals("short") || this.name.equals("byte"));
+                 this.name.equals("float") || this.name.equals("double") ||
+                 this.name.equals("short") || this.name.equals("byte"));
     }
 
     boolean isStringType() {
