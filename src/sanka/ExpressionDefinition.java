@@ -350,6 +350,7 @@ class ExpressionDefinition {
             checkNumericType(ctx, this.expression1.type);
         }
         this.type = this.expression1.type;
+        LiteralUtils.foldUnaryOp(this);
     }
 
     void evaluateFieldAccess(ExpressionContext expr, TerminalNode identifier) {
@@ -458,6 +459,7 @@ class ExpressionDefinition {
                 this.type = TypeDefinition.BOOLEAN_TYPE;
             }
         }
+        LiteralUtils.foldBinaryOp(this);
     }
 
     void evaluateArrayAccess(ExpressionContext expr, ExpressionContext itemExpr) {

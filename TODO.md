@@ -8,8 +8,6 @@
 
 ## Unimplemented features
 
-* literal folding
-
 * support inline fields
 
 * support "exports" keyword

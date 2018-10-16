@@ -1,5 +1,7 @@
 package sanka;
 
+import sanka.ExpressionDefinition.ExpressionType;
+
 class LiteralUtils {
     /**
      * Reformat the integer literal as a simple decimal literal, and determine if
@@ -47,6 +49,74 @@ class LiteralUtils {
     static boolean isShort(String text) {
         int value = Integer.parseInt(text);
         return Short.MIN_VALUE <= value && value <= Short.MAX_VALUE;
+    }
+
+    static void foldUnaryOp(ExpressionDefinition expr) {
+        if (expr.expression1.expressionType == ExpressionType.LITERAL && expr.expression1.type != null) {
+            if (expr.expression1.type.isIntegralType()) {
+                if (expr.operator.equals("+") || expr.operator.equals("-")) {
+                    expr.expressionType = expr.expression1.expressionType;
+                    expr.type = expr.expression1.type;
+                    expr.name = expr.expression1.name;
+                    if (expr.operator.equals("-")) {
+                        expr.name = Long.toString(-Long.parseLong(expr.name));
+                    }
+                    expr.operator = null;
+                    expr.expression1 = null;
+                }
+            }
+        }
+    }
+
+    static void foldBinaryOp(ExpressionDefinition expr) {
+        if (expr.expression1.expressionType == ExpressionType.LITERAL && expr.expression1.type != null &&
+            expr.expression2.expressionType == ExpressionType.LITERAL && expr.expression2.type != null) {
+            if (expr.expression1.type.isIntegralType() && expr.expression2.type.isIntegralType()) {
+                long v1 = Long.parseLong(expr.expression1.name);
+                long v2 = Long.parseLong(expr.expression2.name);
+                Long value = null;
+                switch (expr.operator) {
+                case "+":
+                    value = v1 + v2;
+                    break;
+                case "-":
+                    value = v1 - v2;
+                    break;
+                case "*":
+                    value = v1 * v2;
+                    break;
+                case "/":
+                    value = v1 / v2;
+                    break;
+                case "%":
+                    value = v1 % v2;
+                    break;
+                case "<<":
+                    value = v1 << v2;
+                    break;
+                case ">>":
+                    value = v1 >> v2;
+                    break;
+                case "|":
+                    value = v1 | v2;
+                    break;
+                case "&":
+                    value = v1 & v2;
+                    break;
+                }
+                if (value != null) {
+                    expr.expressionType = expr.expression1.expressionType;
+                    expr.type = expr.expression1.type;
+                    if (expr.expression2.type.equals(TypeDefinition.LONG_TYPE)) {
+                        expr.type = expr.expression2.type;
+                    }
+                    expr.name = value.toString();
+                    expr.operator = null;
+                    expr.expression1 = null;
+                    expr.expression2 = null;
+                }
+            }
+        }
     }
 
     static String translateLiteral(ExpressionDefinition expr) {
