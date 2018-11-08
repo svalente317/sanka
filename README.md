@@ -31,7 +31,7 @@ and runs in both Java and Sanka:
 
 ~~~
 class Hello {
-    public static void main(String[] argv) {
+    static void main(String[] argv) {
         System.out.println("Hello, world!");
     }
 }
@@ -43,44 +43,43 @@ Sanka has the following things in common with Java:
 * Function calls are technically pass-by-value, but the "value" of an
   object is a reference to that object, so the language is effectively
   pass-by-reference except for numeric types.
-* The numeric types are byte, char, int, long, float, double.
+* The numeric types are byte, short, int, long, float, double.
 * The language provides garbage collection.
 * Fields can be public or private, and classes can be public or private.
-  (I'm not sure if I want to support protected fields or classes.)
 * Many keywords work as they do in Java, such as `if`, `for`, `while`,
   `break`, `continue`, `case`.
 * Objects and arrays are mutable.
 
-Here are the important ways that Sanka differs from Java:
+Here are the Java constructs that Sanka does not provide:
 
 * Sanka does not provide class inheritance or subclasses or abstract classes.
 * Classes are a compile-time abstraction. They basically don't exist at
   runtime. I can declare variables of type `Foo`, but there is no `Foo.class`
   object accessable at runtime.
+* Exceptions cannot be thrown or caught.
 * Runtime exceptions (null pointer, division by zero, array out of bounds,
-  etc.) cannot be caught.
+  etc.) kill the application.
 * There is no reflection.
 * There is no base Object class.
 * There are no base methods like wait(), notify(), hashCode(), etc. Types
   only have the methods that you define.
 * Generic objects cannot be used as synchronization monitors.
-
-Here are the syntactic ways that Sanka differs from Java:
-
-* There is no `implements` keyword. The compiler determines whether a class
-  implements an interface.
-* There is no try/throw/catch/finally support.
-* There are no Annotations.
 * There are no `static {}` blocks.
 * There is no implicit reference to instance variables. To access the `foo`
   field, explicitly write `this.foo`.
-* Local variables do not need to be declared. In fact, local variables cannot
-  be declared. The first time that the compiler sees a definition like
-  `x = foo()`, where the RHS is any value or expression other then `null`,
-  the compiler evaluates the type of the RHS, and that is the type of `x`.
-  Then, it is a compile error for `x` to be used as any other type.
 
 That's what Sanka takes away. Here's what it adds:
+
+* When you declare a local variables, you do not need to explicitly
+  specify its type. Use the keyword "var" to declare a local
+  variable. The first time that the compiler sees an assignment to
+  that variable, where the RHS is any value or expression other then
+  `null`, the compiler evaluates the type of the RHS, and that is the
+  type of `x`.  Then, it is a compile error for `x` to be used as any
+  other type.
+* When you declare a class, you do not need to explicitly specify what
+  interfaces it implements. The compiler determines whether a class
+  implements an interface.
 
 **inline keyword**
 
@@ -185,15 +184,24 @@ name conflicts, then it is a compile-time error.
 person.getName`? Should it support exporting a field and then
 overriding one or more of its methods?)
 
+** Dynamic Arrays and Maps**
+
+In Sanka, you can grow and shrink arrays after you create them. This
+has two advantages over using a dynamic `List` class in the runtime
+class library. (1) The syntax is nicer. (2) You can create a dynamic
+array of a primitive type like `int` without promoting it to a class
+type like `Integer`.
+
+Also, Sanka supports sorted maps as a built-in type using an
+array-like syntax.
+
+For more information on all Sanka types, including arrays and maps,
+see docs/Builtin-Types.md.
+
 ## Open Questions
 
-* Which of these should the language directly support? (As opposed to support
-  only in the class library?)
-  * threads?
-  * dynamic arrays?
-  * maps?
-  * synchronization primitives?
-* Should there be a `synchronized` keyword?
+* Should the language directly support threads and synchronization,
+  or should they be supported only by the runtime class library?
 * Should the language support slices or channels as defined in Go?
 * Are there other constructs in other languages that are worth stealing?
 * Even though Sanka is an imperative language, it must support some kind of
