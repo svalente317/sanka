@@ -184,13 +184,13 @@ name conflicts, then it is a compile-time error.
 person.getName`? Should it support exporting a field and then
 overriding one or more of its methods?)
 
-** Dynamic Arrays and Maps**
+**Dynamic Arrays and Maps**
 
-In Sanka, you can grow and shrink arrays after you create them. This
-has two advantages over using a dynamic `List` class in the runtime
-class library. (1) The syntax is nicer. (2) You can create a dynamic
-array of a primitive type like `int` without promoting it to a class
-type like `Integer`.
+In Sanka, you can change the size of an array after you create it.  So
+you can use an array where Java would force you to use a `List` class.
+Arrays have two advantages over `List` classes. (1) The array syntax
+is nicer. (2) You can create an array of a primitive type like `int`
+without promoting it to a class like `Integer`.
 
 Also, Sanka supports sorted maps as a built-in type using an
 array-like syntax.
