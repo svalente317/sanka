@@ -1,0 +1,8 @@
+// -*- mode: Java; -*-
+package sanka.lang;
+
+class Condition {
+    Condition() {}
+    int wait(Mutex mutex) {}
+    int signal() {}
+}

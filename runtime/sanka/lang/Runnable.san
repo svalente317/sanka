@@ -1,0 +1,6 @@
+// -*- mode: Java; -*-
+package sanka.lang;
+
+interface Runnable {
+    void run();
+}

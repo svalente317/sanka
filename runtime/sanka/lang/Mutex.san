@@ -1,0 +1,8 @@
+// -*- mode: Java; -*-
+package sanka.lang;
+
+class Mutex {
+    Mutex() {}
+    int lock() {}
+    int unlock() {}
+}

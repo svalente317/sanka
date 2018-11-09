@@ -19,16 +19,10 @@ OBJS=	bin/panic.o \
 	bin/rb.o \
 	bin/string_add.o \
 	bin/FileReader.o \
-	bin/System.o
-
-INCLUDES=rb.h \
-	sanka_header.h \
-	sanka/io/FileReader.h \
-	sanka/io/FileReader.san \
-	sanka/lang/String.h \
-	sanka/lang/String.san \
-	sanka/lang/System.h \
-	sanka/lang/System.san
+	bin/Condition.o \
+	bin/Mutex.o \
+	bin/System.o \
+	bin/Thread.o
 
 CC=		gcc
 DBG=		-O6
@@ -58,22 +52,13 @@ bin/libsankaruntime.a: $(OBJS)
 	rm -f $@
 	ar rc $@ $^
 
-bin/panic.o:		runtime/panic.c
+bin/%.o:		runtime/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-bin/array.o:		runtime/array.c
+bin/%.o:		runtime/sanka/lang/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
-bin/rb.o:		runtime/rb.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-bin/string_add.o:	runtime/string_add.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-bin/FileReader.o:	runtime/sanka/io/FileReader.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-bin/System.o:		runtime/sanka/lang/System.c
+bin/%.o:		runtime/sanka/io/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
@@ -93,4 +78,5 @@ ifeq ($(UNAME), Darwin)
 	cp $(ANTLR_FILE) $(ANTLR_RUNTIME)
 endif
 	cp bin/sanka.jar $(PREFIX)/share/
-	cd runtime; tar cf - $(INCLUDES) | (cd $(PREFIX)/include; tar xf -)
+	cd runtime; tar cf - rb.h sanka_header.h \
+	`find sanka -name '*.h'` | (cd $(PREFIX)/include; tar xf -)
