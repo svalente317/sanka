@@ -9,3 +9,9 @@ void Runnable__Runnable(struct Runnable *this, void *object, void *run) {
 void Runnable__run(struct Runnable *this) {
     this->run(this->object);
 }
+
+void *Runnable__threadrun(void *p) {
+    struct Runnable *this = (struct Runnable *) p;
+    this->run(this->object);
+    return 0;
+}

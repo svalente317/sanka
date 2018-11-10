@@ -412,7 +412,7 @@ public class StatementDefinition {
             return;
         case SankaLexer.IF:
             text = this.expression.translate(null);
-            if (this.expression.expressionType != ExpressionType.BINARY) {
+            if (this.expression.expressionType != ExpressionType.BINARY || text.charAt(0) != '(') {
                 text = "(" + text + ")";
             }
             env.print("if " + text + " {");

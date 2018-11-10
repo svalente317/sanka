@@ -5,4 +5,7 @@ class System {
     static void print(String text) {}
     static void println(String text) {}
     static String strerror(int errno) {}
+    static long currentTimeMillis() {}
+    static void sleep(int millis) {}
+    static int random(int max) {}
 }

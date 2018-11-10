@@ -1,0 +1,87 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+import sanka.lang.Mutex;
+import sanka.lang.Condition;
+
+/**
+ * Channel (also called a WorkQueue) implements the producer / consumer
+ * model across multiple threads.
+ */
+class Channel {
+    private int maxSize;
+    private inline Mutex mutex;
+    private inline Condition full_cond;
+    private inline Condition empty_cond;
+    private inline String[] data;
+    private int size;
+    private int current;
+        
+    /**
+     * Create a Channel. By default, always allow more items to be pushed
+     * on the channel (until the system runs out of memory).
+     *
+     * @param maxSize if non-zero, then store at most this many items
+     *        in the channel.
+     */
+    Channel(int maxSize) {
+        this.maxSize = maxSize;
+        this.mutex = new Mutex();
+        this.full_cond = new Condition();
+        this.empty_cond = new Condition();
+        this.data = new String[maxSize];
+        this.size = 0;
+        this.current = 0;
+    }
+
+    /**
+     * Add an item to the end of the queue. If the channel already holds
+     * maxSize items, then block until some other thread calls pop().
+     */
+    void push(String item) {
+        this.mutex.lock();
+        if (this.maxSize > 0) {
+            while (this.size == this.maxSize) {
+                this.full_cond.wait(this.mutex);
+            }
+        }
+        var idx = this.current + this.size;
+        if (this.maxSize > 0 && idx >= this.maxSize) {
+            idx = idx - this.maxSize;
+        }
+        if (idx < this.data.length) {
+            this.data[idx] = item;
+        } else {
+            this.data.add(item);
+        }
+        this.size++;
+        this.empty_cond.signal();
+        this.mutex.unlock();
+    }
+
+    /**
+     * Remove and return the item from the front of the queue. If the queue
+     * is empty, then block until some other thread calls push().
+     */
+    String pop() {
+        this.mutex.lock();
+        while (this.size == 0) {
+            this.empty_cond.wait(this.mutex);
+        }
+        var item = this.data[this.current];
+        this.current++;
+        this.size--;
+        if (this.maxSize == 0) {
+            if (this.size == 0) {
+                this.current = 0;
+            }
+            // if (this.current > this.size) shift_left();
+        } else {
+            if (this.current == this.maxSize) {
+                this.current = 0;
+            }
+        }
+        this.full_cond.signal();
+        this.mutex.unlock();
+        return item;
+    }
+}

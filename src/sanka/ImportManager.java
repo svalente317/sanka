@@ -87,13 +87,17 @@ public class ImportManager {
         env.currentPackage = packageName;
         env.classPackageMap = env.baseClassPackageMap(false);
         for (TypeDeclarationContext item : ctx.typeDeclaration()) {
-            if (item.classDeclaration() != null) {
+            if (item.classDeclaration() != null || item.interfaceDeclaration() != null) {
                 ClassDefinition classdef = new ClassDefinition();
                 classdef.isImport = true;
                 classdef.packageName = env.currentPackage;
-                classdef.name = item.classDeclaration().Identifier().getText();
+                if (item.classDeclaration() != null) {
+                    classdef.parse(item.classDeclaration());
+                }
+                if (item.interfaceDeclaration() != null) {
+                    classdef.parseInterface(item.interfaceDeclaration());
+                }
                 env.classList.add(classdef);
-                classdef.parse(item.classDeclaration());
             }
         }
         env.currentPackage = origCurrentPackage;

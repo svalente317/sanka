@@ -21,6 +21,7 @@ OBJS=	bin/panic.o \
 	bin/FileReader.o \
 	bin/Condition.o \
 	bin/Mutex.o \
+	bin/Runnable.o \
 	bin/System.o \
 	bin/Thread.o
 
@@ -79,4 +80,5 @@ ifeq ($(UNAME), Darwin)
 endif
 	cp bin/sanka.jar $(PREFIX)/share/
 	cd runtime; tar cf - rb.h sanka_header.h \
-	`find sanka -name '*.h'` | (cd $(PREFIX)/include; tar xf -)
+	`find sanka -name '*.h' -o -name '*.san'` | \
+	(cd $(PREFIX)/include; tar xf -)

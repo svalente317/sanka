@@ -33,6 +33,7 @@ class CompileManager {
         // TODO Do not hardcode /opt/sanka
         linkcommand.add("-L/opt/sanka/lib");
         linkcommand.add("-lsankaruntime");
+        linkcommand.add("-lpthread");
         linkcommand.add("-o");
         linkcommand.add(exeName);
         int status = executeCommand(linkcommand);

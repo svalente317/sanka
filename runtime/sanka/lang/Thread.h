@@ -6,11 +6,8 @@
 
 struct Thread {
     pthread_t thread;
-    struct Runnable *runnable;
 };
 void Thread__Thread(struct Thread *this, struct Runnable *runnable);
-int Thread__run(struct Thread *this);
 int Thread__join(struct Thread *this);
-struct Thread *Thread__currentThread();
 
 #endif

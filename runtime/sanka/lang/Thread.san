@@ -3,7 +3,5 @@ package sanka.lang;
 
 class Thread {
     Thread(Runnable runnable) {}
-    int run() {}
     int join() {}
-    static Thread currentThread() {}
 }

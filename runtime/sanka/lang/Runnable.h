@@ -9,5 +9,6 @@ struct Runnable {
 
 void Runnable__Runnable(struct Runnable *this, void *object, void *run);
 void Runnable__run(struct Runnable *this);
+void *Runnable__threadrun(void *p);
 
 #endif
