@@ -13,3 +13,7 @@ int Condition__wait(struct Condition *this, struct Mutex *mutex) {
 int Condition__signal(struct Condition *this) {
     return pthread_cond_signal(&this->condition);
 }
+
+int Condition__broadcast(struct Condition *this) {
+    return pthread_cond_broadcast(&this->condition);
+}

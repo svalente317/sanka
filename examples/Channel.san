@@ -10,12 +10,13 @@ import sanka.lang.Condition;
 class Channel {
     private int maxSize;
     private inline Mutex mutex;
-    private inline Condition full_cond;
-    private inline Condition empty_cond;
+    private inline Condition fullCond;
+    private inline Condition emptyCond;
     private inline String[] data;
     private int size;
     private int current;
-        
+    private boolean closed;
+
     /**
      * Create a Channel. By default, always allow more items to be pushed
      * on the channel (until the system runs out of memory).
@@ -26,11 +27,12 @@ class Channel {
     Channel(int maxSize) {
         this.maxSize = maxSize;
         this.mutex = new Mutex();
-        this.full_cond = new Condition();
-        this.empty_cond = new Condition();
+        this.fullCond = new Condition();
+        this.emptyCond = new Condition();
         this.data = new String[maxSize];
         this.size = 0;
         this.current = 0;
+        this.closed = false;
     }
 
     /**
@@ -41,7 +43,10 @@ class Channel {
         this.mutex.lock();
         if (this.maxSize > 0) {
             while (this.size == this.maxSize) {
-                this.full_cond.wait(this.mutex);
+                if (this.closed) {
+                    return;
+                }
+                this.fullCond.wait(this.mutex);
             }
         }
         var idx = this.current + this.size;
@@ -54,7 +59,7 @@ class Channel {
             this.data.add(item);
         }
         this.size++;
-        this.empty_cond.signal();
+        this.emptyCond.signal();
         this.mutex.unlock();
     }
 
@@ -65,7 +70,10 @@ class Channel {
     String pop() {
         this.mutex.lock();
         while (this.size == 0) {
-            this.empty_cond.wait(this.mutex);
+            if (this.closed) {
+                return null;
+            }
+            this.emptyCond.wait(this.mutex);
         }
         var item = this.data[this.current];
         this.current++;
@@ -80,8 +88,21 @@ class Channel {
                 this.current = 0;
             }
         }
-        this.full_cond.signal();
+        this.fullCond.signal();
         this.mutex.unlock();
         return item;
+    }
+
+    /**
+     * Close the channel. If any calls to push() are waiting, then those
+     * calls will return immediately, without pushing the item. If any
+     * calls to pop() are waiting, then those calls will return immediately,
+     * with null data. If any calls to push() or pop() are running but
+     * not blocked, then those calls will run to completion.
+     */
+    void close() {
+        this.closed = true;
+        this.fullCond.broadcast();
+        this.emptyCond.broadcast();
     }
 }

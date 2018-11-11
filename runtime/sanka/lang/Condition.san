@@ -5,4 +5,5 @@ class Condition {
     Condition() {}
     int wait(Mutex mutex) {}
     int signal() {}
+    int broadcast() {}
 }

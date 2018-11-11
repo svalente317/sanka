@@ -1,0 +1,85 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+// TODO Fix TypeUtils.isCompatible() so this line can be removed.
+import sanka.lang.Runnable;
+import sanka.lang.Thread;
+
+/**
+ * This class creates a Producer thread and four Consumer threads.
+ * They use a Channel to work together. The Consumer threads can take a
+ * few milliseconds to process an item. When the channel fills up, the
+ * Producer waits. Also, the Producer occasionally pauses for a complete
+ * second. When the channel is empty, the Consumers wait.
+ */
+class ProducerConsumer {
+    static void main(String[] args) {
+        new ProducerConsumer().run();
+    }
+
+    void run() {
+        var channel = new Channel(50);
+
+        var threads = new Thread[4];
+        var i;
+        for (i = 0; i < threads.length; i++) {
+            // TODO fix bug if Consumer is not a variable
+            var consumer = new Consumer(i, channel);
+            threads[i] = new Thread(consumer);
+        }
+        
+        var producer = new Producer(channel);
+        producer.run();
+
+        // channel.close();
+        for (i = 0; i < threads.length; i++) {
+            threads[i].join();
+        }
+    }
+}
+
+class Producer {
+    private Channel channel;
+    
+    Producer(Channel channel) {
+        this.channel = channel;
+    }
+
+    void run() {
+        var start = System.currentTimeMillis();
+        var count = 0;
+        for (var i = 0; i < 4; i++) {
+            for (var j = 0; j < 250; j++) {
+                var now = System.currentTimeMillis();
+                System.println("" + (now - start) + " push " + count);
+                this.channel.push("item" + count);
+                count++;
+            }
+            System.sleep(1000);
+        }
+    }
+}
+
+class Consumer {
+    private int id;
+    private Channel channel;
+
+    Consumer(int id, Channel channel) {
+        this.id = id;
+        this.channel = channel;
+    }
+
+    void run() {
+        var start = System.currentTimeMillis();
+        while (true) {
+            var item = this.channel.pop();
+            if (item == null) {
+                return;
+            }
+            var now = System.currentTimeMillis();
+            var ts = "" + (now - start);
+            System.println(ts + " pop " + this.id + " " + item);
+            var millis = System.random(4);
+            System.sleep(millis);
+        }
+    }
+}

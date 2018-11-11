@@ -10,5 +10,6 @@ struct Condition {
 void Condition__Condition(struct Condition *this);
 int Condition__wait(struct Condition *this, struct Mutex *mutex);
 int Condition__signal(struct Condition *this);
+int Condition__broadcast(struct Condition *this);
 
 #endif
