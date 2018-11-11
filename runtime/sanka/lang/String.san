@@ -3,4 +3,10 @@ package sanka.lang;
 
 class String {
     int length() {}
+    byte byteAt(int n) {}
+    int indexOf(byte b) {}
+    int find(String s) {}
+    boolean startsWith(String s) {}
+    boolean endsWith(String s) {}
+    String substring(int beginIndex, int endIndex) {}
 }

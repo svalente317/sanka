@@ -22,6 +22,7 @@ OBJS=	bin/panic.o \
 	bin/Condition.o \
 	bin/Mutex.o \
 	bin/Runnable.o \
+	bin/String.o \
 	bin/System.o \
 	bin/Thread.o
 
