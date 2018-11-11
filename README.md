@@ -184,7 +184,7 @@ name conflicts, then it is a compile-time error.
 
 Also, you can export specific methods, like `export person.getName`.
 
-*Implicit Interfaces**
+**Implicit Interfaces**
 
 When you declare a class, you do not need to explicitly specify what
 interfaces it implements. The compiler determines whether a class
@@ -193,7 +193,7 @@ implements an interface.
 **Less Stuttering**
 
 When you declare a local variables, you do not need to explicitly
-specify its type. Use the keyword "var" to declare a local
+specify its type. Use the keyword `var` to declare a local
 variable. The first time that the compiler sees an assignment to that
 variable, where the RHS is any value or expression other then `null`,
 the compiler evaluates the type of the RHS, and that is the type of
