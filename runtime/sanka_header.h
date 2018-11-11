@@ -17,6 +17,7 @@ static inline void DIVISIONCHECK(long d) {
 
 /* Part 2: string_add.c */
 
+extern int STRING_EQUALS(char *, char *);
 extern char *STRING_ADD(char **, int);
 extern void INT_TO_STRING(int, char *);
 extern void LONG_TO_STRING(long, char *);
@@ -32,7 +33,7 @@ struct array {
 extern struct array *NEW_ARRAY(int length, int size);
 extern void GROW_ARRAY(struct array *this, int size);
 extern void GROW_AND_MOVE_ARRAY(struct array *this, int idx, int size);
-extern void SHRINK_ARRAY(struct array *this, int idx, int size);
+extern void SHRINK_ARRAY(struct array *this, int idx, int count, int size);
 extern void SET_ARRAY_LENGTH(struct array *this, int length, int size);
 extern const char *ARRAY_BOUNDS_ERROR;
 

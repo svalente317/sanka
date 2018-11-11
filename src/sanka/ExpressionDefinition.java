@@ -764,21 +764,20 @@ class ExpressionDefinition {
     }
 
     String translateStringComparison(String text1, String text2, String operator) {
-        if (!(operator.equals("==") || operator.equals("!=") ||
-              operator.equals("<") || operator.equals("<=") ||
-              operator.equals(">") || operator.equals(">="))) {
-            return null;
+        if (operator.equals("==")) {
+            return "STRING_EQUALS(" + text1 + ", " + text2 + ")";
         }
-        StringBuilder builder = new StringBuilder();
-        builder.append("(");
-        builder.append("strcmp(");
-        builder.append(text1);
-        builder.append(", ");
-        builder.append(text2);
-        builder.append(") ");
-        builder.append(operator);
-        builder.append(" 0)");
-        return builder.toString();
+        if (operator.equals("!=")) {
+            return "(!STRING_EQUALS(" + text1 + ", " + text2 + "))";
+        }
+        if (operator.equals("<") || operator.equals("<=") ||
+            operator.equals(">") || operator.equals(">=")) {
+            Environment env = Environment.getInstance();
+            env.print("NULLCHECK(" + text1 + ");");
+            env.print("NULLCHECK(" + text2 + ");");
+            return "(strcmp(" + text1 + ", " + text2 + ") " + operator + " 0)";
+        }
+        return null;
     }
 
     void setTextToVariable(String text, String variableName) {

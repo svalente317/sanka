@@ -44,6 +44,7 @@ class Channel {
         if (this.maxSize > 0) {
             while (this.size == this.maxSize) {
                 if (this.closed) {
+                    this.mutex.unlock();
                     return;
                 }
                 this.fullCond.wait(this.mutex);
@@ -71,6 +72,7 @@ class Channel {
         this.mutex.lock();
         while (this.size == 0) {
             if (this.closed) {
+                this.mutex.unlock();
                 return null;
             }
             this.emptyCond.wait(this.mutex);
@@ -79,10 +81,12 @@ class Channel {
         this.current++;
         this.size--;
         if (this.maxSize == 0) {
-            if (this.size == 0) {
+            if (this.current > this.size) {
+                if (this.size > 0) {
+                    this.data.delete(0, this.current);
+                }
                 this.current = 0;
             }
-            // if (this.current > this.size) shift_left();
         } else {
             if (this.current == this.maxSize) {
                 this.current = 0;
@@ -101,8 +105,10 @@ class Channel {
      * not blocked, then those calls will run to completion.
      */
     void close() {
+        this.mutex.lock();
         this.closed = true;
         this.fullCond.broadcast();
         this.emptyCond.broadcast();
+        this.mutex.unlock();
     }
 }

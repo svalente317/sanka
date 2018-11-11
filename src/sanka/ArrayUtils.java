@@ -32,7 +32,8 @@ public class ArrayUtils {
         addMethod(classdef, TypeDefinition.VOID_TYPE, "add", elementType);
         addMethod(classdef, TypeDefinition.VOID_TYPE, "insert",
                   TypeDefinition.INT_TYPE, elementType);
-        addMethod(classdef, elementType, "delete", TypeDefinition.INT_TYPE);
+        addMethod(classdef, TypeDefinition.VOID_TYPE, "delete",
+                TypeDefinition.INT_TYPE, TypeDefinition.INT_TYPE);
         addMethod(classdef, elementType, "pop");
         addMethod(classdef, elementType, "setLength", TypeDefinition.INT_TYPE);
         TypeDefinition arrayType = new TypeDefinition();
@@ -83,22 +84,22 @@ public class ArrayUtils {
                       value + ";");
             return null;
         case "delete":
+            env.print("SHRINK_ARRAY(" + arrayName + ", " +
+                      expr.argList[0].translate(null) + ", " +
+                      expr.argList[1].translate(null) + ", " +
+                      "sizeof(" + typeName + "));");
+            return null;
         case "pop":
-            if (methodName.equals("delete")) {
-                index = expr.argList[0].translate(null);
-            } else {
-                index = arrayName + "->length-1";
-            }
-            env.print("BOUNDSCHECK(" + arrayName + ", " + index + ");");
+            env.print("BOUNDSCHECK(" + arrayName + ", 0);");
             String text = "";
             if (variableName == null) {
                 text = arrayExpr.type.arrayOf.translateSpace();
                 variableName = env.getTmpVariable();
             }
             text += variableName + " =  ARRCAST(" + arrayName + ", " + typeName + ")[" +
-                    index + "];";
+                    arrayName + "->length-1];";
             env.print(text);
-            env.print("SHRINK_ARRAY(" + arrayName + ", " + index + ", sizeof(" + typeName + "));");
+            env.print(arrayName + "->length--;");
             return variableName;
         case "setLength":
             index = expr.argList[0].translate(null);

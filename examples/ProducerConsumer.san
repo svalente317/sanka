@@ -30,7 +30,7 @@ class ProducerConsumer {
         var producer = new Producer(channel);
         producer.run();
 
-        // channel.close();
+        channel.close();
         for (i = 0; i < threads.length; i++) {
             threads[i].join();
         }

@@ -32,13 +32,15 @@ void GROW_AND_MOVE_ARRAY(struct array *this, int idx, int size) {
             (this->length-idx-1) * size);
 }
 
-void SHRINK_ARRAY(struct array *this, int idx, int size) {
-    this->length--;
-    if (idx < this->length) {
-        memmove(((char *) this->data) + (idx * size),
-                ((char *) this->data) + ((idx+1) * size),
-                (this->length - idx) * size);
+void SHRINK_ARRAY(struct array *this, int idx, int count, int size) {
+    BOUNDSCHECK(this, idx);
+    if (count < 0 || count > (this->length - idx)) {
+        PANIC(ARRAY_BOUNDS_ERROR);
     }
+    memmove(((char *) this->data) + (idx * size),
+            ((char *) this->data) + ((idx+count) * size),
+            (this->length - (idx+count)) * size);
+    this->length -= count;
 }
 
 void SET_ARRAY_LENGTH(struct array *this, int length, int size) {

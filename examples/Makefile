@@ -2,7 +2,7 @@ PREFIX=	/opt/sanka
 CC=	gcc
 DBG=	-g
 
-all:	wordmap interface heap
+all:	wordmap interface heap channel
 
 wordmap:	WordMap.san
 	sanka $^ --exe $@ --main sanka.examples.WordMap
@@ -13,5 +13,8 @@ interface:	Interface.san
 heap:		Heap.san
 	sanka $^ --exe $@ --main sanka.examples.HeapTest
 
+channel:	ProducerConsumer.san Channel.san
+	sanka $^ --exe $@ --main sanka.examples.ProducerConsumer
+
 clean:
-	rm -rf wordmap interface heap *.o *~ sanka
+	rm -rf wordmap interface heap channel *.o *~ sanka

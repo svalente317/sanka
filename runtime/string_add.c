@@ -1,6 +1,13 @@
 #include <string.h>
 #include "sanka_header.h"
 
+int STRING_EQUALS(char *s1, char *s2) {
+    if (s1 == NULL) {
+        return (s2 == NULL);
+    }
+    return (s2 != NULL) && (strcmp(s1, s2) == 0);
+}
+
 char *STRING_ADD(char **arr, int size) {
     int length, idx;
     char *cp;

@@ -1,0 +1,36 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+
+class Array {
+    static void main(String[] argv) {
+        var arr = new int[3];
+        arr[0] = 17;
+        arr[1] = 34;
+        arr[2] = 51;
+        printArray(arr);
+
+        arr.add(99);
+        printArray(arr);
+
+        arr.insert(1, 18);
+        printArray(arr);
+
+        arr.delete(1, 2);
+        printArray(arr);
+
+        arr.add(999);
+        printArray(arr);
+
+        var value = arr.pop();
+        System.println("value=" + value);
+        printArray(arr);
+    }
+
+    static void printArray(int[] arr) {
+        var text = "";
+        for (var item : arr) {
+            text = text + item + " ";
+        }
+        System.println(text);
+    }
+}
