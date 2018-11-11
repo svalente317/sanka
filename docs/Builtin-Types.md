@@ -117,27 +117,28 @@ bytes:
     var s = new String(arr);
 ~~~
 
-Of course, an application may choose to interpret these bytes as UTF-8
-characters or Unicode characters or etc., but this support is not
-built into the language.
-
-The `String` class has the usual methods that you'd expect: `size()`,
-`substring()`, `indexOf()`, etc. The exact list of methods and
-signatures is outside the scope of this document.
+An application may choose to interpret these bytes as ASCII, UTF-8,
+etc., but this support is not built into the language.
 
 Since `String` is builtin to the language, it supports the comparison
 operators `==`, `<`, `>`, etc. These work by doing a byte-by-byte
 comparison between two Strings. The bytes have no particular meaning
-as characters or letters. They are just numbers. For example, if
-string `s1` starts with byte 65, and string `s2` starts with byte 132,
-then `s1 < s2`.
+as characters or letters. They are compared as integers.
 
 If `s1` and `s2` are the same sequence of bytes, then `s1 == s2`.
 
-The `+` operator joins two strings into a new string.
-* Support adding strings to primitive types?
-* Support adding strings to instances of user-defined classes by
-  implicitly calling `toString()`?
+The `+` operator joins two strings into a new string. If a string is
+added to a primitive numeric type, then that number is converted to a
+string (in base 10) and added to the string.
+
+The `String` class has these methods:
+* `int length()` Return the number of bytes in the string
+* `byte byteAt(int n)` Return the n'th byte in the string
+* `int indexOf(byte b)` Return the index of the first occurrence of `b`
+* `int find(String s)` Return the index of the first occurrence of `s`
+* `boolean startsWith(String s)` Return true if this string starts with `s`
+* `boolean endsWith(String s)` Return true if this string ends with `s`
+* `String substring(int beginIndex, int endIndex)` Return a substring
 
 ## Array
 
@@ -167,10 +168,30 @@ element, and on the right-hand-side to get an element.
     var s = arr[1];
 ~~~
 
-The array class has a `length` field, and a set of methods including
-`add()`, `remove()`, `setLength()`, etc. The exact list of methods and
-signatures is outside the scope of this document. Just note that,
-unlike in Java, the size of an array can change after it is created.
+The array class has a `length` field, and these methods:
+* `void add(T item)` Add item to the array
+* `void insert(int n, T item)` Add item as the n'th item in the array.
+   The rest of the array is shifted to the right.
+* `void delete(int n, int count)` Delete items from the array, from the
+  n'th item. The rest of the array is shifted left.
+* `T pop()` Delete the last item from the array, and return it.
+* `void setLength(int n)` If the array is shorter then n, then add items
+  with the default value. If the array is longer then n, then truncate it.
+* `void addAll(T[] arr)` Add the items in arr to the end of this.
+
+Initially, an array is allocated with the exact amount of memory that
+you specify. But all of the array methods may allocate a little extra
+memory if it may make the program more efficient. For example:
+~~~
+var arr = new int[3];
+arr.add(17);
+~~~
+
+Initially, `arr` is the three element array `{0, 0, 0}`, and no
+further memory has been allocated. After the call to add(), it is the
+four element array `{0, 0, 0, 17}`. And there may be a little extra
+memory at the end of the array, so that the next call to add() can
+be processed efficiently.
 
 Of course, the arithmetic operators and the comparison operators are
 meaningless on arrays, just as they are on user-defined classes.
@@ -214,19 +235,22 @@ the program dies with a Null Pointer Exception. For example:
 ~~~
     var s = "hello";   // "s" is of type String
     s = null;          // Valid assignment for type String
-    System.println(s.length);   // Compiler accepts this. Dies at runtime.
+    System.println(s.length());   // Compiler accepts this. Dies at runtime.
 ~~~
 
-The string comparison operators are undefined for the null string. For
-example, consider this function:
+If you have two strings that may or may not be null, then you can
+compare them for equality. Obviously, `null` equals `null`, and `null`
+does not equal any non-null string, including the empty string.
+However, the less-then and greater-then operators are undefined for
+`null`. For example, consider this function:
 ~~~
 boolean compareStrings(String s1, String s2) {
     return s1 < s2;
 }
 ~~~
 
-If you call `compareStrings("hello", null)` then it will die with a
-Null Pointer Exception.
+The call `compareStrings("hello", null)` will die with a Null Pointer
+Exception.
 
 If you access past the end of an array, then it will die with an Out
 Of Bounds Exception. For example:
@@ -237,8 +261,8 @@ Of Bounds Exception. For example:
 ~~~
 
 If you define a map with String as the key type, and you add a key of
-null, then it will die with a Null Pointer Exception (since the map
-must be able to compare the key to the other keys).
+null, then it will die with a Null Pointer Exception, since the map
+must be able to compare the key to the other keys.
 
 However, other then `null`, a map is spans the entire domain of its
 key type (int or String). So, if you access a key that is not in the
