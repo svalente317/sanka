@@ -268,6 +268,9 @@ class ExpressionDefinition {
             return;
         }
         this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
+        TypeDefinition arrayType = new TypeDefinition();
+        arrayType.arrayOf = this.type;
+        this.type = arrayType;
         if (ctx.expressionList() != null) {
             List<ExpressionContext> exprList = ctx.expressionList().expression();
             this.argList = new ExpressionDefinition[exprList.size()];
@@ -280,9 +283,9 @@ class ExpressionDefinition {
         }
         Environment env = Environment.getInstance();
         for (ExpressionDefinition arg : this.argList) {
-            if (!TypeUtils.isCompatible(this.type, arg)) {
+            if (!TypeUtils.isCompatible(this.type.arrayOf, arg)) {
                 env.printError(ctx.expressionList(), "incompatible types: " + arg.type +
-                        " cannot be converted to " + this.type);
+                        " cannot be converted to " + this.type.arrayOf);
             }
         }
     }
@@ -648,10 +651,22 @@ class ExpressionDefinition {
     }
 
     String translateNewArrayWithValues(String variableName) {
-        return "not implemented";
+        Environment env = Environment.getInstance();
+        String count = Integer.toString(this.argList.length);
+        variableName = translateNewArrayWithCount(variableName, count);
+        for (int idx = 0; idx < this.argList.length; idx++) {
+            // Promote RHS numeric type / interface type?
+            env.print("ARRCAST(" + variableName + ", " + this.type.arrayOf.translate() +
+                      ")[" + idx + "] = " + this.argList[idx].translate(null) + ";");
+        }
+        return variableName;
     }
 
     String translateNewArray(String variableName) {
+        return translateNewArrayWithCount(variableName, this.expression1.translate(null));
+    }
+
+    String translateNewArrayWithCount(String variableName, String count) {
         Environment env = Environment.getInstance();
         StringBuilder builder = new StringBuilder();
         if (variableName == null) {
@@ -660,7 +675,7 @@ class ExpressionDefinition {
         }
         builder.append(variableName);
         builder.append(" = NEW_ARRAY(");
-        builder.append(this.expression1.translate(null));
+        builder.append(count);
         builder.append(", sizeof(");
         builder.append(this.type.arrayOf.translate());
         builder.append("));");

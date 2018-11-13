@@ -14,11 +14,9 @@
 
 * support "switch" statement
 
-* finish implementing string, array, and map builtin methods
-
 * iterate over strings
 
-* Support new array with values
+* implement map builtin methods
 
 * type checking in ternary op
 

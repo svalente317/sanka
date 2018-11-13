@@ -2,7 +2,7 @@
          xmlns:ivy="antlib:org.apache.ivy.ant">
 
   <path id="classpath">
-    <fileset dir="lib"/>
+    <pathelement location="/usr/share/java/antlr4-runtime.jar"/>
   </path>
 
   <target name="resolve" description="retrieve dependencies with ivy">
@@ -15,7 +15,7 @@
            classpathref="classpath"/>
   </target>
 
-  <target name="jar" depends="resolve, compile">
+  <target name="jar" depends="compile">
     <jar destfile="bin/sanka.jar" basedir="bin" includes="sanka/**"/>
   </target>
 </project>
