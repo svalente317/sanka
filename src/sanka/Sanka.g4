@@ -169,7 +169,7 @@ statement
     |   constDeclaration
     |   variableDeclaration ';'
     |   variableAssignment ';'
-    |   'if' parExpression block ('else' block)?
+    |   ifStatement
     |   'for' '(' forControl ')' block
     |   'while' parExpression block
     |   'switch' parExpression '{' switchBlockStatementGroup* switchLabel* '}'
@@ -192,6 +192,15 @@ variableAssignment
 assignable
     :   (expression '.')? Identifier
     |   expression '[' expression ']'
+    ;
+
+ifStatement
+    :   'if' parExpression block ('else' elseStatement)?
+    ;
+
+elseStatement
+    :   block
+    |   ifStatement
     ;
 
 forControl

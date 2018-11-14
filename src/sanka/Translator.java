@@ -2,6 +2,7 @@ package sanka;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -143,10 +144,16 @@ class Translator {
      */
     void evaluate() {
         Environment env = Environment.getInstance();
+        // Take a snapshot of the classes to evaluate.
+        // Do this now because env.classList can change while evaluating classes.
+        List<ClassDefinition> toEvaluate = new LinkedList<>();
         for (ClassDefinition classdef : env.classList) {
             if (!classdef.isImport) {
-                classdef.evaluate();
+                toEvaluate.add(classdef);
             }
+        }
+        for (ClassDefinition classdef : toEvaluate) {
+            classdef.evaluate();
         }
     }
 

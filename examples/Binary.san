@@ -19,12 +19,10 @@ class Binary {
         System.println("args are " + args[1] + " and " + args[2]);
         if (args[1] == args[2]) {
             System.println("they are equal");
-        } else { // TODO else if
-            if (args[1] < args[2]) {
-                System.println("the first is smaller");
-            } else {
-                System.println("the first is bigger.");
-            }
+        } else if (args[1] < args[2]) {
+            System.println("the first is smaller");
+        } else {
+            System.println("the first is bigger.");
         }
         var v = 'a';
         System.println("v is " + v + " and next is " + (v+1));

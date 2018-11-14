@@ -1,7 +1,5 @@
 // -*- mode: Java; -*-
 package sanka.examples;
-// TODO Fix TypeUtils.isCompatible() so this line can be removed.
-import sanka.lang.Runnable;
 import sanka.lang.Thread;
 
 /**
@@ -22,9 +20,7 @@ class ProducerConsumer {
         var threads = new Thread[4];
         var i;
         for (i = 0; i < threads.length; i++) {
-            // TODO fix bug if Consumer is not a variable
-            var consumer = new Consumer(i, channel);
-            threads[i] = new Thread(consumer);
+            threads[i] = new Thread(new Consumer(i, channel));
         }
         
         var producer = new Producer(channel);

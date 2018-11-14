@@ -310,6 +310,26 @@ public interface SankaListener extends ParseTreeListener {
 	 */
 	void exitAssignable(SankaParser.AssignableContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SankaParser#ifStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterIfStatement(SankaParser.IfStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#ifStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitIfStatement(SankaParser.IfStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SankaParser#elseStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterElseStatement(SankaParser.ElseStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#elseStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitElseStatement(SankaParser.ElseStatementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SankaParser#forControl}.
 	 * @param ctx the parse tree
 	 */

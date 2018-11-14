@@ -49,6 +49,10 @@ public class TypeUtils {
         Environment env = Environment.getInstance();
         ClassDefinition exprClass = env.getClassDefinition(expr.type);
         ClassDefinition typeClass = env.getClassDefinition(type);
+        if (typeClass == null) {
+            ImportManager.getInstance().doImport(null, type.packageName, type.name);
+            typeClass = env.getClassDefinition(type);
+        }
         if (exprClass == null || typeClass == null || !typeClass.isInterface) {
             return false;
         }

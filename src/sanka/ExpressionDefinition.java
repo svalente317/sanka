@@ -605,6 +605,7 @@ class ExpressionDefinition {
 
     String translateNewInstance(String variableName) {
         Environment env = Environment.getInstance();
+        env.addType(this.type);
         StringBuilder builder = new StringBuilder();
         if (variableName == null) {
             builder.append(this.type.translateSpace());

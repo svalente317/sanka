@@ -15,6 +15,7 @@ import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.ForControlContext;
 import sanka.antlr4.SankaParser.ForIncrementContext;
 import sanka.antlr4.SankaParser.ForInitContext;
+import sanka.antlr4.SankaParser.IfStatementContext;
 import sanka.antlr4.SankaParser.StatementContext;
 import sanka.antlr4.SankaParser.VariableAssignmentContext;
 import sanka.antlr4.SankaParser.VariableDeclarationContext;
@@ -75,23 +76,18 @@ public class StatementDefinition {
                 return;
             }
         }
-        switch (this.statementType) {
-        case SankaLexer.IF:
-            evaluateBooleanExpression(this.ctx.parExpression().expression());
-            this.block = new BlockDefinition();
-            this.block.evaluate(this.ctx.block(0));
-            if (this.ctx.block(1) != null) {
-                this.elseBlock = new BlockDefinition();
-                this.elseBlock.evaluate(this.ctx.block(1));
-            }
+        if (this.ctx.ifStatement() != null) {
+            evaluateIf(this.ctx.ifStatement());
             return;
+        }
+        switch (this.statementType) {
         case SankaLexer.WHILE:
             evaluateBooleanExpression(this.ctx.parExpression().expression());
             this.block = new BlockDefinition();
-            this.block.evaluate(this.ctx.block(0));
+            this.block.evaluate(this.ctx.block());
             return;
         case SankaLexer.FOR:
-            evaluateFor(this.ctx.forControl(), this.ctx.block(0));
+            evaluateFor(this.ctx.forControl(), this.ctx.block());
             return;
         case SankaLexer.SWITCH:
             env.printError(this.ctx, "switch support not implemented");
@@ -120,10 +116,10 @@ public class StatementDefinition {
         case SankaLexer.SEMI:
             return;
         }
-        if (this.ctx.block(0) != null) {
+        if (this.ctx.block() != null) {
             this.statementType = SankaLexer.LBRACE;
             this.block = new BlockDefinition();
-            this.block.evaluate(this.ctx.block(0));
+            this.block.evaluate(this.ctx.block());
             return;
         }
         env.printError(this.ctx, "unrecognized statement");
@@ -249,6 +245,25 @@ public class StatementDefinition {
         if (this.expression.type != null && !this.expression.type.isBooleanType()) {
             env.printError(exprCtx, "incompatible types: " + this.expression.type +
                     " cannot be converted to boolean");
+        }
+    }
+
+    /**
+     * Evaluate an "if" statement.
+     */
+    void evaluateIf(IfStatementContext ictx) {
+        System.out.println("st=" + this.statementType + " IF=" + SankaLexer.IF);
+        this.statementType = SankaLexer.IF;
+        evaluateBooleanExpression(ictx.parExpression().expression());
+        this.block = new BlockDefinition();
+        this.block.evaluate(ictx.block());
+        if (ictx.elseStatement() != null) {
+            this.elseBlock = new BlockDefinition();
+            if (ictx.elseStatement().block() != null) {
+                this.elseBlock.evaluate(ictx.elseStatement().block());
+            } else {
+                this.elseBlock.evaluate(ictx.elseStatement().ifStatement());
+            }
         }
     }
 
