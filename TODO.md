@@ -24,8 +24,6 @@
 
 * Improve support for char literals and complex literals
 
-* Type checking in == binary expression
-
 * float to double promotion and demotion
 
 * Support parameterized types
@@ -46,10 +44,6 @@
 
 * Support static field initialized to literal array
 
-* static fields without initial values should be initialized to zero
-
-* const fields (not local variables)
-
 * const local variables (not fields)
 
 * translate float and double in strings
@@ -57,3 +51,5 @@
 * what if map changes during iteration?
 
 * Error if two classes have same qualified name
+
+* Implement "x == y" where x or y is an interface

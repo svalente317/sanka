@@ -21,6 +21,15 @@ public class TypeUtils {
      * optional conversion or promotion)
      */
     static boolean isCompatible(TypeDefinition type, ExpressionDefinition expr) {
+        return isCompatibleExt(type, expr, false);
+    }
+
+    static boolean isCompatibleRO(TypeDefinition type, ExpressionDefinition expr) {
+        return isCompatibleExt(type, expr, true);
+    }
+
+    static boolean isCompatibleExt(TypeDefinition type, ExpressionDefinition expr,
+                                   boolean isReadOnly) {
         if (expr.type == null) {
             // We've already printed an error. We won't continue to the next pass.
             // Finish this pass.
@@ -61,10 +70,12 @@ public class TypeUtils {
         if (!isInterfaceImplemented(typeClass, exprClass)) {
             return false;
         }
-        ExpressionDefinition copy = expr.copyAndClear();
-        expr.expressionType = ExpressionType.NEW_INSTANCE;
-        expr.type = type;
-        expr.expression1 = copy;
+        if (!isReadOnly) {
+            ExpressionDefinition copy = expr.copyAndClear();
+            expr.expressionType = ExpressionType.NEW_INSTANCE;
+            expr.type = type;
+            expr.expression1 = copy;
+        }
         return true;
     }
 

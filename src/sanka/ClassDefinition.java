@@ -246,9 +246,12 @@ class ClassDefinition {
         env.print("};");
         for (Map.Entry<String, FieldDefinition> entry : this.fieldMap.entrySet()) {
             FieldDefinition field = entry.getValue();
-            if (field.isStatic && !field.isConst) {
+            if (field.isStatic) {
                 StringBuilder builder = new StringBuilder();
                 builder.append("extern ");
+                if (field.isConst) {
+                    builder.append("const ");
+                }
                 env.addType(field.type);
                 builder.append(field.type.translateSpace());
                 builder.append(TranslationUtils.translateClassItem(this.name, entry.getKey()));
@@ -310,8 +313,11 @@ class ClassDefinition {
         boolean printedSomething = false;
         for (Map.Entry<String, FieldDefinition> entry : this.fieldMap.entrySet()) {
             FieldDefinition field = entry.getValue();
-            if (field.isStatic && !field.isConst) {
+            if (field.isStatic) {
                 StringBuilder builder = new StringBuilder();
+                if (field.isConst) {
+                    builder.append("const ");
+                }
                 env.addType(field.type);
                 builder.append(field.type.translateSpace());
                 builder.append(TranslationUtils.translateClassItem(this.name, entry.getKey()));

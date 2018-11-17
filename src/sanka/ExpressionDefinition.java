@@ -407,6 +407,10 @@ class ExpressionDefinition {
                 env.printError(expr, "non-static field " + this.name +
                         " cannot be referenced from a static context");
             }
+            if (fielddef != null && fielddef.isConst && fielddef.value != null) {
+                this.expressionType = ExpressionType.LITERAL;
+                this.name = fielddef.value.name;
+            }
         }
     }
 
@@ -458,7 +462,11 @@ class ExpressionDefinition {
                 this.type = this.expression1.type;
             }
             else if (this.operator.equals("==") || this.operator.equals("!=")) {
-                // TODO check compatible types?
+                if (!(TypeUtils.isCompatibleRO(this.expression1.type, this.expression2) ||
+                      TypeUtils.isCompatibleRO(this.expression2.type, this.expression1))) {
+                    env.printError(rhs, "incompatible types: " + this.expression1.type +
+                            " cannot be compared to " + this.expression2.type);
+                }
                 this.type = TypeDefinition.BOOLEAN_TYPE;
             }
         }

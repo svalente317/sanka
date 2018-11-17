@@ -252,7 +252,6 @@ public class StatementDefinition {
      * Evaluate an "if" statement.
      */
     void evaluateIf(IfStatementContext ictx) {
-        System.out.println("st=" + this.statementType + " IF=" + SankaLexer.IF);
         this.statementType = SankaLexer.IF;
         evaluateBooleanExpression(ictx.parExpression().expression());
         this.block = new BlockDefinition();

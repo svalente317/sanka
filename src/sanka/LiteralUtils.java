@@ -69,54 +69,73 @@ class LiteralUtils {
     }
 
     static void foldBinaryOp(ExpressionDefinition expr) {
-        if (expr.expression1.expressionType == ExpressionType.LITERAL && expr.expression1.type != null &&
-            expr.expression2.expressionType == ExpressionType.LITERAL && expr.expression2.type != null) {
-            if (expr.expression1.type.isIntegralType() && expr.expression2.type.isIntegralType()) {
-                long v1 = Long.parseLong(expr.expression1.name);
-                long v2 = Long.parseLong(expr.expression2.name);
-                Long value = null;
-                switch (expr.operator) {
-                case "+":
-                    value = v1 + v2;
-                    break;
-                case "-":
-                    value = v1 - v2;
-                    break;
-                case "*":
-                    value = v1 * v2;
-                    break;
-                case "/":
-                    value = v1 / v2;
-                    break;
-                case "%":
-                    value = v1 % v2;
-                    break;
-                case "<<":
-                    value = v1 << v2;
-                    break;
-                case ">>":
-                    value = v1 >> v2;
-                    break;
-                case "|":
-                    value = v1 | v2;
-                    break;
-                case "&":
-                    value = v1 & v2;
-                    break;
-                }
-                if (value != null) {
-                    expr.expressionType = expr.expression1.expressionType;
-                    expr.type = expr.expression1.type;
-                    if (expr.expression2.type.equals(TypeDefinition.LONG_TYPE)) {
-                        expr.type = expr.expression2.type;
-                    }
-                    expr.name = value.toString();
-                    expr.operator = null;
-                    expr.expression1 = null;
-                    expr.expression2 = null;
+        if (expr.expression1.expressionType != ExpressionType.LITERAL ||
+            expr.expression2.expressionType != ExpressionType.LITERAL) {
+            return;
+        }
+        if (expr.expression1.type == null || expr.expression2.type == null) {
+            return;
+        }
+        String newValue = null;
+        if (expr.expression1.type.isStringType() && expr.expression2.type.isStringType()) {
+            if (expr.operator.equals("+")) {
+                String n1 = expr.expression1.name, n2 = expr.expression2.name;
+                String quote = "\"";
+                if (n1.startsWith(quote) && n1.endsWith(quote) &&
+                    n2.startsWith(quote) && n2.endsWith(quote)) {
+                    newValue = n1.substring(0, n1.length()-1) + n2.substring(1);
                 }
             }
         }
+        if (expr.expression1.type.isIntegralType() && expr.expression2.type.isIntegralType()) {
+            long v1 = Long.parseLong(expr.expression1.name);
+            long v2 = Long.parseLong(expr.expression2.name);
+            Long value = null;
+            switch (expr.operator) {
+            case "+":
+                value = v1 + v2;
+                break;
+            case "-":
+                value = v1 - v2;
+                break;
+            case "*":
+                value = v1 * v2;
+                break;
+            case "/":
+                value = v1 / v2;
+                break;
+            case "%":
+                value = v1 % v2;
+                break;
+            case "<<":
+                value = v1 << v2;
+                break;
+            case ">>":
+                value = v1 >> v2;
+                break;
+            case "|":
+                value = v1 | v2;
+                break;
+            case "&":
+                value = v1 & v2;
+                break;
+            }
+            if (value != null) {
+                newValue = value.toString();
+            }
+        }
+        if (newValue == null) {
+            return;
+        }
+        expr.expressionType = expr.expression1.expressionType;
+        expr.type = expr.expression1.type;
+        if (expr.expression2.type.equals(TypeDefinition.LONG_TYPE)) {
+            expr.type = expr.expression2.type;
+        }
+        expr.name = newValue;
+        expr.operator = null;
+        expr.expression1 = null;
+        expr.expression2 = null;
     }
 
     static String translateLiteral(ExpressionDefinition expr) {
