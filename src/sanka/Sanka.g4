@@ -81,6 +81,8 @@ classBodyDeclaration
     |   'export' Identifier
     |   constructorDeclaration
     |   methodDeclaration
+    |   'c__include' StringLiteral ';'
+    |   'c__field' StringLiteral ';'
     ;
 
 constDeclaration
@@ -177,6 +179,7 @@ statement
     |   'break' ';'
     |   'continue' ';'
     |   expression ';'
+    |   'c__stmt' StringLiteral ';'
     |   ';'
     ;
 
@@ -330,6 +333,9 @@ THIS          : 'this';
 VAR           : 'var';
 VOID          : 'void';
 WHILE         : 'while';
+C__INCLUDE    : 'c__include';
+C__FIELD      : 'c__field';
+C__STMT       : 'c__stmt';
 
 // 3.10.1 Integer Literals
 

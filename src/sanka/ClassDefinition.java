@@ -37,6 +37,8 @@ class ClassDefinition {
     List<String> exports;
     MethodDefinition constructor;
     List<MethodDefinition> methodList;
+    List<String> c_includes;
+    List<String> c_fields;
 
     ClassDefinition() {
         this.fieldMap = new TreeMap<>();
@@ -92,6 +94,20 @@ class ClassDefinition {
                             " already defined");
                 }
                 this.methodList.add(method);
+            }
+            if (item.getStart().getType() == SankaLexer.C__INCLUDE) {
+                if (this.c_includes == null) {
+                    this.c_includes = new LinkedList<>();
+                }
+                String literal = item.StringLiteral().getText();
+                this.c_includes.add(LiteralUtils.evaluateStringLiteral(literal));
+            }
+            if (item.getStart().getType() == SankaLexer.C__FIELD) {
+                if (this.c_fields == null) {
+                    this.c_fields = new LinkedList<>();
+                }
+                String literal = item.StringLiteral().getText();
+                this.c_fields.add(LiteralUtils.evaluateStringLiteral(literal));
             }
         }
     }
@@ -241,6 +257,11 @@ class ClassDefinition {
             }
             env.addType(field.type);
             env.print(field.type.translateSpace() + entry.getKey() + ";");
+        }
+        if (this.c_fields != null) {
+            for (String cfield : this.c_fields) {
+                env.print(cfield + ";");
+            }
         }
         env.level--;
         env.print("};");

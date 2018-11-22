@@ -156,6 +156,7 @@ class ExpressionDefinition {
             }
             if (literal.StringLiteral() != null) {
                 this.type = TypeDefinition.STRING_TYPE;
+                this.name = LiteralUtils.evaluateStringLiteral(this.name);
                 return;
             }
             if (this.name.equals("null")) {

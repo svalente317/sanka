@@ -115,6 +115,10 @@ public class StatementDefinition {
         case SankaLexer.CONTINUE:
         case SankaLexer.SEMI:
             return;
+        case SankaLexer.C__STMT:
+            String literal = this.ctx.StringLiteral().getText();
+            this.name = LiteralUtils.evaluateStringLiteral(literal);
+            return;
         }
         if (this.ctx.block() != null) {
             this.statementType = SankaLexer.LBRACE;
@@ -527,9 +531,9 @@ public class StatementDefinition {
             this.block.translate(false);
             env.level--;
             env.print("}");
-            break;
+            return;
         case SankaLexer.SWITCH:
-            break;
+            return;
         case SankaLexer.RETURN:
             builder = new StringBuilder();
             builder.append("return");
@@ -543,13 +547,13 @@ public class StatementDefinition {
             }
             builder.append(";");
             env.print(builder.toString());
-            break;
+            return;
         case SankaLexer.BREAK:
             env.print("break;");
-            break;
+            return;
         case SankaLexer.CONTINUE:
             env.print("continue;");
-            break;
+            return;
         case SankaLexer.BOOLEAN:
             this.expression.translate(null);
             // Since the returned expression has no side-effects,
@@ -557,6 +561,9 @@ public class StatementDefinition {
             return;
         case SankaLexer.SEMI:
             env.print(";");
+            return;
+        case SankaLexer.C__STMT:
+            env.print(this.name + ";");
             return;
         }
     }

@@ -1,34 +1,12 @@
-# Build the sanka compiler and the runtime library.
+# Build the sanka compiler.
 #
 # Install the compiler shell script as
 # $prefix/bin/sanka
 #
 # Install the compiler jar file as
 # $prefix/share/sanka.jar
-#
-# Install the sanka runtime header files as
-# $prefix/include/sanka/*.{h,san}
-#
-# Install the sanka runtime library as
-# $prefix/lib/libsankaruntime.a
 
 PREFIX=/opt/sanka
-
-OBJS=	bin/panic.o \
-	bin/array.o \
-	bin/rb.o \
-	bin/string_add.o \
-	bin/FileReader.o \
-	bin/Condition.o \
-	bin/Mutex.o \
-	bin/Runnable.o \
-	bin/String.o \
-	bin/System.o \
-	bin/Thread.o
-
-CC=		gcc
-DBG=		-O6
-CFLAGS=		$(DBG) -Iruntime
 
 UNAME :=	$(shell uname)
 ifeq ($(UNAME), Linux)
@@ -39,47 +17,27 @@ ANTLR_FILE=	lib/antlr4-runtime-4.5.1.jar
 ANTLR_RUNTIME=	$(PREFIX)/$(ANTLR_FILE)
 endif
 
-all:	bin/sanka.jar bin/sanka.sh bin/libsankaruntime.a
+all:	bin/sanka.jar bin/sanka.sh
 
-bin/sanka.jar:
+bin/sanka.jar: FORCE
 	ant -e jar
 
-bin/sanka.sh:
+bin/sanka.sh: FORCE
 	echo '#!/bin/sh' > $@
 	echo exec java -cp ${PREFIX}/share/sanka.jar:$(ANTLR_RUNTIME) \
-	sanka/Translator -I ${PREFIX}/include '"$$@"' >> $@
+	sanka/Translator -I ${PREFIX}/include -L ${PREFIX}/lib '"$$@"' >> $@
 	chmod 755 $@
 
-bin/libsankaruntime.a: $(OBJS)
-	rm -f $@
-	ar rc $@ $^
-
-bin/%.o:		runtime/%.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-bin/%.o:		runtime/sanka/lang/%.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-bin/%.o:		runtime/sanka/io/%.c
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-clean:
+clean: FORCE
 	rm -rf bin *~
-
-allclean:	clean
-	rm -rf $(PREFIX)/*
 
 install: all
 	mkdir -p $(PREFIX)/bin
-	mkdir -p $(PREFIX)/include
-	mkdir -p $(PREFIX)/lib
 	mkdir -p $(PREFIX)/share
 	cp bin/sanka.sh $(PREFIX)/bin/sanka
-	cp bin/libsankaruntime.a $(PREFIX)/lib/
 ifeq ($(UNAME), Darwin)
 	cp $(ANTLR_FILE) $(ANTLR_RUNTIME)
 endif
 	cp bin/sanka.jar $(PREFIX)/share/
-	cd runtime; tar cf - rb.h sanka_header.h \
-	`find sanka -name '*.h' -o -name '*.san'` | \
-	(cd $(PREFIX)/include; tar xf -)
+
+FORCE:

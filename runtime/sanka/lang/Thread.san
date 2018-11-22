@@ -2,6 +2,14 @@
 package sanka.lang;
 
 class Thread {
-    Thread(Runnable runnable) {}
-    int join() {}
+    c__include "pthread.h";
+    c__field "pthread_t thread";
+
+    Thread(Runnable runnable) {
+        c__stmt "pthread_create(&this->thread, NULL, (void *) runnable->run, runnable->object)";
+    }
+
+    int join() {
+        c__stmt "return pthread_join(this->thread, NULL)";
+    }
 }

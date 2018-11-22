@@ -33,6 +33,14 @@ class LiteralUtils {
         expr.name = Long.toString(value);
     }
 
+    static String evaluateStringLiteral(String literal) {
+        String quote = "\"";
+        if (literal.startsWith(quote) && literal.endsWith(quote)) {
+            return literal.substring(1, literal.length()-1);
+        }
+        return null;
+    }
+
     /**
      * @param text a literal of type int
      * @return true if this literal can be used as a byte.
@@ -79,12 +87,7 @@ class LiteralUtils {
         String newValue = null;
         if (expr.expression1.type.isStringType() && expr.expression2.type.isStringType()) {
             if (expr.operator.equals("+")) {
-                String n1 = expr.expression1.name, n2 = expr.expression2.name;
-                String quote = "\"";
-                if (n1.startsWith(quote) && n1.endsWith(quote) &&
-                    n2.startsWith(quote) && n2.endsWith(quote)) {
-                    newValue = n1.substring(0, n1.length()-1) + n2.substring(1);
-                }
+                newValue = expr.expression1.name + expr.expression2.name;
             }
         }
         if (expr.expression1.type.isIntegralType() && expr.expression2.type.isIntegralType()) {
@@ -156,7 +159,7 @@ class LiteralUtils {
             return expr.name.equals("true") ? "1" : (expr.name.equals("false") ? "0" : "error");
         }
         if (expr.type == TypeDefinition.STRING_TYPE) {
-            return expr.name;
+            return "\"" + expr.name + "\"";
         }
         if (expr.type == TypeDefinition.NULL_TYPE) {
             return "NULL";

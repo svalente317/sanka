@@ -2,10 +2,35 @@
 package sanka.lang;
 
 class System {
-    static void print(String text) {}
-    static void println(String text) {}
-    static String strerror(int errno) {}
-    static long currentTimeMillis() {}
-    static void sleep(int millis) {}
-    static int random(int max) {}
+    c__include "stdio.h";
+    c__include "string.h";
+    c__include "unistd.h";
+    c__include "sys/time.h";
+
+    static void print(String text) {
+        c__stmt "fputs(text, stdout)";
+    }
+
+    static void println(String text) {
+        c__stmt "puts(text)";
+    }
+
+    static String strerror(int errno) {
+        c__stmt "return strerror(errno)";
+    }
+
+    static long currentTimeMillis() {
+        c__stmt "struct timeval now";
+        c__stmt "gettimeofday(&now, NULL)";
+        c__stmt "return ((long long)now.tv_sec)*1000 + (now.tv_usec/1000)";
+    }
+
+    static void sleep(int millis) {
+        c__stmt "usleep(millis * 1000)";
+    }
+
+    static int random(int max) {
+        c__stmt "return random() % max";
+    }
 }
+

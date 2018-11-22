@@ -2,7 +2,29 @@
 package sanka.io;
 
 class FileReader {
-    int open(String filename) {}
-    String readline() {}
-    int close() {}
+    c__include "stdio.h";
+    c__include "errno.h";
+    c__field "FILE *fp";
+
+    int open(String filename) {
+        c__stmt "char rd[2] = {'r', 0}";
+        c__stmt "this->fp = fopen(filename, rd)";
+        c__stmt "return this->fp != NULL ? 0 : errno";
+    }
+
+    String readline() {
+        c__stmt "char buf[256]";
+        c__stmt "if (fgets(buf, sizeof(buf), this->fp) == NULL) return NULL";
+        c__stmt "buf[sizeof(buf)-1] = 0";
+        c__stmt "int len = strlen(buf)";
+        c__stmt "while (len > 0 && (buf[len-1] == '\n' || buf[len-1] == '\r')) len--";
+        c__stmt "buf[len] = 0";
+        c__stmt "return strdup(buf)";
+    }
+
+    int close() {
+        c__stmt "int status = fclose(this->fp)";
+        c__stmt "this->fp = NULL";
+        c__stmt "return status == 0 ? 0 : errno";
+    }
 }

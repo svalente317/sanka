@@ -15,6 +15,7 @@ class Environment {
 
     // Pass 1.
     List<String> importPath;
+    List<String> libPath;
     List<ClassDefinition> classList;
     String currentPackage;
     Map<String, String> classPackageMap;
@@ -27,6 +28,7 @@ class Environment {
     SortedSet<TypeDefinition> typeList;
 
     // Pass 3.
+    String topDirectory;
     BufferedWriter writer = null;
     int level = 0;
     int tmpVariableCount = 0;
@@ -44,6 +46,13 @@ class Environment {
             this.importPath = new LinkedList<>();
         }
         this.importPath.add(importDir);
+    }
+
+    void addLibPath(String libDir) {
+        if (this.libPath == null) {
+            this.libPath = new LinkedList<>();
+        }
+        this.libPath.add(libDir);
     }
 
     /**

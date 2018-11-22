@@ -30,8 +30,9 @@ class CompileManager {
             return;
         }
         linkcommand.add(0, GCC);
-        // TODO Do not hardcode /opt/sanka
-        linkcommand.add("-L/opt/sanka/lib");
+        for (String libPath : env.libPath) {
+            linkcommand.add("-L" + libPath);
+        }
         linkcommand.add("-lsankaruntime");
         linkcommand.add("-lpthread");
         linkcommand.add("-o");

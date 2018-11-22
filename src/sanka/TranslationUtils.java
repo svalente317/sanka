@@ -46,19 +46,20 @@ class TranslationUtils {
         env.writer.close();
         env.writer = null;
 
-        // TODO append prefix directory
         String suffix = isHeader ? ".h" : ".c";
         String filename = classdef.name + suffix;
         File destFile;
         String symbol;
         if (classdef.packageName != null) {
             String path = replaceDot(classdef.packageName, File.separatorChar);
-            File packageDirectory = new File(path);
+            File packageDirectory = env.topDirectory == null ? new File(path) :
+                new File(env.topDirectory, path);
             packageDirectory.mkdirs();
             destFile = new File(packageDirectory, filename);
             symbol = replaceDot(classdef.packageName, '_') + "_" + classdef.name;
         } else {
-            destFile = new File(filename);
+            destFile = env.topDirectory == null ? new File(filename) :
+                new File(env.topDirectory, filename);
             symbol = classdef.name;
         }
         env.writer = new BufferedWriter(new FileWriter(destFile));
@@ -74,6 +75,11 @@ class TranslationUtils {
         }
         for (TypeDefinition type : env.typeList) {
             env.print("#include <" + getHeaderFileName(type.packageName, type.name) + ">");
+        }
+        if (classdef.c_includes != null) {
+            for (String c_include : classdef.c_includes) {
+                env.print("#include <" + c_include + ">");
+            }
         }
         env.print("");
         copyFileContents(tmpfile, env.writer);

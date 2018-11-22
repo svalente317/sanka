@@ -2,11 +2,45 @@
 package sanka.lang;
 
 class String {
-    int length() {}
-    byte byteAt(int n) {}
-    int indexOf(byte b) {}
-    int find(String s) {}
-    boolean startsWith(String s) {}
-    boolean endsWith(String s) {}
-    String substring(int beginIndex, int endIndex) {}
+    c__include "string.h";
+
+    int length() {
+        c__stmt "return strlen(this)";
+    }
+
+    byte byteAt(int n) {
+        c__stmt "return this[n]";
+    }
+
+    int indexOf(byte b) {
+        c__stmt "for (int idx = 0; this[idx] != 0; idx++) if (this[idx] == b) return idx";
+        c__stmt "return -1";
+    }
+
+    int find(String s) {
+        c__stmt "char *cp = strstr(this, s)";
+        c__stmt "return cp == NULL ? -1 : (cp - this)";
+    }
+
+    boolean startsWith(String s) {
+        c__stmt "return strncmp(this, s, strlen(s)) == 0";
+    }
+
+    boolean endsWith(String s) {
+        c__stmt "int n1 = strlen(this)";
+        c__stmt "int n2 = strlen(s)";
+        c__stmt "return (n1 >= n2) && strcmp(this+(n1-n2), s) == 0";
+    }
+
+    String substring(int beginIndex, int endIndex) {
+        c__stmt "if (beginIndex < 0 || endIndex < 0) return NULL";
+        c__stmt "int n = strlen(this)";
+        c__stmt "if (endIndex == 0 || endIndex > n) endIndex = n";
+        c__stmt "if (beginIndex > endIndex) beginIndex = endIndex";
+        c__stmt "n = endIndex - beginIndex";
+        c__stmt "char *that = malloc(n + 1)";
+        c__stmt "strncpy(that, this+beginIndex, n)";
+        c__stmt "that[n] = 0";
+        c__stmt "return that";
+    }
 }

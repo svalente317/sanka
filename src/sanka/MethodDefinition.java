@@ -108,9 +108,7 @@ class MethodDefinition {
         builder.append("(");
         boolean needComma = false;
         if (!this.isStatic) {
-            // Instead of hardcoding "struct" here, we could convert
-            // ClassDefinition -> TypeDefinition -> translate().
-            builder.append("struct " + classdef.name + " *this");
+            builder.append(classdef.toTypeDefinition().translateSpace() + "this");
             needComma = true;
         }
         if (this.parameters != null) {

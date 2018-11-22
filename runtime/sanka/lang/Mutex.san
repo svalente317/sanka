@@ -2,7 +2,18 @@
 package sanka.lang;
 
 class Mutex {
-    Mutex() {}
-    int lock() {}
-    int unlock() {}
+    c__include "pthread.h";
+    c__field "pthread_mutex_t mutex";
+
+    Mutex() {
+        c__stmt "pthread_mutex_init(&this->mutex, NULL)";
+    }
+
+    int lock() {
+        c__stmt "return pthread_mutex_lock(&this->mutex)";
+    }
+
+    int unlock() {
+        c__stmt "return pthread_mutex_unlock(&this->mutex)";
+    }
 }

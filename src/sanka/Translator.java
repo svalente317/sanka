@@ -23,6 +23,8 @@ class Translator {
     public static final int CANNOT_EVALUATE = 4;
     public static final int CANNOT_TRANSLATE = 5;
 
+    boolean skipImports;
+
     public static void main(String[] argv) throws Exception {
         Environment env = Environment.getInstance();
         Translator translator = new Translator();
@@ -36,6 +38,16 @@ class Translator {
                 env.addImportPath(argv[idx]);
                 continue;
             }
+            if (arg.equals("-L")) {
+                idx++;
+                env.addLibPath(argv[idx]);
+                continue;
+            }
+            if (arg.equals("--top")) {
+                idx++;
+                env.topDirectory = argv[idx];
+                continue;
+            }
             if (arg.equals("--main")) {
                 idx++;
                 mainClass = argv[idx];
@@ -44,6 +56,10 @@ class Translator {
             if (arg.equals("--exe")) {
                 idx++;
                 exeName = argv[idx];
+                continue;
+            }
+            if (arg.equals("--skip-imports")) {
+                translator.skipImports = true;
                 continue;
             }
             if ((mainClass != null && exeName == null) ||
@@ -76,8 +92,10 @@ class Translator {
      * Pass 1: Parse each class. For each class, note the defined methods and signatures.
      */
     void parse(List<CompilationUnitContext> contextList) {
-        ImportManager.getInstance().doImport(null, Environment.SANKA_LANG, "String");
-        ImportManager.getInstance().doImport(null, Environment.SANKA_LANG, "System");
+        if (!this.skipImports) {
+            ImportManager.getInstance().doImport(null, Environment.SANKA_LANG, "String");
+            ImportManager.getInstance().doImport(null, Environment.SANKA_LANG, "System");
+        }
         for (CompilationUnitContext ctx : contextList) {
             parseClassNames(ctx);
         }
