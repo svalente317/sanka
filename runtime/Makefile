@@ -8,13 +8,16 @@
 
 PREFIX=/opt/sanka
 
-SRCS=	bin/sanka/lang/Condition.c \
+SRCS=	bin/sanka/lang/Channel.c \
+	bin/sanka/lang/Condition.c \
 	bin/sanka/lang/Mutex.c \
 	bin/sanka/lang/Runnable.c \
 	bin/sanka/lang/String.c \
 	bin/sanka/lang/System.c \
 	bin/sanka/lang/Thread.c \
-	bin/sanka/io/FileReader.c
+	bin/sanka/io/FileReader.c \
+	bin/sanka/json/JsonElement.c \
+	bin/sanka/json/JsonObject.c
 
 OBJS=	bin/panic.o \
 	bin/array.o \

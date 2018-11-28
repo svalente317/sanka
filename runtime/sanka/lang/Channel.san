@@ -1,7 +1,5 @@
 // -*- mode: Java; -*-
-package sanka.examples;
-import sanka.lang.Mutex;
-import sanka.lang.Condition;
+package sanka.lang;
 
 /**
  * Channel (also called a WorkQueue) implements the producer / consumer

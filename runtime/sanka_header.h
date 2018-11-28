@@ -21,6 +21,7 @@ extern int STRING_EQUALS(char *, char *);
 extern char *STRING_ADD(char **, int);
 extern void INT_TO_STRING(int, char *);
 extern void LONG_TO_STRING(long, char *);
+extern void DOUBLE_TO_STRING(double, char *);
 
 /* Part 3: array.c */
 

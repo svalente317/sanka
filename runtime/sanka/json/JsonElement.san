@@ -1,0 +1,126 @@
+// -*- mode: Java; -*-
+package sanka.json;
+
+class JsonElement {
+    const NULL_TYPE = 0;
+    const BOOLEAN_TYPE = 1;
+    const INT_TYPE = 2;
+    const DOUBLE_TYPE = 3;
+    const STRING_TYPE = 4;
+    const ARRAY_TYPE = 5;
+    const OBJECT_TYPE = 6;
+
+    int type;
+    c__field "union { int i; double d; char *s; struct array *arr; struct JsonObject *obj; } data";
+
+    JsonElement() {
+        this.type = JsonElement.NULL_TYPE;
+    }
+
+    JsonElement makeBoolean(boolean value) {
+        this.type = JsonElement.BOOLEAN_TYPE;
+        c__stmt "this->data.i = value";
+        return this;
+    }
+
+    JsonElement makeInt(int value) {
+        this.type = JsonElement.INT_TYPE;
+        c__stmt "this->data.i = value";
+        return this;
+    }
+
+    JsonElement makeDouble(double value) {
+        this.type = JsonElement.DOUBLE_TYPE;
+        c__stmt "this->data.d = value";
+        return this;
+    }
+
+    JsonElement makeString(String value) {
+        this.type = JsonElement.STRING_TYPE;
+        c__stmt "this->data.s = value";
+        return this;
+    }
+
+    JsonElement makeArray(JsonElement[] value) {
+        this.type = JsonElement.ARRAY_TYPE;
+        c__stmt "this->data.arr = value";
+        return this;
+    }
+
+    JsonElement makeObject(JsonObject value) {
+        this.type = JsonElement.OBJECT_TYPE;
+        c__stmt "this->data.obj = value";
+        return this;
+    }
+
+    boolean getAsBoolean() {
+        if (this.type != JsonElement.BOOLEAN_TYPE) {
+            return false;
+        }
+        c__stmt "return this->data.i";
+    }
+
+    int getAsInt() {
+        if (this.type != JsonElement.INT_TYPE) {
+            return 0;
+        }
+        c__stmt "return this->data.i";
+    }
+
+    double getAsDouble() {
+        if (this.type != JsonElement.DOUBLE_TYPE) {
+            return 0;
+        }
+        c__stmt "return this->data.d";
+    }
+
+    String getAsString() {
+        if (this.type != JsonElement.STRING_TYPE) {
+            return null;
+        }
+        c__stmt "return this->data.s";
+    }
+
+    JsonElement[] getAsArray() {
+        if (this.type != JsonElement.ARRAY_TYPE) {
+            return null;
+        }
+        c__stmt "return this->data.arr";
+    }
+
+    JsonObject getAsObject() {
+        if (this.type != JsonElement.OBJECT_TYPE) {
+            return null;
+        }
+        c__stmt "return this->data.obj";
+    }
+
+    String toString() {
+        switch (this.type) {
+        case JsonElement.NULL_TYPE:
+            return "null";
+        case JsonElement.BOOLEAN_TYPE:
+            return getAsBoolean() ? "true" : "false";
+        case JsonElement.INT_TYPE:
+            return "" + getAsInt();
+        case JsonElement.DOUBLE_TYPE:
+            return "" + getAsDouble();
+        case JsonElement.STRING_TYPE:
+            // TODO escape things
+            return "\"" + getAsString() + "\"";
+        case JsonElement.ARRAY_TYPE:
+            var arr = getAsArray();
+            if (arr.length == 0) {
+                return "[]";
+            }
+            var s = arr[0].toString();
+            for (var idx = 1; idx < arr.length; idx++) {
+                s = s + "," + arr[idx].toString();
+            }
+            return "[" + s + "]";
+        case JsonElement.OBJECT_TYPE:
+            return getAsObject().toString();
+        }
+        return null;
+    }
+}

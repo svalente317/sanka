@@ -148,18 +148,20 @@ class TranslationUtils {
         if (expr.type.equals(TypeDefinition.BOOLEAN_TYPE)) {
             return "(" + text + " ? \"true\" : \"false\")";
         }
-        if (expr.type.isIntegralType()) {
+        if (expr.type.isNumericType()) {
             String variableName = env.getTmpVariable();
             if (expr.type.equals(TypeDefinition.LONG_TYPE)) {
                 env.print("char " + variableName + "[22];");
                 env.print("LONG_TO_STRING(" + text + ", " + variableName + ");");
-            } else {
+            } else if (expr.type.equals(TypeDefinition.INT_TYPE)) {
                 env.print("char " + variableName + "[12];");
                 env.print("INT_TO_STRING(" + text + ", " + variableName + ");");
+            } else {
+                env.print("char " + variableName + "[32];");
+                env.print("DOUBLE_TO_STRING(" + text + ", " + variableName + ");");
             }
             return variableName;
         }
-        // TODO float and double
         return "not_implemented";
     }
 }

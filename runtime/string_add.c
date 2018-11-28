@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include "sanka_header.h"
 
@@ -84,4 +85,11 @@ void LONG_TO_STRING(long i, char *str) {
         len++;
     }
     reverse_string(str, len);
+}
+
+void DOUBLE_TO_STRING(double d, char *str) {
+    // This is a hack. It's slow, imprecise, poorly defined, and it might
+    // overflow the buffer. If you want to use this functionality, then
+    // replace this with something better.
+    sprintf(str, "%g", d);
 }

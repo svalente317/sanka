@@ -131,10 +131,10 @@ class Translator {
 
     void parse(CompilationUnitContext ctx) {
         Environment env = Environment.getInstance();
-        env.classPackageMap = env.baseClassPackageMap(true);
         if (ctx.packageDeclaration() != null) {
             env.currentPackage = ctx.packageDeclaration().qualifiedName().getText();
         }
+        env.classPackageMap = env.baseClassPackageMap(true);
         if (ctx.importDeclaration() != null) {
             for (ImportDeclarationContext item : ctx.importDeclaration()) {
                 ImportManager.getInstance().doImport(item.qualifiedName());
@@ -147,6 +147,7 @@ class Translator {
             if (item.classDeclaration() != null) {
                 String name = item.classDeclaration().Identifier().getText();
                 ClassDefinition classdef = env.getClassDefinition(env.currentPackage, name);
+                classdef.classPackageMap = env.classPackageMap;
                 classdef.parse(item.classDeclaration());
             }
             if (item.interfaceDeclaration() != null) {
@@ -155,6 +156,7 @@ class Translator {
                 classdef.parseInterface(item.interfaceDeclaration());
             }
         }
+        env.classPackageMap = null;
     }
 
     /**
@@ -171,7 +173,9 @@ class Translator {
             }
         }
         for (ClassDefinition classdef : toEvaluate) {
+        	env.classPackageMap = classdef.classPackageMap;
             classdef.evaluate();
+            env.classPackageMap = null;
         }
     }
 

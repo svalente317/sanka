@@ -1,5 +1,6 @@
 // -*- mode: Java; -*-
 package sanka.examples;
+import sanka.lang.Channel;
 import sanka.lang.Thread;
 
 /**
@@ -9,9 +10,9 @@ import sanka.lang.Thread;
  * Producer waits. Also, the Producer occasionally pauses for a complete
  * second. When the channel is empty, the Consumers wait.
  */
-class ProducerConsumer {
+class ChannelTest {
     static void main(String[] args) {
-        new ProducerConsumer().run();
+        new ChannelTest().run();
     }
 
     void run() {

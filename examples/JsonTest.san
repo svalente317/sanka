@@ -1,0 +1,35 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+import sanka.json.JsonElement;
+import sanka.json.JsonObject;
+
+class JsonTest {
+    static void main(String[] argv) {
+        var strElem = new JsonElement().makeString("hello");
+        System.println(strElem.getAsString());
+
+        var intElem = new JsonElement().makeInt(1);
+        System.println("int " + intElem.getAsInt());
+        System.println(intElem.getAsString() == null ? "ok" : "oops");
+
+        var obj = new JsonObject();
+        var map = obj.getMap();
+        map["key"] = strElem;
+        System.println(map["key"].getAsString());
+        System.println(obj.getAsString("key"));
+
+        var subobj = new JsonObject();
+        var submap = subobj.getMap();
+        submap["key"] = new JsonElement().makeString("world!");
+        var value = subobj.getAsString("key");
+        System.println(value);
+
+        map["sub"] = new JsonElement().makeObject(subobj);
+        var tmpobj = obj.getAsObject("sub");
+        System.println("equal? " + (subobj == tmpobj));
+
+        System.println(obj.getAsString("key") + " " +
+                       obj.getAsObject("sub").getAsString("key"));
+    }
+}
+

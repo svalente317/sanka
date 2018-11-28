@@ -29,6 +29,7 @@ class ClassDefinition {
         ExpressionDefinition value;
     }
 
+    Map<String, String> classPackageMap;
     boolean isImport;
     boolean isInterface;
     String packageName;

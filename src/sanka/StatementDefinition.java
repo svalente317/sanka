@@ -16,13 +16,13 @@ import sanka.antlr4.SankaParser.ForControlContext;
 import sanka.antlr4.SankaParser.ForIncrementContext;
 import sanka.antlr4.SankaParser.ForInitContext;
 import sanka.antlr4.SankaParser.IfStatementContext;
+import sanka.antlr4.SankaParser.ParExpressionContext;
 import sanka.antlr4.SankaParser.StatementContext;
 import sanka.antlr4.SankaParser.VariableAssignmentContext;
 import sanka.antlr4.SankaParser.VariableDeclarationContext;
 
 public class StatementDefinition {
 
-    StatementContext ctx;
     int statementType;
     ExpressionDefinition lhsExpression;
     String name;
@@ -33,80 +33,66 @@ public class StatementDefinition {
     String valueName;
 
     /**
-     * Pass 1 (of 3): Parse the statement. Actually, ignore the statement, because pass 1
-     * just builds the class's list of fields and methods.
-     */
-    void parse(StatementContext ctx) {
-        this.ctx = ctx;
-    }
-
-    void evaluate(StatementContext ctx) {
-        this.ctx = ctx;
-        evaluate();
-    }
-
-    /**
      * Pass 2 (of 3): Evaluate the statement. Calculate the type of all expressions
      * in the statement, and report compile-time errors.
      */
-    void evaluate() {
+    void evaluate(StatementContext ctx) {
         Environment env = Environment.getInstance();
-        this.statementType = this.ctx.getStart().getType();
-        if (this.ctx.constDeclaration() != null) {
+        this.statementType = ctx.getStart().getType();
+        if (ctx.constDeclaration() != null) {
             this.statementType = SankaLexer.CONST;
-            env.printError(this.ctx, "const support not implemented");
+            env.printError(ctx, "const support not implemented");
             return;
         }
-        if (this.ctx.variableDeclaration() != null) {
-            evaluateVariableDeclaration(this.ctx.variableDeclaration());
+        if (ctx.variableDeclaration() != null) {
+            evaluateVariableDeclaration(ctx.variableDeclaration());
             return;
         }
-        if (this.ctx.variableAssignment() != null) {
-            evaluateVariableAssignment(this.ctx.variableAssignment());
+        if (ctx.variableAssignment() != null) {
+            evaluateVariableAssignment(ctx.variableAssignment());
             return;
         }
-        if (this.ctx.getChildCount() == 2) {
-            ParseTree child0 = this.ctx.getChild(0);
-            ParseTree child1 = this.ctx.getChild(1);
+        if (ctx.getChildCount() == 2) {
+            ParseTree child0 = ctx.getChild(0);
+            ParseTree child1 = ctx.getChild(1);
             if (child0 instanceof ExpressionContext && child1 instanceof TerminalNode) {
                 evaluateExpressionStatement((ExpressionContext) child0);
                 if (!child1.getText().equals(";")) {
-                    env.printError(this.ctx, "unrecognized statement");
+                    env.printError(ctx, "unrecognized statement");
                 }
                 return;
             }
         }
-        if (this.ctx.ifStatement() != null) {
-            evaluateIf(this.ctx.ifStatement());
+        if (ctx.ifStatement() != null) {
+            evaluateIf(ctx.ifStatement());
             return;
         }
         switch (this.statementType) {
         case SankaLexer.WHILE:
-            evaluateBooleanExpression(this.ctx.parExpression().expression());
+            evaluateBooleanExpression(ctx.parExpression().expression());
             this.block = new BlockDefinition();
-            this.block.evaluate(this.ctx.block());
+            this.block.evaluate(ctx.block());
             return;
         case SankaLexer.FOR:
-            evaluateFor(this.ctx.forControl(), this.ctx.block());
+            evaluateFor(ctx.forControl(), ctx.block());
             return;
         case SankaLexer.SWITCH:
-            env.printError(this.ctx, "switch support not implemented");
             return;
         case SankaLexer.RETURN:
-            if (this.ctx.expression() == null) {
+            if (ctx.expression() == null) {
                 TypeDefinition desired = env.currentMethod.returnType;
                 if (!desired.isVoidType()) {
-                    env.printError(this.ctx, "incompatible types: missing return value " +
+                    env.printError(ctx, "incompatible types: missing return value " +
                             "of type " + desired);
                 }
                 return;
             }
             this.expression = new ExpressionDefinition();
-            this.expression.evaluate(this.ctx.expression());
+            this.expression.evaluate(ctx.expression());
             if (this.expression.type != null) {
                 TypeDefinition desired = env.currentMethod.returnType;
                 if (!TypeUtils.isCompatible(desired, this.expression)) {
-                    env.printError(this.ctx, "incompatible types: " + this.expression.type +
+                    env.printError(ctx, "incompatible types: " + this.expression.type +
                             " cannot be converted to " + desired);
                 }
             }
@@ -116,17 +102,17 @@ public class StatementDefinition {
         case SankaLexer.SEMI:
             return;
         case SankaLexer.C__STMT:
-            String literal = this.ctx.StringLiteral().getText();
+            String literal = ctx.StringLiteral().getText();
             this.name = LiteralUtils.evaluateStringLiteral(literal);
             return;
         }
-        if (this.ctx.block() != null) {
+        if (ctx.block() != null) {
             this.statementType = SankaLexer.LBRACE;
             this.block = new BlockDefinition();
-            this.block.evaluate(this.ctx.block());
+            this.block.evaluate(ctx.block());
             return;
         }
-        env.printError(this.ctx, "unrecognized statement");
+        env.printError(ctx, "unrecognized statement");
     }
 
     /**
@@ -347,6 +333,31 @@ public class StatementDefinition {
         }
     }
 
+    void evaluateSwitch(ParExpressionContext peCtx) {
+        Environment env = Environment.getInstance();
+        this.expression = new ExpressionDefinition();
+        this.expression.evaluate(peCtx.expression());
+        if (this.expression.type != null) {
+            if (!(this.expression.type.isIntegralType() || this.expression.type.isStringType())) {
+                env.printError(peCtx, "incompatible types: switch statement must use " +
+                        "integral type or String");
+            }
+        }
+        // TODO need a block for local variables
+        // TODO Check for duplicate labels.
+        // TODO Special rules for "default" label?
+        /*      if (this.expression.type != null && item.label.type != null) {
+                    if (item.label.expressionType != ExpressionType.LITERAL) {
+                        env.printError(labelCtx, "constant expression required");
+                    }
+                    if (!TypeUtils.isCompatible(this.expression.type, item.label)) {
+                        env.printError(labelCtx, "incompatible types: " +
+                             item.label.type + " cannot be converted to " + this.expression.type);
+                    }
+                }
+            }*/
+    }
+
     /**
      * Pass 3 (of 3). Generate C code for the evaluated statements and expressions.
      */
@@ -433,17 +444,12 @@ public class StatementDefinition {
             if (this.expression.expressionType != ExpressionType.BINARY || text.charAt(0) != '(') {
                 text = "(" + text + ")";
             }
-            env.print("if " + text + " {");
-            env.level++;
-            this.block.translate(false);
-            env.level--;
+            env.print("if " + text);
+            this.block.translate(true);
             if (this.elseBlock != null) {
-                env.print("} else {");
-                env.level++;
-                this.elseBlock.translate(false);
-                env.level--;
+                env.print("else");
+                this.elseBlock.translate(true);
             }
-            env.print("}");
             return;
         case SankaLexer.WHILE:
             env.print("while (1) {");

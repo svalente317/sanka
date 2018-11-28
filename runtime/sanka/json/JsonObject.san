@@ -1,0 +1,80 @@
+// -*- mode: Java; -*-
+package sanka.json;
+
+/**
+ * JsonObject is a thin wrapper around a String -> JsonElement map.
+ * The wrapper does not add any state. All of the state is in the map.
+ * So if two JsonObjects both wrap the same map, then the objects are
+ * effectively equivalent to each other. Any changes made to the map
+ * will be observable through either object.
+ *
+ * Here's how all the "getAs" methods work:
+ *
+ * If the field is defined, AND the field has the specified type, then
+ * return the field value.
+ * Otherwise -- if the field is not defined, or the field does not have
+ * the specified type -- then return the default value for the type
+ * (false for boolean, 0 for int, null for string, etc.)
+ */
+class JsonObject {
+    private static JsonElement NULL_ELEMENT;
+    private JsonElement[String] map;
+
+    JsonObject() {
+        if (JsonObject.NULL_ELEMENT == null) {
+            JsonObject.NULL_ELEMENT = new JsonElement();
+        }
+        this.map = new JsonElement[class String];
+    }
+
+    JsonElement[String] getMap() {
+        return this.map;
+    }
+
+    /**
+     * If the field is defined then return the value.
+     * Otherwise, return a JsonElement with type == NULL_TYPE.
+     *
+     * Why return a JsonElement instead of null? So that you can safely
+     * call JsonElement methods on the return value.
+     */
+    private JsonElement getElement(String fieldName) {
+        var value = this.map[fieldName];
+        return value == null ? JsonObject.NULL_ELEMENT: value;
+    }
+
+    boolean getAsBoolean(String fieldName) {
+        return getElement(fieldName).getAsBoolean();
+    }
+
+    int getAsInt(String fieldName) {
+        return getElement(fieldName).getAsInt();
+    }
+
+    double getAsDouble(String fieldName) {
+        return getElement(fieldName).getAsDouble();
+    }
+
+    String getAsString(String fieldName) {
+        return getElement(fieldName).getAsString();
+    }
+
+    JsonElement[] getAsArray(String fieldName) {
+        return getElement(fieldName).getAsArray();
+    }
+
+    JsonObject getAsObject(String fieldName) {
+        return getElement(fieldName).getAsObject();
+    }
+
+    String toString() {
+        var s = "";
+        var comma = "";
+        for (var key, value : this.map) {
+            // TODO escape things in key
+            s = s + comma + "\"" + key + "\":" + value.toString();
+            comma = ",";
+        }
+        return "{" + s + "}";
+    }
+}

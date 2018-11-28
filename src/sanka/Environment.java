@@ -135,8 +135,15 @@ class Environment {
     }
 
     String getTmpVariable() {
-        this.tmpVariableCount++;
-        return "tmp" + this.tmpVariableCount;
+        String name = null;
+        while (name == null) {
+            this.tmpVariableCount++;
+            name = "tmp" + this.tmpVariableCount;
+            if (this.symbolTable.get(name) != null) {
+                name = null;
+            }
+        }
+        return name;
     }
 
     static Environment instance = null;
