@@ -1,4 +1,9 @@
-# Sanka Programming Language
+Sanka Programming Language
+==========================
+
+svalente@mit.edu
+
+## Overview
 
 Sanka is a general purpose programming language. It is compiled,
 strongly typed, and imperative. Its philosophy is defined as much by
