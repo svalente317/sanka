@@ -173,7 +173,7 @@ class Translator {
             }
         }
         for (ClassDefinition classdef : toEvaluate) {
-        	env.classPackageMap = classdef.classPackageMap;
+            env.classPackageMap = classdef.classPackageMap;
             classdef.evaluate();
             env.classPackageMap = null;
         }

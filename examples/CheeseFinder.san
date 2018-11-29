@@ -1,0 +1,88 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+
+class CheeseFinder {
+    void run(Mouse mouse) {
+        var current = new Point();
+        var state = new Point[class String];
+        state[current.toString()] = current;
+        while (!mouse.goal()) {
+            System.println("current=" + current.x + "," + current.y);
+            var next = new Point();
+            var key;
+            next.x = current.x;
+            next.y = current.y-1;
+            key = next.toString();
+            if (state[key] == null && mouse.move(Mouse.DOWN)) {
+                state[key] = current;
+                current = next;
+                continue;
+            }
+            next.x = current.x;
+            next.y = current.y+1;
+            key = next.toString();
+            if (state[key] == null && mouse.move(Mouse.UP)) {
+                state[key] = current;
+                current = next;
+                continue;
+            }
+            next.x = current.x-1;
+            next.y = current.y;
+            key = next.toString();
+            if (state[key] == null && mouse.move(Mouse.LEFT)) {
+                state[key] = current;
+                current = next;
+                continue;
+            }
+            next.x = current.x+1;
+            next.y = current.y;
+            key = next.toString();
+            if (state[key] == null && mouse.move(Mouse.RIGHT)) {
+                state[key] = current;
+                current = next;
+                continue;
+            }
+            next = state[current.toString()];
+            if (current.x == next.x) {
+                if (current.y-1 == next.y) {
+                    mouse.move(Mouse.DOWN);
+                    current = next;
+                    continue;
+                }
+                if (current.y+1 == next.y) {
+                    mouse.move(Mouse.UP);
+                    current = next;
+                    continue;
+                }
+            }
+            if (current.y == next.y) {
+                if (current.x-1 == next.x) {
+                    mouse.move(Mouse.LEFT);
+                    current = next;
+                    continue;
+                }
+                if (current.x+1 == next.x) {
+                    mouse.move(Mouse.RIGHT);
+                    current = next;
+                    continue;
+                }
+            }
+            System.println("not found");
+            return;
+        }
+        System.println("found");
+    }
+
+    static void main(String[] argv) {
+        new CheeseFinder().run(new Mouse());
+    }
+}
+
+class Point {
+    int x;
+    int y;
+
+    String toString() {
+        return "" + this.x + "," + this.y;
+    }
+}

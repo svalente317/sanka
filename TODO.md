@@ -12,7 +12,7 @@
 
 * support "exports" keyword
 
-* support "switch" statement
+* support "switch" on strings
 
 * iterate over strings
 
@@ -34,9 +34,7 @@
 
 * Support "new" with class body - adapter statements
 
-* Support initialization of 2d array
-
-* generate correct code for "b[0][0] = value;"
+* Support 2d arrays - initialization and code generation
 
 * Support "var x, y;"
 
@@ -45,8 +43,6 @@
 * Support static field initialized to literal array
 
 * const local variables (not fields)
-
-* translate float and double in strings
 
 * what if map changes during iteration?
 

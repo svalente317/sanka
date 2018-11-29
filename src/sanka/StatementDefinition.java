@@ -540,10 +540,18 @@ public class StatementDefinition {
             SwitchUtils.translateSwitchStatement(this);
             return;
         case SankaLexer.CASE:
-            env.printError(null, "case statement must be inside a switch block");
+            if (this.valueName == null) {
+                env.printError(null, "case statement must be inside a switch block");
+            } else {
+                env.print("case " + this.expression.translate(null) + ":;");
+            }
             return;
         case SankaLexer.DEFAULT:
-            env.printError(null, "default statement must be inside a switch block");
+            if (this.valueName == null) {
+                env.printError(null, "default statement must be inside a switch block");
+            } else {
+                env.print("default:;");
+            }
             return;
         case SankaLexer.RETURN:
             builder = new StringBuilder();

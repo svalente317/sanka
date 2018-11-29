@@ -1,0 +1,51 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+
+class Mouse {
+    const DOWN = 1;
+    const UP = 2;
+    const LEFT = 3;
+    const RIGHT = 4;
+
+    private int x;
+    private int y;
+    
+    /**
+     * The mouse is allowed to move freely in a 5x5 box.
+     */
+    boolean move(int direction) {
+        var next_x;
+        var next_y;
+        switch (direction) {
+        case Mouse.DOWN:
+            next_x = this.x;
+            next_y = this.y-1;
+            break;
+        case Mouse.UP:
+            next_x = this.x;
+            next_y = this.y+1;
+            break;
+        case Mouse.LEFT:
+            next_x = this.x-1;
+            next_y = this.y;
+            break;
+        case Mouse.RIGHT:
+            next_x = this.x+1;
+            next_y = this.y;
+            break;
+        }
+        if (next_x >= 0 && next_x < 5 && next_y >= 0 && next_y < 5) {
+            this.x = next_x;
+            this.y = next_y;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * There is no cheese in the maze.
+     */
+    boolean goal() {
+        return false;
+    }
+}

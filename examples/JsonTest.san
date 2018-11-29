@@ -28,6 +28,16 @@ class JsonTest {
         var tmpobj = obj.getAsObject("sub");
         System.println("equal? " + (subobj == tmpobj));
 
+        map["intkey"] = new JsonElement().makeInt(17);
+        map["boolkey"] = new JsonElement().makeBoolean(true);
+        var arr = new JsonElement[]{
+            new JsonElement().makeInt(1),
+            new JsonElement().makeInt(2),
+            new JsonElement().makeInt(3)
+        };
+        submap["arr"] = new JsonElement().makeArray(arr);
+        System.println(obj.toString());
+
         System.println(obj.getAsString("key") + " " +
                        obj.getAsObject("sub").getAsString("key"));
     }
