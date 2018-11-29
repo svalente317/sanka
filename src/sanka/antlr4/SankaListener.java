@@ -370,16 +370,6 @@ public interface SankaListener extends ParseTreeListener {
 	 */
 	void exitEnhancedForControl(SankaParser.EnhancedForControlContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SankaParser#switchBlockStatementGroup}.
-	 * @param ctx the parse tree
-	 */
-	void enterSwitchBlockStatementGroup(SankaParser.SwitchBlockStatementGroupContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SankaParser#switchBlockStatementGroup}.
-	 * @param ctx the parse tree
-	 */
-	void exitSwitchBlockStatementGroup(SankaParser.SwitchBlockStatementGroupContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SankaParser#switchLabel}.
 	 * @param ctx the parse tree
 	 */

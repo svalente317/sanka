@@ -174,7 +174,8 @@ statement
     |   ifStatement
     |   'for' '(' forControl ')' block
     |   'while' parExpression block
-    |   'switch' parExpression '{' switchBlockStatementGroup* switchLabel* '}'
+    |   'switch' parExpression block
+    |   switchLabel
     |   'return' expression? ';'
     |   'break' ';'
     |   'continue' ';'
@@ -224,13 +225,6 @@ forIncrement
 
 enhancedForControl
     :   'var' Identifier (',' Identifier)? ':' expression
-    ;
-
-/** Matches cases then statements, both of which are mandatory.
- *  To handle empty cases at the end, we add switchLabel* to statement.
- */
-switchBlockStatementGroup
-    :   switchLabel+ statement+
     ;
 
 switchLabel

@@ -450,18 +450,6 @@ public class SankaBaseListener implements SankaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSwitchBlockStatementGroup(SankaParser.SwitchBlockStatementGroupContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitSwitchBlockStatementGroup(SankaParser.SwitchBlockStatementGroupContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterSwitchLabel(SankaParser.SwitchLabelContext ctx) { }
 	/**
 	 * {@inheritDoc}

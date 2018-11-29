@@ -52,7 +52,7 @@ public class TypeUtils {
         if (expr.type.isNumericType()) {
             return type.isNumericType() && isCompatibleNumeric(type, expr);
         }
-        if (expr.type.isPrimitiveType) {
+        if (expr.type.isPrimitiveType || type.isPrimitiveType) {
             return false;
         }
         Environment env = Environment.getInstance();

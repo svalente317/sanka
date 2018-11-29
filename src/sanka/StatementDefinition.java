@@ -16,7 +16,6 @@ import sanka.antlr4.SankaParser.ForControlContext;
 import sanka.antlr4.SankaParser.ForIncrementContext;
 import sanka.antlr4.SankaParser.ForInitContext;
 import sanka.antlr4.SankaParser.IfStatementContext;
-import sanka.antlr4.SankaParser.ParExpressionContext;
 import sanka.antlr4.SankaParser.StatementContext;
 import sanka.antlr4.SankaParser.VariableAssignmentContext;
 import sanka.antlr4.SankaParser.VariableDeclarationContext;
@@ -52,6 +51,20 @@ public class StatementDefinition {
             evaluateVariableAssignment(ctx.variableAssignment());
             return;
         }
+        if (ctx.switchLabel() != null) {
+            if (ctx.switchLabel().expression() != null) {
+                this.statementType = SankaLexer.CASE;
+                this.expression = new ExpressionDefinition();
+                this.expression.evaluate(ctx.switchLabel().expression());
+                if (this.expression.type != null &&
+                    this.expression.expressionType != ExpressionType.LITERAL) {
+                    env.printError(ctx, "constant expression required");
+                }
+            } else {
+                this.statementType = SankaLexer.DEFAULT;
+            }
+            return;
+        }
         if (ctx.getChildCount() == 2) {
             ParseTree child0 = ctx.getChild(0);
             ParseTree child1 = ctx.getChild(1);
@@ -77,6 +90,16 @@ public class StatementDefinition {
             evaluateFor(ctx.forControl(), ctx.block());
             return;
         case SankaLexer.SWITCH:
+            this.expression = new ExpressionDefinition();
+            this.expression.evaluate(ctx.parExpression().expression());
+            TypeDefinition type = this.expression.type;
+            if (type != null && !(type.isIntegralType() || type.isStringType())) {
+                env.printError(ctx, "incompatible types: switch statement must use " +
+                        "integral type or String");
+            }
+            this.block = new BlockDefinition();
+            this.block.evaluate(ctx.block());
+            SwitchUtils.evaluateSwitchStatement(ctx, this);
             return;
         case SankaLexer.RETURN:
             if (ctx.expression() == null) {
@@ -333,31 +356,6 @@ public class StatementDefinition {
         }
     }
 
-    void evaluateSwitch(ParExpressionContext peCtx) {
-        Environment env = Environment.getInstance();
-        this.expression = new ExpressionDefinition();
-        this.expression.evaluate(peCtx.expression());
-        if (this.expression.type != null) {
-            if (!(this.expression.type.isIntegralType() || this.expression.type.isStringType())) {
-                env.printError(peCtx, "incompatible types: switch statement must use " +
-                        "integral type or String");
-            }
-        }
-        // TODO need a block for local variables
-        // TODO Check for duplicate labels.
-        // TODO Special rules for "default" label?
-        /*      if (this.expression.type != null && item.label.type != null) {
-                    if (item.label.expressionType != ExpressionType.LITERAL) {
-                        env.printError(labelCtx, "constant expression required");
-                    }
-                    if (!TypeUtils.isCompatible(this.expression.type, item.label)) {
-                        env.printError(labelCtx, "incompatible types: " +
-                             item.label.type + " cannot be converted to " + this.expression.type);
-                    }
-                }
-            }*/
-    }
-
     /**
      * Pass 3 (of 3). Generate C code for the evaluated statements and expressions.
      */
@@ -539,6 +537,13 @@ public class StatementDefinition {
             env.print("}");
             return;
         case SankaLexer.SWITCH:
+            SwitchUtils.translateSwitchStatement(this);
+            return;
+        case SankaLexer.CASE:
+            env.printError(null, "case statement must be inside a switch block");
+            return;
+        case SankaLexer.DEFAULT:
+            env.printError(null, "default statement must be inside a switch block");
             return;
         case SankaLexer.RETURN:
             builder = new StringBuilder();
