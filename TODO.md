@@ -12,8 +12,6 @@
 
 * support "exports" keyword
 
-* support "switch" on strings
-
 * iterate over strings
 
 * implement map builtin methods

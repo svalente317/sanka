@@ -1,5 +1,7 @@
 package sanka;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -48,8 +50,31 @@ public class SwitchUtils {
 
     static void translateSwitchStatement(StatementDefinition stmt) {
         Environment env = Environment.getInstance();
-        // TODO string to int
-        env.print("switch (" + stmt.expression.translate(null) + ")");
+        String exprText = null;
+        if (stmt.expression.type.isStringType()) {
+            exprText = env.getTmpVariable();
+            List<String> labels = new ArrayList<>();
+            for (StatementDefinition item : stmt.block.block) {
+                if (item.statementType == SankaLexer.CASE) {
+                    labels.add(item.expression.translate(null));
+                    item.expression.type = TypeDefinition.INT_TYPE;
+                    item.expression.name = Integer.toString(labels.size());
+                }
+            }
+            String name = stmt.expression.translate(null);
+            env.print("NULLCHECK(" + name + ");");
+            env.print("int " + exprText + " = 0;");
+            boolean doElse = false;
+            for (int idx = 0; idx < labels.size(); idx++) {
+                String text = "if (strcmp(" + name + ", " + labels.get(idx) + ") == 0) " +
+                        exprText + " = " + (idx+1) + ";";
+                env.print(doElse ? "else " + text : text);
+                doElse = true;
+            }
+        } else {
+            exprText = stmt.expression.translate(null);
+        }
+        env.print("switch (" + exprText + ")");
         stmt.block.translate(true);
     }
 }
