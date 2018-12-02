@@ -7,7 +7,8 @@ class CheeseFinder {
         var state = new Point[class String];
         state[current.toString()] = current;
         while (!mouse.goal()) {
-            System.println("current=" + current.x + "," + current.y);
+            // System.println("current=" + current.x + "," + current.y);
+            print(current, state);
             var next = new Point();
             var key;
             next.x = current.x;
@@ -71,6 +72,24 @@ class CheeseFinder {
             return;
         }
         System.println("found");
+    }
+
+    void print(Point current, Point[String] state) {
+        var pt = new Point();
+        for (pt.y = 4; pt.y >= 0; pt.y--) {
+            var s = "";
+            for (pt.x = 0; pt.x < 5; pt.x++) {
+                var c = " ";
+                if (pt.x == current.x && pt.y == current.y) {
+                    c = "o";
+                } else if (state[pt.toString()] != null) {
+                    c = "@";
+                }
+                s = s + c;
+            }
+            System.println(s);
+        }
+        System.println("---");
     }
 
     static void main(String[] argv) {

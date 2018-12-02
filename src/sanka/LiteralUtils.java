@@ -14,7 +14,7 @@ class LiteralUtils {
      */
     static void evaluateIntegerLiteral(ExpressionDefinition expr) {
         expr.type = TypeDefinition.INT_TYPE;
-        String text = expr.name.replace("_", "");
+        String text = expr.value.replace("_", "");
         int length = text.length();
         char ch = text.charAt(length-1);
         if (ch == 'L' || ch == 'l') {
@@ -30,7 +30,7 @@ class LiteralUtils {
         if (value > Integer.MAX_VALUE || value < Integer.MIN_VALUE) {
             expr.type = TypeDefinition.LONG_TYPE;
         }
-        expr.name = Long.toString(value);
+        expr.value = Long.toString(value);
     }
 
     static String evaluateStringLiteral(String literal) {
@@ -60,39 +60,37 @@ class LiteralUtils {
     }
 
     static void foldUnaryOp(ExpressionDefinition expr) {
-        if (expr.expression1.expressionType == ExpressionType.LITERAL && expr.expression1.type != null) {
-            if (expr.expression1.type.isIntegralType()) {
-                if (expr.operator.equals("+") || expr.operator.equals("-")) {
-                    expr.expressionType = expr.expression1.expressionType;
-                    expr.type = expr.expression1.type;
-                    expr.name = expr.expression1.name;
-                    if (expr.operator.equals("-")) {
-                        expr.name = Long.toString(-Long.parseLong(expr.name));
-                    }
-                    expr.operator = null;
-                    expr.expression1 = null;
+        if (expr.expression1.type == null || expr.expression1.value == null) {
+            return;
+        }
+        if (expr.expression1.type.isIntegralType()) {
+            if (expr.operator.equals("+") || expr.operator.equals("-")) {
+                expr.expressionType = expr.expression1.expressionType;
+                expr.type = expr.expression1.type;
+                expr.value = expr.expression1.value;
+                if (expr.operator.equals("-")) {
+                    expr.value = Long.toString(-Long.parseLong(expr.value));
                 }
+                expr.operator = null;
+                expr.expression1 = null;
             }
         }
     }
 
     static void foldBinaryOp(ExpressionDefinition expr) {
-        if (expr.expression1.expressionType != ExpressionType.LITERAL ||
-            expr.expression2.expressionType != ExpressionType.LITERAL) {
-            return;
-        }
-        if (expr.expression1.type == null || expr.expression2.type == null) {
+        if (expr.expression1.type == null || expr.expression1.value == null ||
+            expr.expression2.type == null || expr.expression2.value == null) {
             return;
         }
         String newValue = null;
         if (expr.expression1.type.isStringType() && expr.expression2.type.isStringType()) {
             if (expr.operator.equals("+")) {
-                newValue = expr.expression1.name + expr.expression2.name;
+                newValue = expr.expression1.value + expr.expression2.value;
             }
         }
         if (expr.expression1.type.isIntegralType() && expr.expression2.type.isIntegralType()) {
-            long v1 = Long.parseLong(expr.expression1.name);
-            long v2 = Long.parseLong(expr.expression2.name);
+            long v1 = Long.parseLong(expr.expression1.value);
+            long v2 = Long.parseLong(expr.expression2.value);
             Long value = null;
             switch (expr.operator) {
             case "+":
@@ -130,12 +128,12 @@ class LiteralUtils {
         if (newValue == null) {
             return;
         }
-        expr.expressionType = expr.expression1.expressionType;
+        expr.expressionType = ExpressionType.LITERAL;
         expr.type = expr.expression1.type;
         if (expr.expression2.type.equals(TypeDefinition.LONG_TYPE)) {
             expr.type = expr.expression2.type;
         }
-        expr.name = newValue;
+        expr.value = newValue;
         expr.operator = null;
         expr.expression1 = null;
         expr.expression2 = null;
@@ -143,23 +141,23 @@ class LiteralUtils {
 
     static String translateLiteral(ExpressionDefinition expr) {
         if (expr.type == TypeDefinition.BYTE_TYPE) {
-            return expr.name;
+            return expr.value;
         }
         if (expr.type == TypeDefinition.SHORT_TYPE ||
             expr.type == TypeDefinition.INT_TYPE) {
-            return expr.name;
+            return expr.value;
         }
         if (expr.type == TypeDefinition.LONG_TYPE) {
-            return "(long)" + expr.name;
+            return "(long)" + expr.value;
         }
         if (expr.type == TypeDefinition.DOUBLE_TYPE) {
-            return expr.name;
+            return expr.value;
         }
         if (expr.type == TypeDefinition.BOOLEAN_TYPE) {
-            return expr.name.equals("true") ? "1" : (expr.name.equals("false") ? "0" : "error");
+            return expr.value.equals("true") ? "1" : (expr.value.equals("false") ? "0" : "error");
         }
         if (expr.type == TypeDefinition.STRING_TYPE) {
-            return "\"" + expr.name + "\"";
+            return "\"" + expr.value + "\"";
         }
         if (expr.type == TypeDefinition.NULL_TYPE) {
             return "NULL";

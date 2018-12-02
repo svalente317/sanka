@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import sanka.ExpressionDefinition.ExpressionType;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.StatementContext;
 
@@ -29,8 +30,8 @@ public class SwitchUtils {
             // Approve the "case" statements that are directly in the block. This is not
             // recursive. You cannot have a "case" statement inside an "if" statement.
             if (item.statementType == SankaLexer.CASE && item.expression.type != null) {
-                if (item.expression.name != null && !labels.add(item.expression.name)) {
-                    env.printError(ctx, "duplicate case label: " + item.expression.name);
+                if (item.expression.value != null && !labels.add(item.expression.value)) {
+                    env.printError(ctx, "duplicate case label: " + item.expression.value);
                 }
                 if (!TypeUtils.isCompatible(stmt.expression.type, item.expression)) {
                     env.printError(ctx, "incompatible types: " + item.expression.type +
@@ -57,8 +58,10 @@ public class SwitchUtils {
             for (StatementDefinition item : stmt.block.block) {
                 if (item.statementType == SankaLexer.CASE) {
                     labels.add(item.expression.translate(null));
+                    item.expression.expressionType = ExpressionType.LITERAL;
                     item.expression.type = TypeDefinition.INT_TYPE;
-                    item.expression.name = Integer.toString(labels.size());
+                    item.expression.name = null;
+                    item.expression.value = Integer.toString(labels.size());
                 }
             }
             String name = stmt.expression.translate(null);

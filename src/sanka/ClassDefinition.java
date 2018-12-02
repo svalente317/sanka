@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import sanka.ExpressionDefinition.ExpressionType;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.ClassBodyDeclarationContext;
 import sanka.antlr4.SankaParser.ClassDeclarationContext;
@@ -213,7 +212,7 @@ class ClassDefinition {
             if (field.expression != null) {
                 field.value = new ExpressionDefinition();
                 field.value.evaluate(field.expression);
-                if (field.value.expressionType != ExpressionType.LITERAL) {
+                if (field.value.value == null) {
                     env.printError(field.expression, "initial value must be simple constant");
                 }
                 if (field.isConst) {

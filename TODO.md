@@ -28,7 +28,8 @@
 
 * Allow multiple constructors with different signatures
 
-* Support expressions with qualified class name
+* Support expressions with qualified class name or classes in the current
+  package (in ED.evaluatePrimary)
 
 * Support "new" with class body - adapter statements
 
@@ -40,10 +41,14 @@
 
 * Support static field initialized to literal array
 
-* const local variables (not fields)
-
 * what if map changes during iteration?
 
 * Error if two classes have same qualified name
 
 * Implement "x == y" where x or y is an interface
+
+* Allow class constants to be accessed as local variables
+
+* Implement ArrayUtils "addAll"
+
+* Support MAP[IDX]++ in StatementDefinition.translateMapAssignment

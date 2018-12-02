@@ -38,11 +38,6 @@ public class StatementDefinition {
     void evaluate(StatementContext ctx) {
         Environment env = Environment.getInstance();
         this.statementType = ctx.getStart().getType();
-        if (ctx.constDeclaration() != null) {
-            this.statementType = SankaLexer.CONST;
-            env.printError(ctx, "const support not implemented");
-            return;
-        }
         if (ctx.variableDeclaration() != null) {
             evaluateVariableDeclaration(ctx.variableDeclaration());
             return;
@@ -56,8 +51,7 @@ public class StatementDefinition {
                 this.statementType = SankaLexer.CASE;
                 this.expression = new ExpressionDefinition();
                 this.expression.evaluate(ctx.switchLabel().expression());
-                if (this.expression.type != null &&
-                    this.expression.expressionType != ExpressionType.LITERAL) {
+                if (this.expression.type != null && this.expression.value == null) {
                     env.printError(ctx, "constant expression required");
                 }
             } else {
@@ -364,8 +358,6 @@ public class StatementDefinition {
         StringBuilder builder;
         String text;
         switch (this.statementType) {
-        case SankaLexer.CONST:
-            break;
         case SankaLexer.VAR:
             builder = new StringBuilder();
             if (this.expression == null) {
@@ -465,8 +457,7 @@ public class StatementDefinition {
             if (this.forStatements[0] != null) {
                 this.forStatements[0].translate();
             }
-            // Optimization TODO:
-            // Generate different code for loops that don't use "continue".
+            // Should generate different code for loops that don't use "continue".
             text = null;
             if (this.forStatements[1] != null) {
                 text = env.getTmpVariable();
@@ -598,7 +589,6 @@ public class StatementDefinition {
         }
         String valueName = env.getTmpVariable();
         env.print("union rb_value " + valueName + ";");
-        // TODO inc and dec
         String field = TranslationUtils.typeToMapFieldName(this.expression.type);
         env.print(valueName + "." + field + " = " + this.expression.translate(null) + ";");
         env.print("rb_put(" + text1 + ", (union rb_key) " + text2 + ", " + valueName + ", 0);");

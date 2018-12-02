@@ -107,7 +107,6 @@ public class ArrayUtils {
                       ", sizeof(" + typeName + ");");
             return null;
         case "addAll":
-            // TODO
             break;
         }
         env.printError(null, "array method not implemented: " + methodName);

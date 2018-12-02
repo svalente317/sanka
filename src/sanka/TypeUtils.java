@@ -92,12 +92,12 @@ public class TypeUtils {
             return !(type.equals(TypeDefinition.BYTE_TYPE));
         }
         if (expr.type.equals(TypeDefinition.INT_TYPE)) {
-            if (expr.expressionType == ExpressionType.LITERAL) {
-                if (type.equals(TypeDefinition.BYTE_TYPE) && LiteralUtils.isByte(expr.name)) {
+            if (expr.value != null) {
+                if (type.equals(TypeDefinition.BYTE_TYPE) && LiteralUtils.isByte(expr.value)) {
                     expr.type = TypeDefinition.BYTE_TYPE;
                     return true;
                 }
-                if (type.equals(TypeDefinition.SHORT_TYPE) && LiteralUtils.isShort(expr.name)) {
+                if (type.equals(TypeDefinition.SHORT_TYPE) && LiteralUtils.isShort(expr.value)) {
                     expr.type = TypeDefinition.SHORT_TYPE;
                     return true;
                 }

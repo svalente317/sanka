@@ -31,6 +31,7 @@ class ExpressionDefinition {
     ExpressionDefinition expression2;
     MethodDefinition method;
     boolean isStatic;
+    String value;
     TypeDefinition identifiedClass;
     ExpressionDefinition[] argList;
     String translatedThis;
@@ -45,6 +46,7 @@ class ExpressionDefinition {
         copy.expression2 = this.expression2;
         copy.method = this.method;
         copy.isStatic = this.isStatic;
+        copy.value = this.value;
         copy.identifiedClass = this.identifiedClass;
         copy.argList = this.argList;
         copy.translatedThis = this.translatedThis;
@@ -57,6 +59,7 @@ class ExpressionDefinition {
         this.expression2 = null;
         this.method = null;
         this.isStatic = false;
+        this.value = null;
         this.identifiedClass = null;
         this.argList = null;
         this.translatedThis = null;
@@ -128,8 +131,9 @@ class ExpressionDefinition {
             return;
         }
         this.expressionType = ExpressionType.LITERAL;
-        this.name = primary.getText();
+        String text = primary.getText();
         if (primary.literal() != null) {
+            this.value = text;
             // Parse all of the complex literals, such as:
             // * integers in binary, octal, hex
             // * floating points in hex and/or exp mode
@@ -156,15 +160,16 @@ class ExpressionDefinition {
             }
             if (literal.StringLiteral() != null) {
                 this.type = TypeDefinition.STRING_TYPE;
-                this.name = LiteralUtils.evaluateStringLiteral(this.name);
+                this.value = LiteralUtils.evaluateStringLiteral(this.value);
                 return;
             }
-            if (this.name.equals("null")) {
+            if (this.value.equals("null")) {
                 this.type = TypeDefinition.NULL_TYPE;
                 return;
             }
         }
         if (primary.Identifier() != null) {
+            this.name = text;
             this.type = env.symbolTable.get(this.name);
             if (this.type != null) {
                 this.expressionType = ExpressionType.IDENTIFIER;
@@ -183,8 +188,6 @@ class ExpressionDefinition {
                 // Type is void because this expression has no value when evaluated
                 // as part of an arithmetic operation, function call, etc.
                 // It must be followed by a field access, or else it is a compile-time error.
-                // TODO Find classes in the current package?
-                // Or fully-qualified class names that have not been imported?
                 this.expressionType = ExpressionType.CLASS_IDENTIFIER;
                 this.type = TypeDefinition.VOID_TYPE;
                 this.identifiedClass = new TypeDefinition(packageName, this.name);
@@ -193,7 +196,7 @@ class ExpressionDefinition {
             env.printError(primary, "undefined variable: " + this.name);
             return;
         }
-        if (this.name.equals("this")) {
+        if (text.equals("this")) {
             evaluateThis();
             return;
         }
@@ -409,8 +412,10 @@ class ExpressionDefinition {
                         " cannot be referenced from a static context");
             }
             if (fielddef != null && fielddef.isConst && fielddef.value != null) {
-                this.expressionType = ExpressionType.LITERAL;
-                this.name = fielddef.value.name;
+                if (this.type != null && !this.type.isStringType()) {
+                    this.expressionType = ExpressionType.LITERAL;
+                }
+                this.value = fielddef.value.value;
             }
         }
     }

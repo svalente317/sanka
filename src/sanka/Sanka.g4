@@ -168,7 +168,6 @@ block
 
 statement
     :   block
-    |   constDeclaration
     |   variableDeclaration ';'
     |   variableAssignment ';'
     |   ifStatement

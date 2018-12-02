@@ -9,11 +9,20 @@ class Mouse {
 
     private int x;
     private int y;
-    
+
     /**
      * The mouse is allowed to move freely in a 5x5 box.
      */
     boolean move(int direction) {
+        if (this.x == 1 && this.y == 2 && direction != Mouse.RIGHT) {
+            return false;
+        }
+        if (this.x == 3 && this.y == 2 && direction != Mouse.LEFT) {
+            return false;
+        }
+        if (this.x == 2 && this.y == 3 && direction != Mouse.DOWN) {
+            return false;
+        }
         var next_x;
         var next_y;
         switch (direction) {
@@ -34,18 +43,27 @@ class Mouse {
             next_y = this.y;
             break;
         }
-        if (next_x >= 0 && next_x < 5 && next_y >= 0 && next_y < 5) {
-            this.x = next_x;
-            this.y = next_y;
-            return true;
+        if (next_x < 0 || next_y < 0 || next_x >= 5 || next_y >= 5) {
+            return false;
         }
-        return false;
+        if (next_x == 1 && next_y == 2 && direction != Mouse.LEFT) {
+            return false;
+        }
+        if (next_x == 3 && next_y == 2 && direction != Mouse.RIGHT) {
+            return false;
+        }
+        if (next_x == 2 && next_y == 3 && direction != Mouse.UP) {
+            return false;
+        }
+        this.x = next_x;
+        this.y = next_y;
+        return true;
     }
 
     /**
      * There is no cheese in the maze.
      */
     boolean goal() {
-        return false;
+        return this.x == 4 && this.y == 4;
     }
 }
