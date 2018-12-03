@@ -14,8 +14,6 @@
 
 * iterate over strings
 
-* implement map builtin methods
-
 * type checking in ternary op
 
 * Do not access "this" or instance method in LHS or RHS in static method
@@ -49,6 +47,6 @@
 
 * Allow class constants to be accessed as local variables
 
-* Implement ArrayUtils "addAll"
+* Implement ArrayUtils "addAll" and Map "clear"
 
 * Support MAP[IDX]++ in StatementDefinition.translateMapAssignment

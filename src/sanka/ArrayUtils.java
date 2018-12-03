@@ -42,6 +42,18 @@ public class ArrayUtils {
         return classdef;
     }
 
+    /**
+     * Generate the ClassDefinition for a map of the given key type.
+     */
+    static ClassDefinition mapClassDefinition(TypeDefinition keyType) {
+        ClassDefinition classdef = new ClassDefinition();
+        addMethod(classdef, TypeDefinition.INT_TYPE, "size");
+        addMethod(classdef, TypeDefinition.BOOLEAN_TYPE, "contains", keyType);
+        addMethod(classdef, TypeDefinition.BOOLEAN_TYPE, "remove", keyType);
+        addMethod(classdef, TypeDefinition.VOID_TYPE, "clear");
+        return classdef;
+    }
+
     static void addMethod(ClassDefinition classdef, TypeDefinition returnType,
             String name, TypeDefinition... paramTypes) {
         MethodDefinition method = new MethodDefinition();
@@ -61,12 +73,15 @@ public class ArrayUtils {
      * Generate C code for int[].add(), etc.
      */
     static String translateFunctionCall(ExpressionDefinition expr, String variableName) {
-        Environment env = Environment.getInstance();
         ExpressionDefinition arrayExpr = expr.expression1.expression1;
+        if (arrayExpr.type.keyType != null) {
+            return translateMapFunctionCall(expr, variableName);
+        }
         String arrayName = arrayExpr.translate(null);
         String typeName = arrayExpr.type.arrayOf.translate();
         String methodName = expr.expression1.name;
         String index, value;
+        Environment env = Environment.getInstance();
         switch (methodName) {
         case "add":
             env.print("GROW_ARRAY(" + arrayName + ", sizeof(" + typeName + "));");
@@ -110,6 +125,42 @@ public class ArrayUtils {
             break;
         }
         env.printError(null, "array method not implemented: " + methodName);
+        return null;
+    }
+
+    static String translateMapFunctionCall(ExpressionDefinition expr, String variableName) {
+        ExpressionDefinition arrayExpr = expr.expression1.expression1;
+        String arrayName = arrayExpr.translate(null);
+        String methodName = expr.expression1.name;
+        Environment env = Environment.getInstance();
+        String decl = "";
+        switch (methodName) {
+        case "size":
+            env.print("NULLCHECK(" + arrayName + ");");
+            if (variableName == null) {
+                decl = TypeDefinition.INT_TYPE.translateSpace();
+                variableName = env.getTmpVariable();
+            }
+            env.print(decl + variableName + " =  rb_count(" + arrayName + ");");
+            return variableName;
+        case "contains":
+        case "remove":
+            String function = methodName.equals("remove") ? "rb_delete" : "rb_find";
+            env.print("NULLCHECK(" + arrayName + ");");
+            if (variableName == null) {
+                decl = TypeDefinition.BOOLEAN_TYPE.translateSpace();
+                variableName = env.getTmpVariable();
+            }
+            String keyName = expr.argList[0].translate(null);
+            String valueName = env.getTmpVariable();
+            env.print("union rb_value " + valueName + ";");
+            env.print(decl + variableName + " = " + function + "(" + arrayName +
+                      ", (union rb_key) " + keyName + ", &" + valueName + ");");
+            return variableName;
+        case "clear":
+            return null;
+        }
+        env.printError(null, "map method not implemented: " + methodName);
         return null;
     }
 }

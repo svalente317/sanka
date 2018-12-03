@@ -200,11 +200,6 @@ class ClassDefinition {
         }
     }
 
-    static ClassDefinition mapClassDefinition() {
-        ClassDefinition classdef = new ClassDefinition();
-        return classdef;
-    }
-
     void evaluate() {
         Environment env = Environment.getInstance();
         env.currentClass = this;

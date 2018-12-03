@@ -383,7 +383,7 @@ class ExpressionDefinition {
         } else if (this.expression1.type.keyType == null) {
             classdef = ArrayUtils.arrayClassDefinition(this.expression1.type.arrayOf);
         } else {
-            classdef = ClassDefinition.mapClassDefinition();
+            classdef = ArrayUtils.mapClassDefinition(this.expression1.type.keyType);
         }
         FieldDefinition fielddef = classdef.fieldMap.get(this.name);
         boolean isPrivate;

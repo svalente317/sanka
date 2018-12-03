@@ -224,8 +224,12 @@ instead of allowing user-defined types? Because the map sorts its
 keys. `int` and `String` are good keys because they are immutable and
 fully-ordered.
 
-The map class has a set of methods including `size()`, `contains()`,
-etc.
+The `Map` class has these methods:
+* `int size()` Return the number of keys in the map
+* `boolean contains(K key)` Return true if the key is in the map
+* `boolean remove(K key)` Remove the key from the map. Return true
+  if key was found and removed.
+* `void clear()` Remove all keys from the map
 
 ## Errors
 
