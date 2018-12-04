@@ -153,7 +153,7 @@ class TranslationUtils {
             if (expr.type.equals(TypeDefinition.LONG_TYPE)) {
                 env.print("char " + variableName + "[22];");
                 env.print("LONG_TO_STRING(" + text + ", " + variableName + ");");
-            } else if (expr.type.equals(TypeDefinition.INT_TYPE)) {
+            } else if (expr.type.isIntegralType()) {
                 env.print("char " + variableName + "[12];");
                 env.print("INT_TO_STRING(" + text + ", " + variableName + ");");
             } else {

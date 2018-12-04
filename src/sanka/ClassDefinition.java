@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.ClassBodyDeclarationContext;
 import sanka.antlr4.SankaParser.ClassDeclarationContext;
@@ -152,18 +154,26 @@ class ClassDefinition {
                 }
             }
         }
-        String name = ctx.Identifier().getText();
-        FieldDefinition field = new FieldDefinition();
-        field.type = new TypeDefinition();
-        field.type.parse(ctx.typeType());
-        field.isPrivate = isPrivate;
-        field.isStatic = isStatic;
-        field.isInline = isInline;
-        FieldDefinition prev = this.fieldMap.put(name, field);
-        if (prev != null) {
-            Environment env = Environment.getInstance();
-            env.printError(ctx, "class " + this.name + " field " + name + " declared twice");
+        List<TerminalNode> identifierList = ctx.Identifier();
+        FieldDefinition field = null;
+        for (TerminalNode identifier : identifierList) {
+            String name = identifier.getText();
+            field = new FieldDefinition();
+            field.type = new TypeDefinition();
+            field.type.parse(ctx.typeType());
+            field.isPrivate = isPrivate;
+            field.isStatic = isStatic;
+            field.isInline = isInline;
+            FieldDefinition prev = this.fieldMap.put(name, field);
+            if (prev != null) {
+                Environment env = Environment.getInstance();
+                env.printError(ctx, "class " + this.name + " field " + name + " declared twice");
+            }
         }
+        if (ctx.expression() == null) {
+            return;
+        }
+        assert(identifierList.size() == 1);
         field.expression = ctx.expression();
         if (field.expression != null && !field.isStatic) {
             Environment env = Environment.getInstance();

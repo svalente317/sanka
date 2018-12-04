@@ -6,23 +6,19 @@
 
 * Support classes with the same name in different packages
 
+* Parameterized types
+
 ## Unimplemented features
 
 * support inline fields
 
 * support "exports" keyword
 
-* iterate over strings
+* string to array and array to string
 
-* type checking in ternary op
-
-* Do not access "this" or instance method in LHS or RHS in static method
-
-* Improve support for char literals and complex literals
+* Improve support for char literals and complex literals?
 
 * float to double promotion and demotion
-
-* Support parameterized types
 
 * Allow multiple constructors with different signatures
 
@@ -32,10 +28,6 @@
 * Support "new" with class body - adapter statements
 
 * Support 2d arrays - initialization and code generation
-
-* Support "var x, y;"
-
-* Support fields "int x, y;"
 
 * Support static field initialized to literal array
 
@@ -50,3 +42,7 @@
 * Implement ArrayUtils "addAll" and Map "clear"
 
 * Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
+
+* Serializable classes
+
+* Add byte to string as character

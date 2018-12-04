@@ -180,7 +180,7 @@ class ExpressionDefinition {
                 this.expressionType = ExpressionType.FIELD_ACCESS;
                 this.type = TypeDefinition.METHOD_TYPE;
                 this.expression1 = new ExpressionDefinition();
-                this.expression1.evaluateThis();
+                this.expression1.evaluateThis(primary);
                 return;
             }
             if (env.classPackageMap.containsKey(this.name)) {
@@ -197,19 +197,22 @@ class ExpressionDefinition {
             return;
         }
         if (text.equals("this")) {
-            evaluateThis();
+            evaluateThis(primary);
             return;
         }
         env.printError(primary, "unknown primary expression");
     }
 
-    void evaluateThis() {
+    void evaluateThis(PrimaryContext primary) {
         Environment env = Environment.getInstance();
         this.expressionType = ExpressionType.IDENTIFIER;
         this.name = "this";
         this.type = new TypeDefinition();
         this.type.packageName = env.currentClass.packageName;
         this.type.name = env.currentClass.name;
+        if (env.currentMethod.isStatic) {
+            env.printError(primary, "'this' cannot be referenced from a static context");
+        }
     }
 
     /**
@@ -567,7 +570,17 @@ class ExpressionDefinition {
         }
         this.expression1 = exprdef1;
         this.argList = new ExpressionDefinition[] { exprdef2, exprdef3 };
-        this.type = exprdef2.type;
+        if (TypeUtils.isCompatible(exprdef2.type, exprdef3)) {
+            this.type = exprdef2.type;
+        }
+        else if (TypeUtils.isCompatible(exprdef3.type, exprdef2)) {
+            this.type = exprdef3.type;
+        }
+        else {
+            Environment env = Environment.getInstance();
+            env.printError(expr2, "incompatible types: " + exprdef2.type + " and " +
+                    exprdef3.type);
+        }
     }
 
     boolean isMapAccess() {

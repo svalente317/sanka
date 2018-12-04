@@ -157,8 +157,7 @@ public class StatementDefinition {
     void verifyVariableNotDefined(ParserRuleContext ctx, String name) {
         Environment env = Environment.getInstance();
         if (env.symbolTable.get(name) != null) {
-            env.printError(ctx, "variable " + this.name + " is already defined in method " +
-                    env.currentMethod.name + "()");
+            env.printError(ctx, "variable " + this.name + " is already defined");
         }
     }
 
@@ -301,19 +300,19 @@ public class StatementDefinition {
         TypeDefinition type = null;
         TypeDefinition valueType = null;
         if (this.expression.type != null) {
-            if (this.expression.type.arrayOf == null) {
-                env.printError(forControl, "can only iterate over array or map");
-            }
-            else if (this.expression.type.keyType == null) {
-                type = this.expression.type.arrayOf;
-                if (this.valueName != null) {
-                    env.printError(forControl, "only specify one variable " +
-                            "to iterate over " + type);
-                }
-            }
-            else {
+            if (this.expression.type.keyType != null) {
                 type = this.expression.type.keyType;
                 valueType = this.expression.type.arrayOf;
+            } else if (this.expression.type.arrayOf != null) {
+                type = this.expression.type.arrayOf;
+            } else if (this.expression.type.isStringType()) {
+                type = TypeDefinition.BYTE_TYPE;
+            } else {
+                env.printError(forControl, "can only iterate over array, map, or string");
+            }
+            if (this.valueName != null && type != null && valueType == null) {
+                env.printError(forControl, "only specify one variable " +
+                        "to iterate over " + type);
             }
         }
         env.symbolTable.put(this.name, type);
@@ -483,22 +482,37 @@ public class StatementDefinition {
             env.print("}");
             return;
         case SankaLexer.COLON:
-            TypeDefinition arrayType = this.expression.type;
-            if (arrayType.keyType == null) {
-                String arrayVar = env.getTmpVariable();
-                env.print(arrayType.translateSpace() + arrayVar + ";");
-                text = this.expression.translate(arrayVar);
-                if (!text.equals(arrayVar)) {
-                    env.print(arrayVar + " = " + text + ";");
+            TypeDefinition exprType = this.expression.type;
+            if (exprType.keyType == null) {
+                // Expression is String or array.
+                String exprVar = env.getTmpVariable();
+                env.print(exprType.translateSpace() + exprVar + ";");
+                text = this.expression.translate(exprVar);
+                if (!text.equals(exprVar)) {
+                    env.print(exprVar + " = " + text + ";");
                 }
-                env.print("NULLCHECK(" + arrayVar + ");");
+                env.print("NULLCHECK(" + exprVar + ");");
+                String lenCode;
+                if (exprType.isStringType()) {
+                    lenCode = env.getTmpVariable();
+                    env.print(TypeDefinition.INT_TYPE.translateSpace() + lenCode + " = " +
+                            TranslationUtils.translateClassItem(exprType.name, "length") +
+                            "(" + exprVar + ");");
+                } else {
+                    lenCode = exprVar + "->length";
+                }
                 String indexVar = env.getTmpVariable();
                 env.print("for (int " + indexVar + " = 0; " +
-                        indexVar + " < " + arrayVar + "->length; " + indexVar + "++) {");
+                        indexVar + " < " + lenCode + "; " + indexVar + "++) {");
                 env.level++;
-                env.print(arrayType.arrayOf.translateSpace() + this.name + " = " +
-                         "ARRCAST(" + arrayVar + ", " + arrayType.arrayOf.translate() +
-                         ")[" + indexVar + "];");
+                if (exprType.isStringType()) {
+                    env.print(TypeDefinition.BYTE_TYPE.translateSpace() + this.name + " = " +
+                            exprVar + "[" + indexVar + "];");
+                } else {
+                    env.print(exprType.arrayOf.translateSpace() + this.name + " = " +
+                            "ARRCAST(" + exprVar + ", " + exprType.arrayOf.translate() +
+                            ")[" + indexVar + "];");
+                }
                 this.block.translate(false);
                 env.level--;
                 env.print("}");
@@ -511,6 +525,7 @@ public class StatementDefinition {
             env.print("union rb_key " + keyVar + ";");
             env.print("union rb_value " + valueVar + ";");
             String exprText = this.expression.translate(null);
+            env.print("NULLCHECK(" + exprText + ");");
             env.print("rb_t_init(&" + traverserVar + ", " + exprText + ");");
             env.print("while (rb_t_next(&" + traverserVar + ", &" + keyVar + ", &" +
                     valueVar + ")) {");

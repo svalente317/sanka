@@ -91,6 +91,7 @@ constDeclaration
 
 fieldDeclaration
     :   fieldModifier* typeType Identifier ('=' expression)? ';'
+    |   fieldModifier* typeType Identifier (',' Identifier)* ';'
     ;
 
 fieldModifier

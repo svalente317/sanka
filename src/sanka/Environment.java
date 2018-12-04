@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 
 class Environment {
     public static final String SANKA_LANG = "sanka.lang";
@@ -79,8 +80,12 @@ class Environment {
     }
 
     void printError(ParserRuleContext ctx, String error) {
-        int line = ctx == null ? 0 : ctx.getStart().getLine();
-        System.out.println("" + line + ": " + error);
+        String prefix = "error";
+        if (ctx != null) {
+            Token token = ctx.getStart();
+            prefix = token.getTokenSource().getSourceName() + ":" + token.getLine();
+        }
+        System.out.println(prefix + ": " + error);
         this.errorCount++;
     }
 

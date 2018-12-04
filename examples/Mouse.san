@@ -7,8 +7,7 @@ class Mouse {
     const LEFT = 3;
     const RIGHT = 4;
 
-    private int x;
-    private int y;
+    private int x, y;
 
     /**
      * The mouse is allowed to move freely in a 5x5 box.
