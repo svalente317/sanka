@@ -46,3 +46,8 @@
 * Serializable classes
 
 * Add byte to string as character
+
+* json library: escape quotes in strings,
+* json library: JsonObject needs "set" functions
+* json library: add JsonArray
+* json library: implement parse()

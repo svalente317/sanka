@@ -117,8 +117,8 @@ bytes:
     var s = new String(arr);
 ~~~
 
-An application may choose to interpret these bytes as ASCII, UTF-8,
-etc., but this support is not built into the language.
+An application may choose to interpret these bytes as UTF-8,
+unicode, etc., but this support is not built into the language.
 
 Since `String` is builtin to the language, it supports the comparison
 operators `==`, `<`, `>`, etc. These work by doing a byte-by-byte

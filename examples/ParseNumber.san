@@ -1,0 +1,83 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+
+class ParseNumber {
+    private String[] words;
+    private int index;
+    
+    long parseEnglishNumber(String text) {
+        // Break up text into words.
+        this.words = new String[0];
+        while (true) {
+            var space = text.indexOf(' ');
+            if (space > 0) {
+                this.words.add(text.substring(0, space));
+                text = text.substring(space + 1, 0);
+            } else {
+                this.words.add(text);
+                break;
+            }
+        }
+        this.index = 0;
+        var numberMaps = NumberMaps.getInstance();
+        var total = 0L;
+        var buffer = 0L;
+        while (this.index < this.words.length) {
+            buffer = parseUpToNinetyNine();
+            var factor = parseWord(numberMaps.hundredMap);
+            if (factor > 0) {
+                buffer = buffer * factor;
+                var remainder = parseUpToNinetyNine();
+                buffer = buffer + remainder;
+            }
+            factor = parseWord(numberMaps.thousandMap);
+            if (factor > 0) {
+                total = total + (buffer * factor);
+            } else {
+                total = total + buffer;
+            }
+        }
+        return total;
+    }
+    
+    int parseUpToNinetyNine() {
+        var numberMaps = NumberMaps.getInstance();
+        var value = parseWord(numberMaps.digitMap);
+        if (value > 0) {
+            return value;
+        }
+        value = parseWord(numberMaps.teenMap);
+        if (value > 0) {
+            return value;
+        }
+        value = parseWord(numberMaps.twentyMap);
+        if (value > 0) {
+            var remainder = parseWord(numberMaps.digitMap);
+            if (remainder > 0) {
+                value = value + remainder;
+            }
+        }
+        return value;
+    }
+
+    int parseWord(int[String] map) {
+        if (this.index >= this.words.length) {
+            return 0;
+        }
+        var value = map[this.words[this.index]];
+        if (value > 0) {
+            this.index++;
+        }
+        return value;
+    }
+
+    static void main(String[] argv) {
+        var s1 = "two billion one hundred three thousand fifteen";
+        var s2 = "one hundred thirty billion fifty one million eight";
+        var s3 = "seventeen";
+        var pn = new ParseNumber();
+        System.println("s1=" + pn.parseEnglishNumber(s1));
+        System.println("s2=" + pn.parseEnglishNumber(s2));
+        System.println("s3=" + pn.parseEnglishNumber(s3));
+    }
+}
