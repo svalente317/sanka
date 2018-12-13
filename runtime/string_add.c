@@ -19,7 +19,7 @@ char *STRING_ADD(char **arr, int size) {
         lens[idx] = strlen(arr[idx]);
         length += lens[idx];
     }
-    cp = malloc(length + 1);
+    cp = GC_MALLOC_ATOMIC(length + 1);
     length = 0;
     for (idx = 0; idx < size; idx++) {
         strcpy(cp + length, arr[idx]);
@@ -92,4 +92,22 @@ void DOUBLE_TO_STRING(double d, char *str) {
     // overflow the buffer. If you want to use this functionality, then
     // replace this with something better.
     sprintf(str, "%g", d);
+}
+
+char *STRING_SUBSTRING(char *this, int beginIndex, int endIndex) {
+    if (beginIndex < 0 || endIndex < 0) {
+        return NULL;
+    }
+    int n = strlen(this);
+    if (endIndex == 0 || endIndex > n) {
+        endIndex = n;
+    }
+    if (beginIndex > endIndex) {
+        beginIndex = endIndex;
+    }
+    n = endIndex - beginIndex;
+    char *that = GC_MALLOC_ATOMIC(n + 1);
+    strncpy(that, this+beginIndex, n);
+    that[n] = 0;
+    return that;
 }

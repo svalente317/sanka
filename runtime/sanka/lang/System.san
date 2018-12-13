@@ -3,6 +3,7 @@ package sanka.lang;
 
 class System {
     c__include "stdio.h";
+    c__include "stdlib.h";
     c__include "string.h";
     c__include "unistd.h";
     c__include "sys/time.h";
@@ -32,5 +33,8 @@ class System {
     static int random(int max) {
         c__stmt "return random() % max";
     }
-}
 
+    static void gc() {
+        c__stmt "while (GC_collect_a_little() != 0)";
+    }
+}

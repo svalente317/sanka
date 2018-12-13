@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gc.h>
 #include "rb.h"
 
 extern void PANIC(const char *);
@@ -33,7 +34,7 @@ rb_create (short use_strcmp)
 {
   struct rb_table *tree;
 
-  tree = malloc (sizeof *tree);
+  tree = GC_MALLOC (sizeof *tree);
   if (tree == NULL)
     PANIC("out of memory error");
 
@@ -106,7 +107,7 @@ rb_put (struct rb_table *tree, union rb_key key, union rb_value value,
       da[k++] = cmp > 0;
     }
 
-  n = pa[k - 1]->rb_link[da[k - 1]] = malloc (sizeof *n);
+  n = pa[k - 1]->rb_link[da[k - 1]] = GC_MALLOC (sizeof *n);
   if (n == NULL)
     PANIC("out of memory error");
 

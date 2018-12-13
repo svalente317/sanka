@@ -63,6 +63,11 @@ class TranslationUtils {
             symbol = classdef.name;
         }
         env.writer = new BufferedWriter(new FileWriter(destFile));
+        if (classdef.c_includes != null) {
+            for (String c_include : classdef.c_includes) {
+                env.print("#include <" + c_include + ">");
+            }
+        }
         if (isHeader) {
             symbol = symbol + "_h_INCLUDED";
             env.print("#ifndef " + symbol);
@@ -75,11 +80,6 @@ class TranslationUtils {
         }
         for (TypeDefinition type : env.typeList) {
             env.print("#include <" + getHeaderFileName(type.packageName, type.name) + ">");
-        }
-        if (classdef.c_includes != null) {
-            for (String c_include : classdef.c_includes) {
-                env.print("#include <" + c_include + ">");
-            }
         }
         env.print("");
         copyFileContents(tmpfile, env.writer);

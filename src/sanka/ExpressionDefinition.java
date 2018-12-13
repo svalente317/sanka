@@ -180,7 +180,15 @@ class ExpressionDefinition {
                 this.expressionType = ExpressionType.FIELD_ACCESS;
                 this.type = TypeDefinition.METHOD_TYPE;
                 this.expression1 = new ExpressionDefinition();
-                this.expression1.evaluateThis(primary);
+                if (this.method.isStatic) {
+                    this.expression1.expressionType = ExpressionType.CLASS_IDENTIFIER;
+                    this.expression1.type = TypeDefinition.VOID_TYPE;
+                    this.expression1.name = env.currentClass.name;
+                    this.expression1.identifiedClass = new TypeDefinition(
+                    		env.currentClass.packageName, env.currentClass.name);
+                } else {
+                    this.expression1.evaluateThis(primary);
+                }
                 return;
             }
             if (env.classPackageMap.containsKey(this.name)) {
@@ -639,7 +647,7 @@ class ExpressionDefinition {
             variableName = env.getTmpVariable();
         }
         builder.append(variableName);
-        builder.append(" = calloc(1, sizeof(");
+        builder.append(" = GC_MALLOC(sizeof(");
         builder.append(this.type.translateDereference());
         builder.append("));");
         StringBuilder builder2 = null;

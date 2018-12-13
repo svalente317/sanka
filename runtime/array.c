@@ -5,8 +5,8 @@
 const char *ARRAY_BOUNDS_ERROR = "array bounds error";
 
 struct array *NEW_ARRAY(int length, int size) {
-    struct array *this = malloc(sizeof(struct array));
-    this->data = calloc(length, size);
+    struct array *this = GC_MALLOC(sizeof(struct array));
+    this->data = GC_MALLOC(length * size);
     this->length = length;
     this->alloced = length;
     return this;
@@ -17,7 +17,7 @@ void GROW_ARRAY(struct array *this, int size) {
     if (this->length == this->alloced) {
         this->alloced = this->alloced == 0 ? 4 :
             this->alloced + this->alloced;
-        this->data = realloc(this->data, this->alloced * size);
+        this->data = GC_REALLOC(this->data, this->alloced * size);
     }
     this->length++;
 }
@@ -49,7 +49,7 @@ void SET_ARRAY_LENGTH(struct array *this, int length, int size) {
         this->length = length;
         return;
     }
-    this->data = realloc(this->data, length * size);
+    this->data = GC_REALLOC(this->data, length * size);
     memset(((char *) this->data) + (this->length * size), 0,
            (length - this->length) * size);
     this->length = length;

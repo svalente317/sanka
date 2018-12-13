@@ -33,14 +33,6 @@ class String {
     }
 
     String substring(int beginIndex, int endIndex) {
-        c__stmt "if (beginIndex < 0 || endIndex < 0) return NULL";
-        c__stmt "int n = strlen(this)";
-        c__stmt "if (endIndex == 0 || endIndex > n) endIndex = n";
-        c__stmt "if (beginIndex > endIndex) beginIndex = endIndex";
-        c__stmt "n = endIndex - beginIndex";
-        c__stmt "char *that = malloc(n + 1)";
-        c__stmt "strncpy(that, this+beginIndex, n)";
-        c__stmt "that[n] = 0";
-        c__stmt "return that";
+        c__stmt "return STRING_SUBSTRING(this, beginIndex, endIndex)";
     }
 }

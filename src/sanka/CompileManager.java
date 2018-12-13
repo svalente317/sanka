@@ -35,6 +35,7 @@ class CompileManager {
         }
         linkcommand.add("-lsankaruntime");
         linkcommand.add("-lpthread");
+        linkcommand.add("-lgc");
         linkcommand.add("-o");
         linkcommand.add(exeName);
         int status = executeCommand(linkcommand);
@@ -98,6 +99,7 @@ class CompileManager {
         env.print("");
         env.print("int main(int argc, char **argv) {");
         env.level++;
+        env.print("GC_INIT();");
         env.print("struct array arr;");
         env.print("arr.data = argv;");
         env.print("arr.length = argc;");

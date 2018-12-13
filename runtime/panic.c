@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "sanka_header.h"
 
 const char *NULL_POINTER_ERROR = "null pointer error";

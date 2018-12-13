@@ -1,18 +1,12 @@
 # TODO
 
-## High Level Design Issues
+* support inline fields
 
-* Garbage collection
+* support "exports" keyword
 
 * Support classes with the same name in different packages
 
 * Parameterized types
-
-## Unimplemented features
-
-* support inline fields
-
-* support "exports" keyword
 
 * string to array and array to string
 

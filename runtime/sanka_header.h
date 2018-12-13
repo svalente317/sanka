@@ -1,5 +1,5 @@
-#include <stdlib.h>
-#include "rb.h"
+#include <gc.h>
+#include <rb.h>
 
 /* Part 1: panic.c -- primitive types, pointers */
 
@@ -22,6 +22,7 @@ extern char *STRING_ADD(char **, int);
 extern void INT_TO_STRING(int, char *);
 extern void LONG_TO_STRING(long, char *);
 extern void DOUBLE_TO_STRING(double, char *);
+extern char *STRING_SUBSTRING(char *, int, int);
 
 /* Part 3: array.c */
 
