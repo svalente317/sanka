@@ -4,12 +4,13 @@ package sanka.lang;
 class String {
     c__include "string.h";
 
-    int length() {
-        c__stmt "return strlen(this)";
+    String(byte[] arr) {
+        // To initialize a String, the translator generates a call to
+        // NEW_STRING(). So this method is never called.
     }
 
-    byte byteAt(int n) {
-        c__stmt "return this[n]";
+    int length() {
+        c__stmt "return strlen(this)";
     }
 
     int indexOf(byte b) {

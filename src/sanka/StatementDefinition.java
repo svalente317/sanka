@@ -192,6 +192,11 @@ public class StatementDefinition {
             this.lhsExpression.evaluateArrayAccess(assignable.expression(0),
                     assignable.expression(1));
             lhsType = this.lhsExpression.type;
+            TypeDefinition containerType = this.lhsExpression.expression1.type;
+            if (containerType != null && containerType.isStringType()) {
+                env.printError(assignable, "String instance cannot be modified");
+                return;
+            }
         }
         else if (assignable.expression(0) != null) {
             // The LHS is made of two expressions: The context and field.

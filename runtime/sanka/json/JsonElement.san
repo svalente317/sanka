@@ -123,4 +123,8 @@ class JsonElement {
         }
         return null;
     }
+
+    static JsonElement parse(String text) {
+        return JsonParser.parse(text);
+    }
 }

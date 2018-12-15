@@ -131,9 +131,10 @@ The `+` operator joins two strings into a new string. If a string is
 added to a primitive numeric type, then that number is converted to a
 string (in base 10) and added to the string.
 
+The expression `str[n]` evaluates to the n'th byte in the string.
+
 The `String` class has these methods:
 * `int length()` Return the number of bytes in the string
-* `byte byteAt(int n)` Return the n'th byte in the string
 * `int indexOf(byte b)` Return the index of the first occurrence of `b`
 * `int find(String s)` Return the index of the first occurrence of `s`
 * `boolean startsWith(String s)` Return true if this string starts with `s`
@@ -279,6 +280,20 @@ new elements in a new array. For example:
     var map2 = new String[String];
     var value2 = map["seventeen"];  // Now value2 == null
 ~~~
+
+If you access past the end of a String, i.e. `str[1000000]`,
+then it may die with an Out Of Bounds Exception. The language is
+allowed to either raise an exception or else return random data, so
+don't access past the end of a string.
+
+Currently, String is implemente using C strings, which means that
+(a) a string cannot contain a zero, and (b) the `length()` function
+runs in linear time rather then constant time. These restrictions may
+be lifted in a future implementation.
+
+As a special-case sentinel, it is legal to call `str[str.length()]`.
+By definition, this must return zero, regardless of the underlying
+String implementation.
 
 ## Multi-Dimensional Arrays
 

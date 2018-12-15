@@ -37,6 +37,7 @@ extern void GROW_ARRAY(struct array *this, int size);
 extern void GROW_AND_MOVE_ARRAY(struct array *this, int idx, int size);
 extern void SHRINK_ARRAY(struct array *this, int idx, int count, int size);
 extern void SET_ARRAY_LENGTH(struct array *this, int length, int size);
+extern char *NEW_STRING(struct array *bytes);
 extern const char *ARRAY_BOUNDS_ERROR;
 
 static inline void BOUNDSCHECK(struct array *a, int idx) {

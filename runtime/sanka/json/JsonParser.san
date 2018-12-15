@@ -1,0 +1,299 @@
+// -*- mode: Java; -*-
+package sanka.json;
+import sanka.json.JsonElement;
+import sanka.json.JsonObject;
+
+class JsonParser {
+    private String text;
+    private int length;
+    private int errorIdx;
+
+    JsonParser(String text) {
+        this.text = text;
+        this.length = text.length();
+    }
+
+    int parseElement(int idx, JsonElement elem) {
+        idx = skipSpace(idx);
+        if (idx == this.length) {
+            return idx;
+        }
+        var ch = this.text[idx];
+        switch (ch) {
+        case '{':
+            return parseObject(idx, elem);
+        case '[':
+            return parseArray(idx, elem);
+        case '"':
+            return parseString(idx, elem);
+        case 't':
+        case 'f':
+        case 'n':
+            return parseLiteral(idx, elem);
+        case '-':
+            return parseNumber(idx, elem);
+        }
+        if (ch >= '0' && ch <= '9') {
+            return parseNumber(idx, elem);
+        }
+        this.errorIdx = idx;
+        return -1;
+    }
+
+    int skipSpace(int idx) {
+        while (idx < this.length) {
+            var ch = this.text[idx];
+            if (!(ch == '\t' || ch == '\r' || ch == '\n' || ch == ' ')) {
+                break;
+            }
+            idx++;
+        }
+        return idx;
+    }
+
+    int parseObject(int idx, JsonElement elem) {
+        if (this.text[idx] != '{') {
+            this.errorIdx = idx;
+            return -1;
+        }
+        var object = new JsonObject();
+        idx++;
+        idx = skipSpace(idx);
+        if (idx < this.length && this.text[idx] == '}') {
+            idx++;
+            elem.makeObject(object);
+            return idx;
+        }
+        var key = new JsonElement();
+        while (true) {
+            idx = parseString(idx, key);
+            if (idx < 0) {
+                return idx;
+            }
+            idx = skipSpace(idx);
+            if (idx == this.length || this.text[idx] != ':') {
+                this.errorIdx = idx;
+                return -1;
+            }
+            idx++;
+            idx = skipSpace(idx);
+            var value = new JsonElement();
+            idx = parseElement(idx, value);
+            if (idx < 0) {
+                return idx;
+            }
+            object.getMap()[key.getAsString()] = value;
+            idx = skipSpace(idx);
+            if (idx == this.length || this.text[idx] != ',') {
+                break;
+            }
+            idx++;
+            idx = skipSpace(idx);
+        }
+        if (idx == this.length || this.text[idx] != '}') {
+            this.errorIdx = idx;
+            return -1;
+        }
+        idx++;
+        elem.makeObject(object);
+        return idx;
+    }
+
+    int parseArray(int idx, JsonElement elem) {
+        if (this.text[idx] != '[') {
+            this.errorIdx = idx;
+            return -1;
+        }
+        var array = new JsonElement[0];
+        idx++;
+        idx = skipSpace(idx);
+        if (idx < this.length && this.text[idx] == ']') {
+            idx++;
+            elem.makeArray(array);
+            return idx;
+        }
+        while (true) {
+            var value = new JsonElement();
+            idx = parseElement(idx, value);
+            if (idx < 0) {
+                return idx;
+            }
+            array.add(value);
+            idx = skipSpace(idx);
+            if (idx == this.length || this.text[idx] != ',') {
+                break;
+            }
+            idx++;
+            idx = skipSpace(idx);
+        }
+        if (idx == this.length || this.text[idx] != ']') {
+            this.errorIdx = idx;
+            return -1;
+        }
+        idx++;
+        elem.makeArray(array);
+        return idx;
+    }
+
+    int parseString(int idx, JsonElement elem) {
+        if (this.text[idx] != '"') {
+            this.errorIdx = idx;
+            return -1;
+        }
+        var bytes = new byte[0];
+        idx++;
+        while (idx < this.length) {
+            var ch = this.text[idx];
+            if (ch == '"') {
+                break;
+            }
+            if (ch == '\\') {
+                idx++;
+                ch = this.text[idx];
+                switch (ch) {
+                case '"':
+                case '\\':
+                case '/':
+                    // No transformation.
+                    break;
+                case 'b':
+                    ch = '\b';
+                    break;
+                case 'n':
+                    ch = '\n';
+                    break;
+                case 'r':
+                    ch = '\r';
+                    break;
+                case 't':
+                    ch = '\t';
+                    break;
+                default:
+                    // TODO Support \u[hhhh].
+                    ch = 0;
+                    break;
+                }
+            }
+            if (ch == 0) {
+                break;
+            }
+            bytes.add(ch);
+            idx++;
+        }
+        if (idx == this.length || this.text[idx] != '"') {
+            this.errorIdx = idx;
+            return -1;
+        }
+        idx++;
+        elem.makeString(new String(bytes));
+        return idx;
+    }
+
+    int parseLiteral(int idx, JsonElement elem) {
+        var text = this.text;
+        if (text[idx] == 't' && text[idx+1] == 'r' &&
+            text[idx+2] == 'u' && text[idx+3] == 'e') {
+            idx = idx + 4;
+            elem.makeBoolean(true);
+            return idx;
+        }
+        if (text[idx] == 'f' && text[idx+1] == 'a' && text[idx+2] == 'l' &&
+            text[idx+3] == 's' && text[idx+4] == 'e') {
+            idx = idx + 5;
+            elem.makeBoolean(false);
+            return idx;
+        }
+        if (text[idx] == 'n' && text[idx+1] == 'u' &&
+            text[idx+2] == 'l' && text[idx+3] == 'l') {
+            idx = idx + 4;
+            return idx;
+        }
+        this.errorIdx = idx;
+        return -1;
+    }
+
+    int parseNumber(int idx, JsonElement elem) {
+        var isMinus = false;
+        var ival = 0;
+        var fval = 0.0;
+        var isFrac = false;
+        if (this.text[idx] == '-') {
+            isMinus = true;
+            idx++;
+        }
+        var ch = this.text[idx];
+        if (ch == '0') {
+            idx++;
+        } else {
+            if (!(ch >= '1' && ch <= '9')) {
+                this.errorIdx = idx;
+                return -1;
+            }
+            while (true) {
+                ival = (ival*10) + (ch-'0');
+                idx++;
+                if (idx == this.length) {
+                    break;
+                }
+                ch = this.text[idx];
+                if (!(ch >= '0' && ch <= '9')) {
+                    break;
+                }
+            }
+        }
+        if (idx == this.length) {
+            return idx;
+        }
+        if (this.text[idx] == '.') {
+            isFrac = true;
+            idx++;
+            ch = this.text[idx];
+            if (!(ch >= '0' && ch <= '9')) {
+                this.errorIdx = idx;
+                return -1;
+            }
+            fval = ival;
+            var mul = 0.1;
+            while (true) {
+                fval = fval + ((ch-'0')*mul);
+                idx++;
+                if (idx == this.length) {
+                    break;
+                }
+                mul = mul * 0.1;
+                ch = this.text[idx];
+                if (!(ch >= '0' && ch <= '9')) {
+                    break;
+                }
+            }
+        }
+        // TODO E sign digits
+        if (isFrac) {
+            if (isMinus) {
+                fval = -fval;
+            }
+            elem.makeDouble(fval);
+        } else {
+            if (isMinus) {
+                ival = -ival;
+            }
+            elem.makeInt(ival);
+        }
+        return idx;
+    }
+
+    /**
+     * If the complete string is legal JSON, then parse it.
+     *
+     * @return the parsed JSON element or null
+     */
+    static JsonElement parse(String text) {
+        var parser = new JsonParser(text);
+        var elem = new JsonElement();
+        var idx = parser.parseElement(0, elem);
+        if (idx > 0) {
+            idx = parser.skipSpace(idx);
+        }
+        return idx == parser.length ? elem: null;
+    }
+}

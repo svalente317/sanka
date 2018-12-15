@@ -6,7 +6,8 @@ const char *ARRAY_BOUNDS_ERROR = "array bounds error";
 
 struct array *NEW_ARRAY(int length, int size) {
     struct array *this = GC_MALLOC(sizeof(struct array));
-    this->data = GC_MALLOC(length * size);
+    this->data = size < sizeof(void*) ? GC_MALLOC_ATOMIC(length * size) :
+        GC_MALLOC(length * size);
     this->length = length;
     this->alloced = length;
     return this;
@@ -54,4 +55,12 @@ void SET_ARRAY_LENGTH(struct array *this, int length, int size) {
            (length - this->length) * size);
     this->length = length;
     this->alloced = length;
+}
+
+char *NEW_STRING(struct array *bytes) {
+    NULLCHECK(bytes);
+    char *str = GC_MALLOC_ATOMIC(bytes->length+1);
+    memcpy(str, bytes->data, bytes->length);
+    str[bytes->length] = 0;
+    return str;
 }

@@ -185,7 +185,7 @@ class ExpressionDefinition {
                     this.expression1.type = TypeDefinition.VOID_TYPE;
                     this.expression1.name = env.currentClass.name;
                     this.expression1.identifiedClass = new TypeDefinition(
-                    		env.currentClass.packageName, env.currentClass.name);
+                            env.currentClass.packageName, env.currentClass.name);
                 } else {
                     this.expression1.evaluateThis(primary);
                 }
@@ -500,6 +500,16 @@ class ExpressionDefinition {
         if (this.expression1.type == null || this.expression2.type == null) {
             return;
         }
+        if (this.expression1.type.isStringType()) {
+            TypeDefinition keyType = TypeDefinition.INT_TYPE;
+            if (!TypeUtils.isCompatible(keyType, this.expression2)) {
+                env.printError(expr, "incompatible types: " + this.expression2.type +
+                        " cannot be converted to " + keyType);
+                return;
+            }
+            this.type = TypeDefinition.BYTE_TYPE;
+            return;
+        }
         if (this.expression1.type.arrayOf == null) {
             env.printError(expr, "array required, but " + this.expression1.type + " found");
             return;
@@ -647,6 +657,10 @@ class ExpressionDefinition {
             variableName = env.getTmpVariable();
         }
         builder.append(variableName);
+        if (this.type.isStringType()) {
+            finishTranslateNewString(builder);
+            return variableName;
+        }
         builder.append(" = GC_MALLOC(sizeof(");
         builder.append(this.type.translateDereference());
         builder.append("));");
@@ -684,6 +698,21 @@ class ExpressionDefinition {
             env.print(builder2.toString());
         }
         return variableName;
+    }
+
+    void finishTranslateNewString(StringBuilder builder) {
+        Environment env = Environment.getInstance();
+        builder.append(" = NEW_STRING(");
+        if (this.argList != null) {
+            String comma = "";
+            for (ExpressionDefinition arg : this.argList) {
+                builder.append(comma);
+                builder.append(arg.translate(null));
+                comma = ", ";
+            }
+        }
+        builder.append(");");
+        env.print(builder.toString());
     }
 
     String translateNewArrayWithValues(String variableName) {
@@ -847,6 +876,10 @@ class ExpressionDefinition {
         Environment env = Environment.getInstance();
         String text1 = this.expression1.translate(null);
         String text2 = this.expression2.translate(null);
+        if (this.expression1.type.isStringType()) {
+            env.print("NULLCHECK(" + text1 + ");");
+            return text1 + "[" + text2 + "]";
+        }
         if (this.expression1.type.keyType == null) {
             env.print("BOUNDSCHECK(" + text1 + ", " + text2 + ");");
             return "ARRCAST(" + text1 + ", " + this.type.translate() + ")[" + text2 + "]";

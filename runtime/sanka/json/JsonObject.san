@@ -77,4 +77,9 @@ class JsonObject {
         }
         return "{" + s + "}";
     }
+
+    static JsonObject parse(String text) {
+        var elem = JsonParser.parse(text);
+        return elem == null ? null : elem.getAsObject();
+    }
 }

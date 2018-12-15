@@ -8,8 +8,6 @@
 
 * Parameterized types
 
-* string to array and array to string
-
 * Improve support for char literals and complex literals?
 
 * float to double promotion and demotion
@@ -41,7 +39,6 @@
 
 * Add byte to string as character
 
-* json library: escape quotes in strings,
+* json library: escape quotes in strings
 * json library: JsonObject needs "set" functions
 * json library: add JsonArray
-* json library: implement parse()

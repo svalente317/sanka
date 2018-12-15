@@ -2,8 +2,8 @@
 
 Sanka uses the Boehm-Demers-Weiser Garbage Collector (libgc, bdwgc, boehm-gc).
 
-https://www.hboehm.info/gc/
-https://github.com/ivmai/bdwgc
+* https://www.hboehm.info/gc/
+* https://github.com/ivmai/bdwgc
 
 As far as I know, libgc supports everything that Sanka requires:
 

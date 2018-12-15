@@ -4,6 +4,7 @@ package sanka.examples;
 class Array {
     static void main(String[] argv) {
         var arr = new int[]{17, 34, 51};
+        arr[1] = 35;
         printArray(arr);
 
         arr.add(99);
@@ -21,6 +22,10 @@ class Array {
         var value = arr.pop();
         System.println("value=" + value);
         printArray(arr);
+
+        var s = "Hello, world!";
+        System.println("value=" + s[0]);
+        // s[1] = 'a';
     }
 
     static void printArray(int[] arr) {
