@@ -41,3 +41,15 @@ endif
 	cp bin/sanka.jar $(PREFIX)/share/
 
 FORCE:
+
+CONFIGURE = PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig  ./configure --prefix=${PREFIX} --disable-shared
+
+install-libgc:
+	wget https://github.com/ivmai/libatomic_ops/releases/download/v7.6.8/libatomic_ops-7.6.8.tar.gz
+	wget https://github.com/ivmai/bdwgc/releases/download/v7.6.10/gc-7.6.10.tar.gz
+	gzip -cd libatomic_ops-7.6.8.tar.gz | tar xf -
+	cd libatomic_ops-7.6.8 && ${CONFIGURE} && make install
+	rm -rf libatomic_ops-7.6.8.tar.gz libatomic_ops-7.6.8
+	gzip -cd  gc-7.6.10.tar.gz | tar xf -
+	cd gc-7.6.10 && ${CONFIGURE} && make install
+	rm -rf gc-7.6.10.tar.gz gc-7.6.10

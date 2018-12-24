@@ -10,46 +10,51 @@ class NumberMaps {
     int[String] thousandMap;
 
     NumberMaps() {
-        this.digitMap = new int[class String];
-        this.digitMap["one"] = 1;
-        this.digitMap["two"] = 2;
-        this.digitMap["three"] = 3;
-        this.digitMap["four"] = 4;
-        this.digitMap["five"] = 5;
-        this.digitMap["six"] = 6;
-        this.digitMap["seven"] = 7;
-        this.digitMap["eight"] = 8;
-        this.digitMap["nine"] = 9;
+        this.digitMap = new int[class String]{
+            "one" : 1,
+            "two" : 2,
+            "three" : 3,
+            "four" : 4,
+            "five" : 5,
+            "six" : 6,
+            "seven" : 7,
+            "eight" : 8,
+            "nine" : 9
+        };
 
-        this.teenMap = new int[class String];
-        this.teenMap["ten"] = 10;
-        this.teenMap["eleven"] = 11;
-        this.teenMap["twelve"] = 12;
-        this.teenMap["thirteen"] = 13;
-        this.teenMap["fourteen"] = 14;
-        this.teenMap["fifteen"] = 15;
-        this.teenMap["sixteen"] = 16;
-        this.teenMap["seventeen"] = 17;
-        this.teenMap["eightteen"] = 18;
-        this.teenMap["nineteen"] = 19;
+        this.teenMap = new int[class String]{
+            "ten" : 10,
+            "eleven" : 11,
+            "twelve" : 12,
+            "thirteen" : 13,
+            "fourteen" : 14,
+            "fifteen" : 15,
+            "sixteen" : 16,
+            "seventeen" : 17,
+            "eightteen" : 18,
+            "nineteen" : 19
+        };
 
-        this.twentyMap = new int[class String];
-        this.twentyMap["twenty"] = 20;
-        this.twentyMap["thirty"] = 30;
-        this.twentyMap["forty"] = 40;
-        this.twentyMap["fifty"] = 50;
-        this.twentyMap["sixty"] = 60;
-        this.twentyMap["seventy"] = 70;
-        this.twentyMap["eighty"] = 80;
-        this.twentyMap["ninety"] = 90;
+        this.twentyMap = new int[class String]{
+            "twenty" : 20,
+            "thirty" : 30,
+            "forty" : 40,
+            "fifty" : 50,
+            "sixty" : 60,
+            "seventy" : 70,
+            "eighty" : 80,
+            "ninety" : 90
+        };
 
-        this.hundredMap = new int[class String];
-        this.hundredMap["hundred"] = 100;
+        this.hundredMap = new int[class String]{
+            "hundred" : 100
+        };
 
-        this.thousandMap = new int[class String];
-        this.thousandMap["thousand"] = 1000;
-        this.thousandMap["million"] = 1000000;
-        this.thousandMap["billion"] = 1000000000;
+        this.thousandMap = new int[class String]{
+            "thousand" : 1000,
+            "million" : 1000000,
+            "billion" : 1000000000
+        };
     }
 
     static private NumberMaps INSTANCE = null;

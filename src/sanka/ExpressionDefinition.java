@@ -13,6 +13,7 @@ import sanka.antlr4.SankaParser.CreatorContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.ExpressionListContext;
 import sanka.antlr4.SankaParser.LiteralContext;
+import sanka.antlr4.SankaParser.MapEntryContext;
 import sanka.antlr4.SankaParser.PrimaryContext;
 
 class ExpressionDefinition {
@@ -280,6 +281,21 @@ class ExpressionDefinition {
             mapType.keyType = new TypeDefinition();
             mapType.keyType.parse(ctx.typeType());
             checkMapKeyType(ctx.typeType(), mapType.keyType);
+            if (ctx.mapDefinition() != null && ctx.mapDefinition().mapEntry() != null) {
+                List<MapEntryContext> entryList = ctx.mapDefinition().mapEntry();
+                this.argList = new ExpressionDefinition[entryList.size()];
+                for (int idx = 0; idx < this.argList.length; idx++) {
+                    MapEntryContext entry = entryList.get(idx);
+                    ExpressionDefinition arg = new ExpressionDefinition();
+                    arg.expression1 = new ExpressionDefinition();
+                    arg.expression1.evaluate(entry.expression(0));
+                    checkRequiredType(entry, this.type.keyType, arg.expression1);
+                    arg.expression2 = new ExpressionDefinition();
+                    arg.expression2.evaluate(entry.expression(1));
+                    checkRequiredType(entry, this.type.arrayOf, arg.expression2);
+                    this.argList[idx] = arg;
+                }
+            }
             return;
         }
         this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
@@ -292,16 +308,10 @@ class ExpressionDefinition {
             for (int idx = 0; idx < this.argList.length; idx++) {
                 this.argList[idx] = new ExpressionDefinition();
                 this.argList[idx].evaluate(exprList.get(idx));
+                checkRequiredType(exprList.get(idx), this.type.arrayOf, this.argList[idx]);
             }
         } else {
             this.argList = new ExpressionDefinition[0];
-        }
-        Environment env = Environment.getInstance();
-        for (ExpressionDefinition arg : this.argList) {
-            if (!TypeUtils.isCompatible(this.type.arrayOf, arg)) {
-                env.printError(ctx.expressionList(), "incompatible types: " + arg.type +
-                        " cannot be converted to " + this.type.arrayOf);
-            }
         }
     }
 
@@ -341,6 +351,13 @@ class ExpressionDefinition {
                 Environment env = Environment.getInstance();
                 env.printError(ctx, "invalid type for map key: " + type);
             }
+        }
+    }
+
+    void checkRequiredType(ParserRuleContext ctx, TypeDefinition type, ExpressionDefinition expr) {
+        if (!TypeUtils.isCompatible(type, expr)) {
+            Environment env = Environment.getInstance();
+            env.printError(ctx, "incompatible types: " + expr.type + " cannot be converted to " + type);
         }
     }
 
@@ -501,12 +518,7 @@ class ExpressionDefinition {
             return;
         }
         if (this.expression1.type.isStringType()) {
-            TypeDefinition keyType = TypeDefinition.INT_TYPE;
-            if (!TypeUtils.isCompatible(keyType, this.expression2)) {
-                env.printError(expr, "incompatible types: " + this.expression2.type +
-                        " cannot be converted to " + keyType);
-                return;
-            }
+            checkRequiredType(expr, TypeDefinition.INT_TYPE, this.expression2);
             this.type = TypeDefinition.BYTE_TYPE;
             return;
         }
@@ -518,11 +530,7 @@ class ExpressionDefinition {
         if (keyType == null) {
             keyType = TypeDefinition.INT_TYPE;
         }
-        if (!TypeUtils.isCompatible(keyType, this.expression2)) {
-            env.printError(expr, "incompatible types: " + this.expression2.type +
-                    " cannot be converted to " + keyType);
-            return;
-        }
+        checkRequiredType(expr, keyType, this.expression2);
         this.type = this.expression1.type.arrayOf;
     }
 
@@ -563,13 +571,7 @@ class ExpressionDefinition {
         }
         for (int idx = 0; idx < paramCount; idx++) {
             ParameterDefinition param = method.parameters.get(idx);
-            if (param.type != null) {
-                if (!TypeUtils.isCompatible(param.type, this.argList[idx])) {
-                    env.printError(exprList.expression(idx),
-                            "incompatible types: " + this.argList[idx].type +
-                            " cannot be converted to " + param.type);
-                }
-            }
+            checkRequiredType(exprList.expression(idx), param.type, this.argList[idx]);
         }
     }
 
@@ -760,6 +762,13 @@ class ExpressionDefinition {
         builder.append(this.type.keyType.isStringType() ? "1" : "0");
         builder.append(");");
         env.print(builder.toString());
+        if (this.argList != null) {
+            String valueName = null;
+            for (ExpressionDefinition arg : this.argList) {
+                valueName = StatementDefinition.translateMapAssignment(
+                        variableName, arg.expression1, arg.expression2, valueName);
+            }
+        }
         return variableName;
     }
 

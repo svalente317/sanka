@@ -1,5 +1,8 @@
 # TODO
 
+* Allow class constants to be accessed as local variables
+  and use in JsonElement.
+
 * support inline fields
 
 * support "exports" keyword
@@ -28,8 +31,6 @@
 * Error if two classes have same qualified name
 
 * Implement "x == y" where x or y is an interface
-
-* Allow class constants to be accessed as local variables
 
 * Implement ArrayUtils "addAll" and Map "clear"
 

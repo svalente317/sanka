@@ -277,11 +277,20 @@ creator
 arrayCreatorRest
     :   '[' ']' '{' expressionList? '}'
     |   '[' expression ']'
-    |   '[' 'class' typeType ']'
+    |   '[' 'class' typeType ']' mapDefinition?
     ;
 
 classCreatorRest
     :    '(' expressionList? ')' classBody?
+    ;
+
+mapDefinition
+    :    '{' '}'
+    |    '{' mapEntry (',' mapEntry)* '}'
+    ;
+
+mapEntry
+    :    expression ':' expression
     ;
 
 literal

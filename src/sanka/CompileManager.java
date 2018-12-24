@@ -19,9 +19,11 @@ class CompileManager {
                 continue;
             }
             // Should use TranslationUtils to get generated file name including $top.
-            String filename = TranslationUtils.replaceDot(
-                    classdef.packageName, File.separatorChar) +
-                    File.separatorChar + classdef.name + ".c";
+            String filename = classdef.name + ".c";
+            if (classdef.packageName != null) {
+                filename = TranslationUtils.replaceDot(classdef.packageName, File.separatorChar) +
+                    File.separatorChar + filename;
+            }
             compileFile(filename, linkcommand);
         }
         String filename = generateMainFile(mainClass);
@@ -34,8 +36,8 @@ class CompileManager {
             linkcommand.add("-L" + libPath);
         }
         linkcommand.add("-lsankaruntime");
-        linkcommand.add("-lpthread");
         linkcommand.add("-lgc");
+        linkcommand.add("-lpthread");
         linkcommand.add("-o");
         linkcommand.add(exeName);
         int status = executeCommand(linkcommand);

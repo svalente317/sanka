@@ -613,4 +613,22 @@ public class StatementDefinition {
         env.print(valueName + "." + field + " = " + this.expression.translate(null) + ";");
         env.print("rb_put(" + text1 + ", (union rb_key) " + text2 + ", " + valueName + ", 0);");
     }
+
+    static String translateMapAssignment(String mapName, ExpressionDefinition keyExpr,
+            ExpressionDefinition valueExpr, String valueName) {
+        Environment env = Environment.getInstance();
+        String keyText = keyExpr.translate(null);
+        String valueText = valueExpr.translate(null);
+        if (keyExpr.type.isStringType() && keyExpr.expressionType != ExpressionType.LITERAL) {
+            env.print("NULLCHECK(" + keyText + ");");
+        }
+        if (valueName == null) {
+            valueName = env.getTmpVariable();
+            env.print("union rb_value " + valueName + ";");
+        }
+        String field = TranslationUtils.typeToMapFieldName(valueExpr.type);
+        env.print(valueName + "." + field + " = " + valueText + ";");
+        env.print("rb_put(" + mapName + ", (union rb_key) " + keyText + ", " + valueName + ", 0);");
+        return valueName;
+    }
 }

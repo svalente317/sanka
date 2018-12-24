@@ -450,6 +450,26 @@ public interface SankaListener extends ParseTreeListener {
 	 */
 	void exitClassCreatorRest(SankaParser.ClassCreatorRestContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SankaParser#mapDefinition}.
+	 * @param ctx the parse tree
+	 */
+	void enterMapDefinition(SankaParser.MapDefinitionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#mapDefinition}.
+	 * @param ctx the parse tree
+	 */
+	void exitMapDefinition(SankaParser.MapDefinitionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SankaParser#mapEntry}.
+	 * @param ctx the parse tree
+	 */
+	void enterMapEntry(SankaParser.MapEntryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#mapEntry}.
+	 * @param ctx the parse tree
+	 */
+	void exitMapEntry(SankaParser.MapEntryContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SankaParser#literal}.
 	 * @param ctx the parse tree
 	 */
