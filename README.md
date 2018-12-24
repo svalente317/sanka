@@ -106,7 +106,7 @@ map[2018] = "Hello, world!";
 ~~~
 
 For more information on all Sanka types, including arrays and maps,
-see docs/Builtin-Types.md.
+see [docs/Builtin-Types.md](docs/Builtin-Types.md).
 
 **inline keyword**
 
@@ -149,8 +149,8 @@ Again, the benefit is that this avoids memory fragmentation.
 
 And finally, you can also inline objects in an array, just like you
 can inline objects in a class. For a full discussion of the `inline`
-keyword -- the syntax, the limitations, etc. -- see docs/Inline.md,
-which has not yet been written.
+keyword -- the syntax, the limitations, etc. -- see
+[docs/Inline.md](docs/Inline.md).
 
 **export keyword**
 
