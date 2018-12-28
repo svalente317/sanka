@@ -78,7 +78,7 @@ interfaceBody
 classBodyDeclaration
     :   constDeclaration
     |   fieldDeclaration
-    |   'export' Identifier
+    |   'export' Identifier ('.' Identifier)? ';'
     |   constructorDeclaration
     |   methodDeclaration
     |   'c__include' StringLiteral ';'

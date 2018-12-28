@@ -66,7 +66,12 @@ class ClassDefinition {
                 parseFields(item.fieldDeclaration());
             }
             if (item.Identifier() != null) {
-                this.exports.add(item.Identifier().getText());
+                List<TerminalNode> nodes = item.Identifier();
+                String name = nodes.get(0).getText();
+                if (nodes.size() > 1) {
+                    name = name + "." + nodes.get(1).getText();
+                }
+                this.exports.add(name);
             }
             if (item.constructorDeclaration() != null) {
                 String name = item.constructorDeclaration().Identifier().getText();

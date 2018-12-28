@@ -1,8 +1,5 @@
 # TODO
 
-* Allow class constants to be accessed as local variables
-  and use in JsonElement.
-
 * support inline fields
 
 * support "exports" keyword

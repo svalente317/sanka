@@ -192,6 +192,19 @@ class ExpressionDefinition {
                 }
                 return;
             }
+            FieldDefinition fielddef = env.currentClass.fieldMap.get(this.name);
+            if (fielddef != null && fielddef.isStatic) {
+                this.expressionType = ExpressionType.FIELD_ACCESS;
+                this.type = fielddef.type;
+                this.expression1 = new ExpressionDefinition();
+                this.expression1.evaluateThis(primary);
+                this.isStatic = true;
+                if (this.type != null && !this.type.isStringType()) {
+                    this.expressionType = ExpressionType.LITERAL;
+                }
+                this.value = fielddef.value.value;
+                return;
+            }
             if (env.classPackageMap.containsKey(this.name)) {
                 String packageName = env.classPackageMap.get(this.name);
                 // Type is void because this expression has no value when evaluated
