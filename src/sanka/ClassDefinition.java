@@ -65,7 +65,7 @@ class ClassDefinition {
             if (item.fieldDeclaration() != null) {
                 parseFields(item.fieldDeclaration());
             }
-            if (item.Identifier() != null) {
+            if (item.getStart().getType() == SankaLexer.EXPORT) {
                 List<TerminalNode> nodes = item.Identifier();
                 String name = nodes.get(0).getText();
                 if (nodes.size() > 1) {
