@@ -3,6 +3,7 @@ package sanka;
 import java.util.ArrayList;
 import java.util.List;
 
+import sanka.ClassDefinition.FieldDefinition;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.BlockContext;
 import sanka.antlr4.SankaParser.FieldModifierContext;
@@ -27,6 +28,7 @@ class MethodDefinition {
     BlockContext blockContext;
     BlockDefinition block;
     SymbolTable.Frame frame;
+    String exportFrom;
 
     MethodDefinition() {
         this.parameters = new ArrayList<>();
@@ -123,6 +125,25 @@ class MethodDefinition {
             env.symbolTable.push(this.frame);
             this.block.translate(true);
             env.symbolTable.pop();
+        } else if (this.exportFrom != null) {
+            env.print("{");
+            env.level++;
+            builder.setLength(0);
+            if (!this.returnType.equals(TypeDefinition.VOID_TYPE)) {
+                builder.append("return ");
+            }
+            FieldDefinition fielddef = classdef.fieldMap.get(this.exportFrom);
+            builder.append(TranslationUtils.translateClassItem(fielddef.type.name, this.name));
+            builder.append("(this->");
+            builder.append(this.exportFrom);
+            for (ParameterDefinition param : this.parameters) {
+                builder.append(", ");
+                builder.append(param.name);
+            }
+            builder.append(");");
+            env.print(builder.toString());
+            env.level--;
+            env.print("}");
         } else {
             env.print("{");
             env.level++;

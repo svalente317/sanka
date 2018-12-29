@@ -102,6 +102,10 @@ class Translator {
         for (CompilationUnitContext ctx : contextList) {
             parse(ctx);
         }
+        Environment env = Environment.getInstance();
+        for (ClassDefinition classdef : env.classList) {
+            ExportUtils.parseExports(classdef);
+        }
     }
 
     void parseClassNames(CompilationUnitContext ctx) {

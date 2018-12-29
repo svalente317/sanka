@@ -2,8 +2,6 @@
 
 * support inline fields
 
-* support "exports" keyword
-
 * Support classes with the same name in different packages
 
 * Parameterized types

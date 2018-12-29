@@ -41,6 +41,7 @@ class ClassDefinition {
     List<MethodDefinition> methodList;
     List<String> c_includes;
     List<String> c_fields;
+    int exportStatus;
 
     ClassDefinition() {
         this.fieldMap = new TreeMap<>();
