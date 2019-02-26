@@ -82,7 +82,7 @@ class JsonParser {
             if (idx < 0) {
                 return idx;
             }
-            object.getMap()[key.getAsString()] = value;
+            object.set(key.getAsString(), value);
             idx = skipSpace(idx);
             if (idx == this.length || this.text[idx] != ',') {
                 break;

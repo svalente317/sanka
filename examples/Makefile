@@ -2,7 +2,7 @@ PREFIX=	/opt/sanka
 CC=	gcc
 DBG=	-g
 
-PROGS=	wordmap interface heap channel jsontest finder parsenumber
+PROGS=	wordmap interface heap channel jsontest finder parsenumber total
 
 all:	$(PROGS)
 
@@ -26,6 +26,9 @@ finder:		CheeseFinder.san Mouse.san
 
 parsenumber:	ParseNumber.san NumberMaps.san
 	sanka $^ --exe $@ --main sanka.examples.ParseNumber
+
+total:		Total.san
+	sanka $^ --exe $@ --main sanka.examples.Total
 
 clean:
 	rm -rf $(PROGS) sanka *~

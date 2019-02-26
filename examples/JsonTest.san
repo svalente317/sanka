@@ -19,23 +19,22 @@ class JsonTest {
         System.println(obj.getAsString("key"));
 
         var subobj = new JsonObject();
-        var submap = subobj.getMap();
-        submap["key"] = new JsonElement().makeString("world!");
+        subobj.setString("key", "world!");
         var value = subobj.getAsString("key");
         System.println(value);
 
-        map["sub"] = new JsonElement().makeObject(subobj);
+        obj.setObject("sub", subobj);
         var tmpobj = obj.getAsObject("sub");
         System.println("equal? " + (subobj == tmpobj));
 
-        map["intkey"] = new JsonElement().makeInt(17);
-        map["boolkey"] = new JsonElement().makeBoolean(true);
+        obj.setInt("intkey", 17);
+        obj.setBoolean("boolkey", true);
         var arr = new JsonElement[]{
             new JsonElement().makeInt(1),
             new JsonElement().makeInt(2),
             new JsonElement().makeInt(3)
         };
-        submap["arr"] = new JsonElement().makeArray(arr);
+        obj.setArray("arr", arr);
         System.println(obj.toString());
 
         System.println(obj.getAsString("key") + " " +

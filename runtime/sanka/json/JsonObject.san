@@ -82,4 +82,32 @@ class JsonObject {
         var elem = JsonParser.parse(text);
         return elem == null ? null : elem.getAsObject();
     }
+
+    void set(String fieldName, JsonElement value) {
+        this.map[fieldName] = value;
+    }
+
+    void setBoolean(String fieldName, boolean value) {
+        this.map[fieldName] = new JsonElement().makeBoolean(value);
+    }
+
+    void setInt(String fieldName, int value) {
+        this.map[fieldName] = new JsonElement().makeInt(value);
+    }
+
+    void setDouble(String fieldName, double value) {
+        this.map[fieldName] = new JsonElement().makeDouble(value);
+    }
+
+    void setString(String fieldName, String value) {
+        this.map[fieldName] = new JsonElement().makeString(value);
+    }
+
+    void setArray(String fieldName, JsonElement[] value) {
+        this.map[fieldName] = new JsonElement().makeArray(value);
+    }
+
+    void setObject(String fieldName, JsonObject value) {
+        this.map[fieldName] = new JsonElement().makeObject(value);
+    }
 }
