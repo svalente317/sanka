@@ -60,6 +60,16 @@ public interface SankaListener extends ParseTreeListener {
 	 */
 	void exitClassDeclaration(SankaParser.ClassDeclarationContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SankaParser#classModifier}.
+	 * @param ctx the parse tree
+	 */
+	void enterClassModifier(SankaParser.ClassModifierContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#classModifier}.
+	 * @param ctx the parse tree
+	 */
+	void exitClassModifier(SankaParser.ClassModifierContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SankaParser#typeParameters}.
 	 * @param ctx the parse tree
 	 */

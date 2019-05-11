@@ -23,7 +23,7 @@ class ExportUtils {
                 methodName = fieldName.substring(idx+1);
                 fieldName = fieldName.substring(0, idx);
             }
-            FieldDefinition fielddef = classdef.fieldMap.get(fieldName);
+            FieldDefinition fielddef = classdef.getField(fieldName);
             if (fielddef == null) {
                 env.printError(null, "export in " + classdef.qualifiedName() +
                         ": field " + fieldName + " not found");

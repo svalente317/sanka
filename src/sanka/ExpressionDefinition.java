@@ -192,7 +192,7 @@ class ExpressionDefinition {
                 }
                 return;
             }
-            FieldDefinition fielddef = env.currentClass.fieldMap.get(this.name);
+            FieldDefinition fielddef = env.currentClass.getField(this.name);
             if (fielddef != null && fielddef.isStatic) {
                 this.expressionType = ExpressionType.FIELD_ACCESS;
                 this.type = fielddef.type;
@@ -426,7 +426,7 @@ class ExpressionDefinition {
         } else {
             classdef = ArrayUtils.mapClassDefinition(this.expression1.type.keyType);
         }
-        FieldDefinition fielddef = classdef.fieldMap.get(this.name);
+        FieldDefinition fielddef = classdef.getField(this.name);
         boolean isPrivate;
         if (fielddef == null) {
              this.method = classdef.getMethod(this.name);

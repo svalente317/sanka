@@ -2,7 +2,8 @@ PREFIX=	/opt/sanka
 CC=	gcc
 DBG=	-g
 
-PROGS=	wordmap interface heap channel jsontest finder parsenumber total
+PROGS=	wordmap interface heap channel jsontest finder parsenumber total \
+        serializabletest
 
 all:	$(PROGS)
 
@@ -29,6 +30,9 @@ parsenumber:	ParseNumber.san NumberMaps.san
 
 total:		Total.san
 	sanka $^ --exe $@ --main sanka.examples.Total
+
+serializabletest:		SerializableTest.san
+	sanka $^ --exe $@ --main sanka.examples.Tester
 
 clean:
 	rm -rf $(PROGS) sanka *~

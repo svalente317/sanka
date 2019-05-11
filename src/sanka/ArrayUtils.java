@@ -26,8 +26,9 @@ public class ArrayUtils {
     static ClassDefinition arrayClassDefinition(TypeDefinition elementType) {
         ClassDefinition classdef = new ClassDefinition();
         FieldDefinition field = new FieldDefinition();
+        field.name = "length";
         field.type = TypeDefinition.INT_TYPE;
-        classdef.fieldMap.put("length", field);
+        classdef.fieldList.add(field);
 
         addMethod(classdef, TypeDefinition.VOID_TYPE, "add", elementType);
         addMethod(classdef, TypeDefinition.VOID_TYPE, "insert",

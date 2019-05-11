@@ -3,13 +3,13 @@ package sanka;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.ClassBodyDeclarationContext;
 import sanka.antlr4.SankaParser.ClassDeclarationContext;
+import sanka.antlr4.SankaParser.ClassModifierContext;
 import sanka.antlr4.SankaParser.ConstDeclarationContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.FieldDeclarationContext;
@@ -21,6 +21,7 @@ import sanka.antlr4.SankaParser.InterfaceMethodDeclarationContext;
 class ClassDefinition {
 
     static class FieldDefinition {
+        String name;
         TypeDefinition type;
         boolean isPrivate;
         boolean isStatic;
@@ -33,9 +34,10 @@ class ClassDefinition {
     Map<String, String> classPackageMap;
     boolean isImport;
     boolean isInterface;
+    boolean isSerializable;
     String packageName;
     String name;
-    Map<String, FieldDefinition> fieldMap;
+    List<FieldDefinition> fieldList;
     List<String> exports;
     MethodDefinition constructor;
     List<MethodDefinition> methodList;
@@ -44,7 +46,7 @@ class ClassDefinition {
     int exportStatus;
 
     ClassDefinition() {
-        this.fieldMap = new TreeMap<>();
+        this.fieldList = new LinkedList<>();
         this.methodList = new LinkedList<>();
         this.exports = new LinkedList<>();
     }
@@ -56,6 +58,10 @@ class ClassDefinition {
     void parse(ClassDeclarationContext ctx) {
         Environment env = Environment.getInstance();
         this.name = ctx.Identifier().getText();
+        ClassModifierContext mod = ctx.classModifier();
+        if (mod != null && mod.getStart().getType() == SankaLexer.SERIALIZABLE) {
+            this.isSerializable = true;
+        }
         if (ctx.classBody().classBodyDeclaration() == null) {
             return;
         }
@@ -118,6 +124,9 @@ class ClassDefinition {
                 this.c_fields.add(LiteralUtils.evaluateStringLiteral(literal));
             }
         }
+        if (this.isSerializable) {
+            SerializableUtils.addMethodsToClass(this);
+        }
     }
 
     MethodDefinition getMethod(String name) {
@@ -129,17 +138,27 @@ class ClassDefinition {
         return null;
     }
 
+    FieldDefinition getField(String name) {
+        for (FieldDefinition field : this.fieldList) {
+            if (field.name.equals(name)) {
+                return field;
+            }
+        }
+        return null;
+    }
+
     void parseConstDeclaration(ConstDeclarationContext ctx) {
         String name = ctx.Identifier().getText();
-        FieldDefinition field = new FieldDefinition();
-        field.isStatic = true;
-        field.isConst = true;
-        field.expression = ctx.expression();
-        FieldDefinition prev = this.fieldMap.put(name, field);
-        if (prev != null) {
+        if (getField(name) != null) {
             Environment env = Environment.getInstance();
             env.printError(ctx, "class " + this.name + " field " + name + " declared twice");
         }
+        FieldDefinition field = new FieldDefinition();
+        field.name = name;
+        field.isStatic = true;
+        field.isConst = true;
+        field.expression = ctx.expression();
+        this.fieldList.add(field);
     }
 
     void parseFields(FieldDeclarationContext ctx) {
@@ -164,17 +183,18 @@ class ClassDefinition {
         FieldDefinition field = null;
         for (TerminalNode identifier : identifierList) {
             String name = identifier.getText();
+            if (getField(name) != null) {
+                Environment env = Environment.getInstance();
+                env.printError(ctx, "class " + this.name + " field " + name + " declared twice");
+            }
             field = new FieldDefinition();
+            field.name = name;
             field.type = new TypeDefinition();
             field.type.parse(ctx.typeType());
             field.isPrivate = isPrivate;
             field.isStatic = isStatic;
             field.isInline = isInline;
-            FieldDefinition prev = this.fieldMap.put(name, field);
-            if (prev != null) {
-                Environment env = Environment.getInstance();
-                env.printError(ctx, "class " + this.name + " field " + name + " declared twice");
-            }
+            this.fieldList.add(field);
         }
         if (ctx.expression() == null) {
             return;
@@ -192,6 +212,7 @@ class ClassDefinition {
         Environment env = Environment.getInstance();
         this.isInterface = true;
         this.name = ctx.Identifier().getText();
+        // TODO modifier
         if (ctx.interfaceBody().interfaceBodyDeclaration() == null) {
             return;
         }
@@ -219,7 +240,7 @@ class ClassDefinition {
     void evaluate() {
         Environment env = Environment.getInstance();
         env.currentClass = this;
-        for (FieldDefinition field : this.fieldMap.values()) {
+        for (FieldDefinition field : this.fieldList) {
             if (field.expression != null) {
                 field.value = new ExpressionDefinition();
                 field.value.evaluate(field.expression);
@@ -261,13 +282,12 @@ class ClassDefinition {
         env.typeList.clear();
         env.print("struct " + this.name + " {");
         env.level++;
-        for (Map.Entry<String, FieldDefinition> entry : this.fieldMap.entrySet()) {
-            FieldDefinition field = entry.getValue();
+        for (FieldDefinition field : this.fieldList) {
             if (field.isStatic) {
                 continue;
             }
             env.addType(field.type);
-            env.print(field.type.translateSpace() + entry.getKey() + ";");
+            env.print(field.type.translateSpace() + field.name + ";");
         }
         if (this.c_fields != null) {
             for (String cfield : this.c_fields) {
@@ -276,8 +296,7 @@ class ClassDefinition {
         }
         env.level--;
         env.print("};");
-        for (Map.Entry<String, FieldDefinition> entry : this.fieldMap.entrySet()) {
-            FieldDefinition field = entry.getValue();
+        for (FieldDefinition field : this.fieldList) {
             if (field.isStatic) {
                 StringBuilder builder = new StringBuilder();
                 builder.append("extern ");
@@ -286,7 +305,7 @@ class ClassDefinition {
                 }
                 env.addType(field.type);
                 builder.append(field.type.translateSpace());
-                builder.append(TranslationUtils.translateClassItem(this.name, entry.getKey()));
+                builder.append(TranslationUtils.translateClassItem(this.name, field.name));
                 builder.append(";");
                 env.print(builder.toString());
             }
@@ -343,8 +362,7 @@ class ClassDefinition {
         Environment env = Environment.getInstance();
         env.typeList.clear();
         boolean printedSomething = false;
-        for (Map.Entry<String, FieldDefinition> entry : this.fieldMap.entrySet()) {
-            FieldDefinition field = entry.getValue();
+        for (FieldDefinition field: this.fieldList) {
             if (field.isStatic) {
                 StringBuilder builder = new StringBuilder();
                 if (field.isConst) {
@@ -352,7 +370,7 @@ class ClassDefinition {
                 }
                 env.addType(field.type);
                 builder.append(field.type.translateSpace());
-                builder.append(TranslationUtils.translateClassItem(this.name, entry.getKey()));
+                builder.append(TranslationUtils.translateClassItem(this.name, field.name));
                 builder.append(" = ");
                 builder.append(field.value == null ? "0" : field.value.translate(null));
                 builder.append(";");

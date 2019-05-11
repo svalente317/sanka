@@ -56,7 +56,11 @@ typeDeclaration
     ;
 
 classDeclaration
-    :   'class' Identifier typeParameters? classBody
+    :   classModifier? 'class' Identifier typeParameters? classBody
+    ;
+
+classModifier
+    :   'serializable'
     ;
 
 typeParameters
@@ -64,7 +68,7 @@ typeParameters
     ;
 
 interfaceDeclaration
-    :   'interface' Identifier typeParameters? interfaceBody
+    :   classModifier? 'interface' Identifier typeParameters? interfaceBody
     ;
 
 classBody
@@ -329,6 +333,7 @@ NEW           : 'new';
 PACKAGE       : 'package';
 PRIVATE       : 'private';
 RETURN        : 'return';
+SERIALIZABLE  : 'serializable';
 SHORT         : 'short';
 STATIC        : 'static';
 SWITCH        : 'switch';

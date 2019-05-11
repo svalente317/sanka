@@ -20,6 +20,10 @@ class MethodDefinition {
         String name;
     }
 
+    static interface MethodTranslator {
+        public void translate();
+    }
+
     boolean isPrivate;
     boolean isStatic;
     TypeDefinition returnType;
@@ -29,6 +33,7 @@ class MethodDefinition {
     BlockDefinition block;
     SymbolTable.Frame frame;
     String exportFrom;
+    MethodTranslator translator;
 
     MethodDefinition() {
         this.parameters = new ArrayList<>();
@@ -125,29 +130,29 @@ class MethodDefinition {
             env.symbolTable.push(this.frame);
             this.block.translate(true);
             env.symbolTable.pop();
-        } else if (this.exportFrom != null) {
-            env.print("{");
-            env.level++;
-            builder.setLength(0);
-            if (!this.returnType.equals(TypeDefinition.VOID_TYPE)) {
-                builder.append("return ");
-            }
-            FieldDefinition fielddef = classdef.fieldMap.get(this.exportFrom);
-            builder.append(TranslationUtils.translateClassItem(fielddef.type.name, this.name));
-            builder.append("(this->");
-            builder.append(this.exportFrom);
-            for (ParameterDefinition param : this.parameters) {
-                builder.append(", ");
-                builder.append(param.name);
-            }
-            builder.append(");");
-            env.print(builder.toString());
-            env.level--;
-            env.print("}");
         } else {
             env.print("{");
             env.level++;
-            translateInterfaceBody();
+            if (this.exportFrom != null) {
+                builder.setLength(0);
+                if (!this.returnType.equals(TypeDefinition.VOID_TYPE)) {
+                    builder.append("return ");
+                }
+                FieldDefinition fielddef = classdef.getField(this.exportFrom);
+                builder.append(TranslationUtils.translateClassItem(fielddef.type.name, this.name));
+                builder.append("(this->");
+                builder.append(this.exportFrom);
+                for (ParameterDefinition param : this.parameters) {
+                    builder.append(", ");
+                    builder.append(param.name);
+                }
+                builder.append(");");
+                env.print(builder.toString());
+            } else if (this.translator != null) {
+                this.translator.translate();
+            } else if (classdef.isInterface) {
+                translateInterfaceBody();
+            }
             env.level--;
             env.print("}");
         }
