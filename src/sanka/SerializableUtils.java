@@ -2,19 +2,26 @@ package sanka;
 
 import sanka.ClassDefinition.FieldDefinition;
 import sanka.ExpressionDefinition.ExpressionType;
-import sanka.MethodDefinition.MethodTranslator;
+import sanka.MethodDefinition.MethodGenerator;
 import sanka.MethodDefinition.ParameterDefinition;
 import sanka.antlr4.SankaLexer;
 
+// TODO ensure sanka.json.JsonObject and sanka.json.Serializable get imported
+
 class SerializableUtils {
 
-    static final TypeDefinition JSON_OBJECT_TYPE = new TypeDefinition("sanka.json", "JsonObject");
+    static final TypeDefinition JSON_OBJECT_TYPE =
+            new TypeDefinition("sanka.json", "JsonObject");
+    static final TypeDefinition SERIALIZABLE_TYPE =
+            new TypeDefinition("sanka.json", "Serializable");
 
     /**
      * Add MethodDefinitions for toJson() and fromJson().
      */
     static void addMethodsToClass(final ClassDefinition classdef) {
+        Environment env = Environment.getInstance();
         MethodDefinition method, current;
+        boolean isEvaluated = false;
         method = new MethodDefinition();
         method.isPrivate = false;
         method.isStatic = false;
@@ -22,9 +29,18 @@ class SerializableUtils {
         method.name = "toJson";
         current = classdef.getMethod(method.name);
         if (current != null) {
-            // TODO verify
+            if (!sameSignature(method, current)) {
+                env.printError(null, "serializable class " + classdef.name +
+                        ": wrong signature for method " + method.name);
+            }
         } else {
-            method.translator = new MethodTranslator() {
+            isEvaluated = true;
+            method.generator = new MethodGenerator() {
+                @Override
+                public void evaluate() {
+                    SerializableUtils.evaluateClass(classdef);
+                }
+
                 @Override
                 public void translate() {
                     SerializableUtils.translateToJson(classdef);
@@ -43,21 +59,90 @@ class SerializableUtils {
         method.parameters.add(param);
         current = classdef.getMethod(method.name);
         if (current != null) {
-            // TODO verify
+            if (!sameSignature(method, current)) {
+                env.printError(null, "serializable class " + classdef.name +
+                        ": wrong signature for method " + method.name);
+            }
         } else {
-            method.translator = new MethodTranslator() {
+            final boolean finalIsEvaluated = isEvaluated;
+            method.generator = new MethodGenerator() {
+                @Override
+                public void evaluate() {
+                    // If this class passed evaluation for toJson(),
+                    // then don't evaluate it again.
+                    if (!finalIsEvaluated) {
+                        SerializableUtils.evaluateClass(classdef);
+                    }
+                }
+
                 @Override
                 public void translate() {
-                    // TODO SerializableUtils.translateFromJson(classdef);
+                    SerializableUtils.translateFromJson(classdef);
                 }
             };
             classdef.methodList.add(method);
         }
     }
 
+    static boolean sameSignature(MethodDefinition m1, MethodDefinition m2) {
+        boolean ok = m1.isPrivate == m2.isPrivate &&
+                m1.isStatic == m2.isStatic &&
+                m1.returnType.equals(m2.returnType) &&
+                m1.parameters.size() == m2.parameters.size();
+        if (!ok) {
+            return false;
+        }
+        for (int idx = 0; idx < m1.parameters.size(); idx++) {
+            if (!m1.parameters.get(idx).type.equals(m2.parameters.get(idx).type)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
+     * Verify that each public instance field is primitive, or a String, or implements
+     * the Serializable interface.
+     */
+    static void evaluateClass(ClassDefinition classdef) {
+        Environment env = Environment.getInstance();
+        ClassDefinition serializableClass = env.getClassDefinition(SERIALIZABLE_TYPE);
+        if (serializableClass == null) {
+            env.printError(null, "interface " + SERIALIZABLE_TYPE + " not found");
+            return;
+        }
+        for (FieldDefinition field : classdef.fieldList) {
+            if (field.isPrivate || field.isStatic) {
+                continue;
+            }
+            TypeDefinition type = field.type;
+            // Find out what this field is an array of.
+            while (type.arrayOf != null && type.keyType == null) {
+                type = type.arrayOf;
+            }
+            if (type.isPrimitiveType || type.isStringType()) {
+                continue;
+            }
+            boolean error;
+            if (type.keyType != null) {
+                // We do not yet support translation of maps to json.
+                error = true;
+            } else {
+                ClassDefinition fieldClass = env.getClassDefinition(type);
+                error = (fieldClass == null ||
+                        !TypeUtils.isInterfaceImplemented(serializableClass, fieldClass));
+            }
+            if (error) {
+                env.printError(null, "class " + classdef.name + " field " + field.name +
+                        " does not implement interface " + SERIALIZABLE_TYPE);
+            }
+        }
+    }
+
+    /**
+     * Generate C code for writing public fields to JSON.
+     * The line "expr.value = field.name" is basically reflection.
      * TODO: Support setArray()
-     * TODO: Support raw Map to JSON
      */
     static void translateToJson(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
@@ -159,5 +244,9 @@ class SerializableUtils {
         Environment env = Environment.getInstance();
         env.printError(null, "cannot convert type to json: " + type.toString());
         return "";
+    }
+
+    static void translateFromJson(ClassDefinition classdef) {
+        // TODO
     }
 }

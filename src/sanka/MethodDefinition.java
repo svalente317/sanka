@@ -20,7 +20,8 @@ class MethodDefinition {
         String name;
     }
 
-    static interface MethodTranslator {
+    static interface MethodGenerator {
+        public void evaluate();
         public void translate();
     }
 
@@ -33,7 +34,7 @@ class MethodDefinition {
     BlockDefinition block;
     SymbolTable.Frame frame;
     String exportFrom;
-    MethodTranslator translator;
+    MethodGenerator generator;
 
     MethodDefinition() {
         this.parameters = new ArrayList<>();
@@ -89,6 +90,8 @@ class MethodDefinition {
         if (this.blockContext != null) {
             this.block = new BlockDefinition();
             this.block.evaluate(this.blockContext);
+        } else if (this.generator != null) {
+            this.generator.evaluate();
         }
         this.frame = env.symbolTable.pop();
     }
@@ -148,8 +151,8 @@ class MethodDefinition {
                 }
                 builder.append(");");
                 env.print(builder.toString());
-            } else if (this.translator != null) {
-                this.translator.translate();
+            } else if (this.generator != null) {
+                this.generator.translate();
             } else if (classdef.isInterface) {
                 translateInterfaceBody();
             }
