@@ -31,7 +31,7 @@
 
 * Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
 
-* Serializable classes
+* Serializable interfaces
 
 * Add byte to string as character
 

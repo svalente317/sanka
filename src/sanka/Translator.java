@@ -14,7 +14,7 @@ import sanka.antlr4.SankaParser.CompilationUnitContext;
 import sanka.antlr4.SankaParser.ImportDeclarationContext;
 import sanka.antlr4.SankaParser.TypeDeclarationContext;
 
-class Translator {
+public class Translator {
 
     // On an uncaught exception, the system exits with status 1;
     // don't use that status for a more specific error.

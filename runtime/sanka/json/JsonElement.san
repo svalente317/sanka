@@ -36,8 +36,12 @@ class JsonElement {
     }
 
     JsonElement makeString(String value) {
-        this.type = STRING_TYPE;
-        c__stmt "this->data.s = value";
+        if (value == null) {
+            this.type = NULL_TYPE;
+        } else {
+            this.type = STRING_TYPE;
+            c__stmt "this->data.s = value";
+        }
         return this;
     }
 

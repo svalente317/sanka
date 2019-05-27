@@ -1,12 +1,13 @@
 package sanka;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import sanka.ClassDefinition.FieldDefinition;
 import sanka.ExpressionDefinition.ExpressionType;
 import sanka.MethodDefinition.MethodGenerator;
 import sanka.MethodDefinition.ParameterDefinition;
 import sanka.antlr4.SankaLexer;
-
-// TODO ensure sanka.json.JsonObject and sanka.json.Serializable get imported
+import sanka.antlr4.SankaParser.AssignableContext;
 
 class SerializableUtils {
 
@@ -20,6 +21,8 @@ class SerializableUtils {
      */
     static void addMethodsToClass(final ClassDefinition classdef) {
         Environment env = Environment.getInstance();
+        ImportManager.getInstance().doImport(null,
+        		JSON_OBJECT_TYPE.packageName, JSON_OBJECT_TYPE.name);
         MethodDefinition method, current;
         boolean isEvaluated = false;
         method = new MethodDefinition();
@@ -106,10 +109,12 @@ class SerializableUtils {
      */
     static void evaluateClass(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
+        ImportManager.getInstance().doImport(null,
+        		SERIALIZABLE_TYPE.packageName, SERIALIZABLE_TYPE.name);
         ClassDefinition serializableClass = env.getClassDefinition(SERIALIZABLE_TYPE);
         if (serializableClass == null) {
-            env.printError(null, "interface " + SERIALIZABLE_TYPE + " not found");
-            return;
+        	env.printError(null, "interface " + SERIALIZABLE_TYPE + " not found");
+        	return;
         }
         for (FieldDefinition field : classdef.fieldList) {
             if (field.isPrivate || field.isStatic) {
@@ -169,7 +174,7 @@ class SerializableUtils {
             expr.expression1.expressionType = ExpressionType.IDENTIFIER;
             expr.expression1.name = "obj";
             expr.expression1.type = JSON_OBJECT_TYPE;
-            expr.name = getMethodName(field.type);
+            expr.name = get_toJson_method(field.type);
             expr.type = TypeDefinition.METHOD_TYPE;
             expr.method = joClass.getMethod(expr.name);
             ExpressionDefinition func = new ExpressionDefinition();
@@ -190,10 +195,7 @@ class SerializableUtils {
             expr.expression1.type = classdef.toTypeDefinition();
             expr.name = field.name;
             expr.type = field.type;
-            if (field.type.isStringType()) {
-                // TODO add nullcheck
-            }
-            else if (!field.type.isPrimitiveType) {
+            if (!(field.type.isStringType() || field.type.isPrimitiveType)) {
                 // Instead of adding `this.field` to the argument list,
                 // generate the expression `this.field.toJson()`.
                 ExpressionDefinition tmp = new ExpressionDefinition();
@@ -225,7 +227,7 @@ class SerializableUtils {
         stmt.translate();
     }
 
-    static String getMethodName(TypeDefinition type) {
+    static String get_toJson_method(TypeDefinition type) {
         if (type.isStringType()) {
             return "setString";
         }
@@ -247,6 +249,71 @@ class SerializableUtils {
     }
 
     static void translateFromJson(ClassDefinition classdef) {
-        // TODO
+    	Environment env = Environment.getInstance();
+        ClassDefinition joClass = env.getClassDefinition(JSON_OBJECT_TYPE);
+        for (FieldDefinition field : classdef.fieldList) {
+            if (field.isPrivate || field.isStatic) {
+                continue;
+            }
+            // translate `this.field = obj.getAsInt([field.name])`
+            // TODO if (!(field.type.isStringType() || field.type.isPrimitiveType)) {
+            // recursively get object }
+            StatementDefinition stmt = new StatementDefinition();
+            stmt.statementType = SankaLexer.EQUAL;
+            ExpressionDefinition expr = new ExpressionDefinition();
+            expr.expressionType = ExpressionType.FIELD_ACCESS;
+            expr.expression1 = new ExpressionDefinition();
+            expr.expression1.expressionType = ExpressionType.IDENTIFIER;
+            expr.expression1.name = "this";
+            expr.expression1.type = classdef.toTypeDefinition();
+            expr.name = field.name;
+            expr.type = field.type;
+            stmt.lhsExpression = expr;
+            // TODO cast int to short.
+            // TODO cast double to float.
+            // TODO get long from json?
+            expr = new ExpressionDefinition();
+            expr.expressionType = ExpressionType.FIELD_ACCESS;
+            expr.expression1 = new ExpressionDefinition();
+            expr.expression1.expressionType = ExpressionType.IDENTIFIER;
+            expr.expression1.name = "obj";
+            expr.expression1.type = JSON_OBJECT_TYPE;
+            expr.name = get_fromJson_method(field.type);
+            expr.type = TypeDefinition.METHOD_TYPE;
+            expr.method = joClass.getMethod(expr.name);
+            ExpressionDefinition func = new ExpressionDefinition();
+            func.expressionType = ExpressionType.FUNCTION_CALL;
+            func.expression1 = expr;
+            func.type = expr.method.returnType;
+            func.argList = new ExpressionDefinition[1];
+            expr = new ExpressionDefinition();
+            expr.expressionType = ExpressionType.LITERAL;
+            expr.value = field.name;
+            expr.type = TypeDefinition.STRING_TYPE;
+            func.argList[0] = expr;
+            stmt.expression = func;
+            stmt.translate();
+        }
+    }
+    
+    static String get_fromJson_method(TypeDefinition type) {
+        if (type.isStringType()) {
+            return "getAsString";
+        }
+        if (!type.isPrimitiveType) {
+            return "getAsObject";
+        }
+        if (type.isBooleanType()) {
+            return "getAsBoolean";
+        }
+        if (type.isIntegralType()) {
+            return "getAsInt";
+        }
+        if (type.isNumericType()) {
+            return "getAsDouble";
+        }
+        Environment env = Environment.getInstance();
+        env.printError(null, "cannot convert type to json: " + type.toString());
+        return "";
     }
 }

@@ -212,7 +212,6 @@ class ClassDefinition {
         Environment env = Environment.getInstance();
         this.isInterface = true;
         this.name = ctx.Identifier().getText();
-        // TODO modifier
         if (ctx.interfaceBody().interfaceBodyDeclaration() == null) {
             return;
         }
