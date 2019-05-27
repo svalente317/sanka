@@ -1,13 +1,10 @@
 package sanka;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import sanka.ClassDefinition.FieldDefinition;
 import sanka.ExpressionDefinition.ExpressionType;
 import sanka.MethodDefinition.MethodGenerator;
 import sanka.MethodDefinition.ParameterDefinition;
 import sanka.antlr4.SankaLexer;
-import sanka.antlr4.SankaParser.AssignableContext;
 
 class SerializableUtils {
 
@@ -22,7 +19,7 @@ class SerializableUtils {
     static void addMethodsToClass(final ClassDefinition classdef) {
         Environment env = Environment.getInstance();
         ImportManager.getInstance().doImport(null,
-        		JSON_OBJECT_TYPE.packageName, JSON_OBJECT_TYPE.name);
+                JSON_OBJECT_TYPE.packageName, JSON_OBJECT_TYPE.name);
         MethodDefinition method, current;
         boolean isEvaluated = false;
         method = new MethodDefinition();
@@ -110,11 +107,11 @@ class SerializableUtils {
     static void evaluateClass(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
         ImportManager.getInstance().doImport(null,
-        		SERIALIZABLE_TYPE.packageName, SERIALIZABLE_TYPE.name);
+                SERIALIZABLE_TYPE.packageName, SERIALIZABLE_TYPE.name);
         ClassDefinition serializableClass = env.getClassDefinition(SERIALIZABLE_TYPE);
         if (serializableClass == null) {
-        	env.printError(null, "interface " + SERIALIZABLE_TYPE + " not found");
-        	return;
+            env.printError(null, "interface " + SERIALIZABLE_TYPE + " not found");
+            return;
         }
         for (FieldDefinition field : classdef.fieldList) {
             if (field.isPrivate || field.isStatic) {
@@ -249,7 +246,7 @@ class SerializableUtils {
     }
 
     static void translateFromJson(ClassDefinition classdef) {
-    	Environment env = Environment.getInstance();
+        Environment env = Environment.getInstance();
         ClassDefinition joClass = env.getClassDefinition(JSON_OBJECT_TYPE);
         for (FieldDefinition field : classdef.fieldList) {
             if (field.isPrivate || field.isStatic) {
@@ -295,7 +292,7 @@ class SerializableUtils {
             stmt.translate();
         }
     }
-    
+
     static String get_fromJson_method(TypeDefinition type) {
         if (type.isStringType()) {
             return "getAsString";
