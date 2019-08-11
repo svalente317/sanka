@@ -57,6 +57,19 @@ void SET_ARRAY_LENGTH(struct array *this, int length, int size) {
     this->alloced = length;
 }
 
+void ADD_ALL_ARRAY(struct array *this, struct array *that, int size) {
+    NULLCHECK(this);
+    NULLCHECK(that);
+    int newlen = this->length + that->length;
+    if (newlen >= this->alloced) {
+        this->alloced = newlen;
+        this->data = GC_REALLOC(this->data, this->alloced * size);
+    }
+    memmove(((char *) this->data) + (this->length * size),
+            (char *) that->data, that->length * size);
+    this->length = newlen;
+}
+
 char *NEW_STRING(struct array *bytes) {
     NULLCHECK(bytes);
     char *str = GC_MALLOC_ATOMIC(bytes->length+1);

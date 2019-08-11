@@ -1,0 +1,117 @@
+// -*- mode: Java; -*-
+package sanka.io;
+
+/**
+ * LineReader reads blocks of data from a plain reader, and it caches,
+ * joins, and divides the data into lines that are terminated LF (\n).
+ */
+class LineReader {
+    const MAX_LINE_LENGTH = 8096;
+
+    private Reader reader;
+    private byte[] prefix;
+
+    LineReader(Reader reader) {
+        this.reader = reader;
+        this.prefix = null;
+    }
+
+    /**
+     * Read the next line of data from the stream. The line may be terminated
+     * by either CR LF or just LF. In either case, the final CR and LF are
+     * stripped. (They are not returned with the line. No other whitespace
+     * is stripped.)
+     *
+     * If CR is not followed by LF, then the CR is part of the line.
+     *
+     * If possible, then this will respond immediately with data that has
+     * already been read from the stream and cached. Otherwise, it will try
+     * to respond with data that is immediately available from the stream.
+     * Finally, if necessary, it will block until the stream provides data
+     * that terminates the line.
+     *
+     * If the stream reaches 8096 bytes without LF, then this returns null.
+     *
+     * @return the next line from the stream
+     */
+    byte[] readline() {
+        var eol = -1;
+        if (this.prefix != null) {
+            eol = findByte(this.prefix, '\n');
+            if (eol >= 0) {
+                var line = this.prefix;
+                this.prefix = arraySuffix(this.prefix, eol+1);
+                stripLine(line, eol);
+                return line;
+            }
+        }
+        var buffer = null;
+        while (true) {
+            buffer = new byte[1024];
+            var len = this.reader.read(buffer);
+            if (len <= 0) {
+                return null;
+            }
+            buffer.setLength(len);
+            eol = findByte(buffer, '\n');
+            if (eol >= 0) {
+                break;
+            }
+            if (this.prefix == null) {
+                this.prefix = buffer;
+                continue;
+            }
+            if (this.prefix.length + buffer.length >= MAX_LINE_LENGTH) {
+                return null;
+            }
+            this.prefix.addAll(buffer);
+        }
+        if (eol == 0 && this.prefix != null &&
+            this.prefix[this.prefix.length-1] == '\r') {
+            var line = this.prefix;
+            line.setLength(line.length-1);
+            buffer.delete(0, 1);
+            this.prefix = buffer;
+            return line;
+        }
+        var newPrefix = arraySuffix(buffer, eol+1);
+        stripLine(buffer, eol);
+        if (this.prefix != null) {
+            this.prefix.addAll(buffer);
+            buffer = this.prefix;
+        }
+        this.prefix = newPrefix;
+        return buffer;
+    }
+
+    private int findByte(byte[] arr, byte target) {
+        for (var idx = 0; idx < arr.length; idx++) {
+            if (arr[idx] == target) {
+                return idx;
+            }
+        }
+        return -1;
+    }
+
+    private byte[] arraySuffix(byte[] arr, int start) {
+        if (arr.length == start) {
+            return null;
+        }
+        var suffix = new byte[arr.length - start];
+        for (var idx = 0; idx < suffix.length; idx++) {
+            suffix[idx] = arr[start+idx];
+        }
+        return suffix;
+    }
+
+    private void stripLine(byte[] line, int eol) {
+        if (eol > 0 && line[eol-1] == '\r') {
+            eol--;
+        }
+        line.setLength(eol);
+    }
+
+    boolean readFully(byte[] buffer) {
+        // TODO
+    }
+}

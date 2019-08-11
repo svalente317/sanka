@@ -27,7 +27,7 @@
 
 * Implement "x == y" where x or y is an interface
 
-* Implement ArrayUtils "addAll" and Map "clear"
+* Implement Map "clear"
 
 * Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
 

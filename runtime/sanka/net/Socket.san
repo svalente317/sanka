@@ -1,0 +1,62 @@
+// -*- mode: Java; -*-
+package sanka.net;
+
+class Socket {
+    c__include "stdio.h";
+    c__include "string.h";
+    c__include "errno.h";
+    c__include "sys/types.h";
+    c__include "sys/socket.h";
+    c__include "netinet/in.h";
+    c__include "unistd.h";
+
+    private int fd;
+
+    Socket() {
+        this.fd = -1;
+    }
+
+    int bind(int port) {
+        c__stmt "this->fd = socket(AF_INET, SOCK_STREAM, 0)";
+        c__stmt "if (this->fd < 0) return errno";
+        c__stmt "int enable = 1";
+        c__stmt "setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int))";
+        c__stmt "struct sockaddr_in sa";
+        c__stmt "memset(&sa, 0, sizeof(sa))";
+        c__stmt "sa.sin_family = AF_INET";
+        c__stmt "sa.sin_addr.s_addr = INADDR_ANY";
+        c__stmt "sa.sin_port = htons(port)";
+        c__stmt "int x = bind(this->fd, (struct sockaddr *) &sa, sizeof(sa))";
+        c__stmt "return x == 0 ? 0 : errno";
+    }
+
+    int listen(int backlog) {
+        c__stmt "int x = listen(this->fd, backlog)";
+        c__stmt "return x == 0 ? 0 : errno";
+    }
+
+    Socket accept() {
+        var new_fd = 0;
+        c__stmt "struct sockaddr_in sa";
+        c__stmt "int len = sizeof(sa)";
+        c__stmt "new_fd = accept(this->fd, (struct sockaddr *) &sa, &len)";
+        if (new_fd < 0) {
+            return null;
+        }
+        var newsocket = new Socket();
+        newsocket.fd = new_fd;
+        return newsocket;
+    }
+
+    int read(byte[] buffer) {
+        c__stmt "return recv(this->fd, buffer->data, buffer->length, 0)";
+    }
+
+    int write(byte[] buffer) {
+        c__stmt "return send(this->fd, buffer->data, buffer->length, 0)";
+    }
+
+    int close() {
+        c__stmt "return close(this->fd) == 0 ? 0 : errno";
+    }
+}

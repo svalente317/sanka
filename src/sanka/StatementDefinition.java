@@ -363,21 +363,20 @@ public class StatementDefinition {
         String text;
         switch (this.statementType) {
         case SankaLexer.VAR:
-            builder = new StringBuilder();
-            if (this.expression == null) {
-                TypeDefinition type = env.symbolTable.get(this.name);
-                if (type != null && !type.isNullType()) {
-                    env.addType(type);
-                    builder.append(type.translateSpace());
-                    builder.append(this.name);
-                    builder.append(" = 0;");
-                    env.print(builder.toString());
-                }
+            TypeDefinition type = env.symbolTable.get(this.name);
+            if (type == null || type.isNullType()) {
+                // This variable never has a non-null value. Drop it.
                 return;
             }
-            env.addType(this.expression.type);
-            builder.append(this.expression.type.translateSpace());
+            env.addType(type);
+            builder = new StringBuilder();
+            builder.append(type.translateSpace());
             builder.append(this.name);
+            if (this.expression == null) {
+                builder.append(" = 0;");
+                env.print(builder.toString());
+                return;
+            }
             builder.append(";");
             env.print(builder.toString());
             text = this.expression.translate(this.name);

@@ -1,0 +1,17 @@
+// -*- mode: Java; -*-
+package sanka.io;
+
+interface Reader {
+    /**
+     * Read available data from the I/O device to the given buffer.
+     * This blocks until data is available.
+     *
+     * If the I/O device (file, socket, etc.) gets closed, then return 0.
+     * If there is an error, then return -1.
+     *
+     * This stores data starting at buffer[0].
+     *
+     * @return the number of bytes read into buffer, or 0 or -1.
+     */
+    int read(byte[] buffer);
+}

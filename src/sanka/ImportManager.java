@@ -45,9 +45,21 @@ public class ImportManager {
 
     void doImport(ParserRuleContext importctx, String packageName, String className) {
         Environment env = Environment.getInstance();
-        if (env.getClassDefinition(packageName, className) != null) {
-            return;
+        if (env.getClassDefinition(packageName, className) == null) {
+            doNewImport(importctx, packageName, className);
         }
+        if (env.getClassDefinition(packageName, className) != null) {
+            if (env.classPackageMap != null) {
+                env.classPackageMap.put(className, packageName);
+            }
+        }
+    }
+
+    /**
+     * Read a class into env.classList so that doImport() can add it to env.classPackageMap.
+     */
+    private void doNewImport(ParserRuleContext importctx, String packageName, String className) {
+        Environment env = Environment.getInstance();
         String filename = TranslationUtils.replaceDot(packageName, File.separatorChar) +
                 File.separatorChar + className + ".san";
         String pathname = null;
@@ -102,9 +114,6 @@ public class ImportManager {
         }
         env.currentPackage = origCurrentPackage;
         env.classPackageMap = origClassPackageMap;
-        if (env.classPackageMap != null) {
-            env.classPackageMap.put(className, packageName);
-        }
     }
 
     static ImportManager instance = null;

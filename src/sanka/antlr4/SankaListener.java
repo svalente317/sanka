@@ -1,4 +1,4 @@
-// Generated from Sanka.g4 by ANTLR 4.5.1
+// Generated from Sanka.g4 by ANTLR 4.7.2
 
     package sanka.antlr4;
 

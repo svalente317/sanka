@@ -120,10 +120,13 @@ public class ArrayUtils {
         case "setLength":
             index = expr.argList[0].translate(null);
             env.print("SET_ARRAY_LENGTH(" + arrayName + ", " + index +
-                      ", sizeof(" + typeName + ");");
+                      ", sizeof(" + typeName + "));");
             return null;
         case "addAll":
-            break;
+            value = expr.argList[0].translate(null);
+            env.print("ADD_ALL_ARRAY(" + arrayName + ", " + value +
+                      ", sizeof(" + typeName + "));");
+            return null;
         }
         env.printError(null, "array method not implemented: " + methodName);
         return null;

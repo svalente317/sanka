@@ -38,4 +38,16 @@ class SerializableTest {
 		// String filename = TestUtils.writeFile(TEST2);
 		// Translator.main(new String[] { "-I", INCLUDE_DIR, filename });
 	}
+	
+	static final String[] TEST3 = {
+			"class Test { void method() { var x = null;",
+			"while (true) { x = new int[1]; break; } } }"
+	};
+	
+	@Test
+	void testDelayedVariableDeclaration() throws Exception {
+		String top = TestUtils.getTopDir();
+		String filename = TestUtils.writeFile(top, TEST3);
+		Translator.main(new String[] { "-I", INCLUDE_DIR, "--top", top, filename });
+	}
 }

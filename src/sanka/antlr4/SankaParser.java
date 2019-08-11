@@ -1,4 +1,4 @@
-// Generated from Sanka.g4 by ANTLR 4.5.1
+// Generated from Sanka.g4 by ANTLR 4.7.2
 
     package sanka.antlr4;
 
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class SankaParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.5.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -48,46 +48,55 @@ public class SankaParser extends Parser {
 		RULE_expression = 40, RULE_primary = 41, RULE_creator = 42, RULE_arrayCreatorRest = 43, 
 		RULE_classCreatorRest = 44, RULE_mapDefinition = 45, RULE_mapEntry = 46, 
 		RULE_literal = 47;
-	public static final String[] ruleNames = {
-		"compilationUnit", "packageDeclaration", "importDeclaration", "typeDeclaration", 
-		"classDeclaration", "classModifier", "typeParameters", "interfaceDeclaration", 
-		"classBody", "interfaceBody", "classBodyDeclaration", "constDeclaration", 
-		"fieldDeclaration", "fieldModifier", "constructorDeclaration", "methodDeclaration", 
-		"interfaceBodyDeclaration", "interfaceMethodDeclaration", "typeType", 
-		"classOrInterfaceType", "typeArguments", "primitiveType", "formalParameters", 
-		"formalParameterList", "formalParameter", "qualifiedName", "block", "statement", 
-		"variableDeclaration", "variableAssignment", "assignable", "ifStatement", 
-		"elseStatement", "forControl", "forInit", "forIncrement", "enhancedForControl", 
-		"switchLabel", "parExpression", "expressionList", "expression", "primary", 
-		"creator", "arrayCreatorRest", "classCreatorRest", "mapDefinition", "mapEntry", 
-		"literal"
-	};
+	private static String[] makeRuleNames() {
+		return new String[] {
+			"compilationUnit", "packageDeclaration", "importDeclaration", "typeDeclaration", 
+			"classDeclaration", "classModifier", "typeParameters", "interfaceDeclaration", 
+			"classBody", "interfaceBody", "classBodyDeclaration", "constDeclaration", 
+			"fieldDeclaration", "fieldModifier", "constructorDeclaration", "methodDeclaration", 
+			"interfaceBodyDeclaration", "interfaceMethodDeclaration", "typeType", 
+			"classOrInterfaceType", "typeArguments", "primitiveType", "formalParameters", 
+			"formalParameterList", "formalParameter", "qualifiedName", "block", "statement", 
+			"variableDeclaration", "variableAssignment", "assignable", "ifStatement", 
+			"elseStatement", "forControl", "forInit", "forIncrement", "enhancedForControl", 
+			"switchLabel", "parExpression", "expressionList", "expression", "primary", 
+			"creator", "arrayCreatorRest", "classCreatorRest", "mapDefinition", "mapEntry", 
+			"literal"
+		};
+	}
+	public static final String[] ruleNames = makeRuleNames();
 
-	private static final String[] _LITERAL_NAMES = {
-		null, "'<<'", "'>>'", "'boolean'", "'break'", "'byte'", "'case'", "'class'", 
-		"'const'", "'continue'", "'default'", "'double'", "'else'", "'export'", 
-		"'float'", "'for'", "'if'", "'import'", "'inline'", "'int'", "'interface'", 
-		"'long'", "'new'", "'package'", "'private'", "'return'", "'serializable'", 
-		"'short'", "'static'", "'switch'", "'this'", "'var'", "'void'", "'while'", 
-		"'c__include'", "'c__field'", "'c__stmt'", null, null, null, null, null, 
-		"'null'", "'('", "')'", "'{'", "'}'", "'['", "']'", "';'", "','", "'.'", 
-		"'='", "'>'", "'<'", "'!'", "'~'", "'?'", "':'", "'=='", "'<='", "'>='", 
-		"'!='", "'&&'", "'||'", "'++'", "'--'", "'+'", "'-'", "'*'", "'/'", "'&'", 
-		"'|'", "'^'", "'%'", null, "'...'"
-	};
-	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, "BOOLEAN", "BREAK", "BYTE", "CASE", "CLASS", "CONST", 
-		"CONTINUE", "DEFAULT", "DOUBLE", "ELSE", "EXPORT", "FLOAT", "FOR", "IF", 
-		"IMPORT", "INLINE", "INT", "INTERFACE", "LONG", "NEW", "PACKAGE", "PRIVATE", 
-		"RETURN", "SERIALIZABLE", "SHORT", "STATIC", "SWITCH", "THIS", "VAR", 
-		"VOID", "WHILE", "C__INCLUDE", "C__FIELD", "C__STMT", "IntegerLiteral", 
-		"FloatingPointLiteral", "BooleanLiteral", "CharacterLiteral", "StringLiteral", 
-		"NullLiteral", "LPAREN", "RPAREN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", 
-		"SEMI", "COMMA", "DOT", "ASSIGN", "GT", "LT", "BANG", "TILDE", "QUESTION", 
-		"COLON", "EQUAL", "LE", "GE", "NOTEQUAL", "AND", "OR", "INC", "DEC", "ADD", 
-		"SUB", "MUL", "DIV", "BITAND", "BITOR", "CARET", "MOD", "Identifier", 
-		"ELLIPSIS", "WS", "COMMENT", "LINE_COMMENT"
-	};
+	private static String[] makeLiteralNames() {
+		return new String[] {
+			null, "'<<'", "'>>'", "'boolean'", "'break'", "'byte'", "'case'", "'class'", 
+			"'const'", "'continue'", "'default'", "'double'", "'else'", "'export'", 
+			"'float'", "'for'", "'if'", "'import'", "'inline'", "'int'", "'interface'", 
+			"'long'", "'new'", "'package'", "'private'", "'return'", "'serializable'", 
+			"'short'", "'static'", "'switch'", "'this'", "'var'", "'void'", "'while'", 
+			"'c__include'", "'c__field'", "'c__stmt'", null, null, null, null, null, 
+			"'null'", "'('", "')'", "'{'", "'}'", "'['", "']'", "';'", "','", "'.'", 
+			"'='", "'>'", "'<'", "'!'", "'~'", "'?'", "':'", "'=='", "'<='", "'>='", 
+			"'!='", "'&&'", "'||'", "'++'", "'--'", "'+'", "'-'", "'*'", "'/'", "'&'", 
+			"'|'", "'^'", "'%'", null, "'...'"
+		};
+	}
+	private static final String[] _LITERAL_NAMES = makeLiteralNames();
+	private static String[] makeSymbolicNames() {
+		return new String[] {
+			null, null, null, "BOOLEAN", "BREAK", "BYTE", "CASE", "CLASS", "CONST", 
+			"CONTINUE", "DEFAULT", "DOUBLE", "ELSE", "EXPORT", "FLOAT", "FOR", "IF", 
+			"IMPORT", "INLINE", "INT", "INTERFACE", "LONG", "NEW", "PACKAGE", "PRIVATE", 
+			"RETURN", "SERIALIZABLE", "SHORT", "STATIC", "SWITCH", "THIS", "VAR", 
+			"VOID", "WHILE", "C__INCLUDE", "C__FIELD", "C__STMT", "IntegerLiteral", 
+			"FloatingPointLiteral", "BooleanLiteral", "CharacterLiteral", "StringLiteral", 
+			"NullLiteral", "LPAREN", "RPAREN", "LBRACE", "RBRACE", "LBRACK", "RBRACK", 
+			"SEMI", "COMMA", "DOT", "ASSIGN", "GT", "LT", "BANG", "TILDE", "QUESTION", 
+			"COLON", "EQUAL", "LE", "GE", "NOTEQUAL", "AND", "OR", "INC", "DEC", 
+			"ADD", "SUB", "MUL", "DIV", "BITAND", "BITOR", "CARET", "MOD", "Identifier", 
+			"ELLIPSIS", "WS", "COMMENT", "LINE_COMMENT"
+		};
+	}
+	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**
@@ -176,6 +185,7 @@ public class SankaParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(97);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==PACKAGE) {
 				{
@@ -228,9 +238,11 @@ public class SankaParser extends Parser {
 	}
 
 	public static class PackageDeclarationContext extends ParserRuleContext {
+		public TerminalNode PACKAGE() { return getToken(SankaParser.PACKAGE, 0); }
 		public QualifiedNameContext qualifiedName() {
 			return getRuleContext(QualifiedNameContext.class,0);
 		}
+		public TerminalNode SEMI() { return getToken(SankaParser.SEMI, 0); }
 		public PackageDeclarationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -271,9 +283,13 @@ public class SankaParser extends Parser {
 	}
 
 	public static class ImportDeclarationContext extends ParserRuleContext {
+		public TerminalNode IMPORT() { return getToken(SankaParser.IMPORT, 0); }
 		public QualifiedNameContext qualifiedName() {
 			return getRuleContext(QualifiedNameContext.class,0);
 		}
+		public TerminalNode SEMI() { return getToken(SankaParser.SEMI, 0); }
+		public TerminalNode DOT() { return getToken(SankaParser.DOT, 0); }
+		public TerminalNode MUL() { return getToken(SankaParser.MUL, 0); }
 		public ImportDeclarationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -300,6 +316,7 @@ public class SankaParser extends Parser {
 			setState(118);
 			qualifiedName();
 			setState(121);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==DOT) {
 				{
@@ -351,6 +368,7 @@ public class SankaParser extends Parser {
 		enterRule(_localctx, 6, RULE_typeDeclaration);
 		try {
 			setState(127);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -380,6 +398,7 @@ public class SankaParser extends Parser {
 	}
 
 	public static class ClassDeclarationContext extends ParserRuleContext {
+		public TerminalNode CLASS() { return getToken(SankaParser.CLASS, 0); }
 		public TerminalNode Identifier() { return getToken(SankaParser.Identifier, 0); }
 		public ClassBodyContext classBody() {
 			return getRuleContext(ClassBodyContext.class,0);
@@ -412,6 +431,7 @@ public class SankaParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(130);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==SERIALIZABLE) {
 				{
@@ -425,6 +445,7 @@ public class SankaParser extends Parser {
 			setState(133);
 			match(Identifier);
 			setState(135);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==LT) {
 				{
@@ -449,6 +470,7 @@ public class SankaParser extends Parser {
 	}
 
 	public static class ClassModifierContext extends ParserRuleContext {
+		public TerminalNode SERIALIZABLE() { return getToken(SankaParser.SERIALIZABLE, 0); }
 		public ClassModifierContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -485,9 +507,15 @@ public class SankaParser extends Parser {
 	}
 
 	public static class TypeParametersContext extends ParserRuleContext {
+		public TerminalNode LT() { return getToken(SankaParser.LT, 0); }
 		public List<TerminalNode> Identifier() { return getTokens(SankaParser.Identifier); }
 		public TerminalNode Identifier(int i) {
 			return getToken(SankaParser.Identifier, i);
+		}
+		public TerminalNode GT() { return getToken(SankaParser.GT, 0); }
+		public List<TerminalNode> COMMA() { return getTokens(SankaParser.COMMA); }
+		public TerminalNode COMMA(int i) {
+			return getToken(SankaParser.COMMA, i);
 		}
 		public TypeParametersContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -546,6 +574,7 @@ public class SankaParser extends Parser {
 	}
 
 	public static class InterfaceDeclarationContext extends ParserRuleContext {
+		public TerminalNode INTERFACE() { return getToken(SankaParser.INTERFACE, 0); }
 		public TerminalNode Identifier() { return getToken(SankaParser.Identifier, 0); }
 		public InterfaceBodyContext interfaceBody() {
 			return getRuleContext(InterfaceBodyContext.class,0);
@@ -578,6 +607,7 @@ public class SankaParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(153);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==SERIALIZABLE) {
 				{
@@ -591,6 +621,7 @@ public class SankaParser extends Parser {
 			setState(156);
 			match(Identifier);
 			setState(158);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==LT) {
 				{
@@ -615,6 +646,8 @@ public class SankaParser extends Parser {
 	}
 
 	public static class ClassBodyContext extends ParserRuleContext {
+		public TerminalNode LBRACE() { return getToken(SankaParser.LBRACE, 0); }
+		public TerminalNode RBRACE() { return getToken(SankaParser.RBRACE, 0); }
 		public List<ClassBodyDeclarationContext> classBodyDeclaration() {
 			return getRuleContexts(ClassBodyDeclarationContext.class);
 		}
@@ -674,6 +707,8 @@ public class SankaParser extends Parser {
 	}
 
 	public static class InterfaceBodyContext extends ParserRuleContext {
+		public TerminalNode LBRACE() { return getToken(SankaParser.LBRACE, 0); }
+		public TerminalNode RBRACE() { return getToken(SankaParser.RBRACE, 0); }
 		public List<InterfaceBodyDeclarationContext> interfaceBodyDeclaration() {
 			return getRuleContexts(InterfaceBodyDeclarationContext.class);
 		}
@@ -739,17 +774,22 @@ public class SankaParser extends Parser {
 		public FieldDeclarationContext fieldDeclaration() {
 			return getRuleContext(FieldDeclarationContext.class,0);
 		}
+		public TerminalNode EXPORT() { return getToken(SankaParser.EXPORT, 0); }
 		public List<TerminalNode> Identifier() { return getTokens(SankaParser.Identifier); }
 		public TerminalNode Identifier(int i) {
 			return getToken(SankaParser.Identifier, i);
 		}
+		public TerminalNode SEMI() { return getToken(SankaParser.SEMI, 0); }
+		public TerminalNode DOT() { return getToken(SankaParser.DOT, 0); }
 		public ConstructorDeclarationContext constructorDeclaration() {
 			return getRuleContext(ConstructorDeclarationContext.class,0);
 		}
 		public MethodDeclarationContext methodDeclaration() {
 			return getRuleContext(MethodDeclarationContext.class,0);
 		}
+		public TerminalNode C__INCLUDE() { return getToken(SankaParser.C__INCLUDE, 0); }
 		public TerminalNode StringLiteral() { return getToken(SankaParser.StringLiteral, 0); }
+		public TerminalNode C__FIELD() { return getToken(SankaParser.C__FIELD, 0); }
 		public ClassBodyDeclarationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -770,6 +810,7 @@ public class SankaParser extends Parser {
 		int _la;
 		try {
 			setState(197);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,13,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -793,6 +834,7 @@ public class SankaParser extends Parser {
 				setState(183);
 				match(Identifier);
 				setState(186);
+				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==DOT) {
 					{
@@ -857,10 +899,13 @@ public class SankaParser extends Parser {
 	}
 
 	public static class ConstDeclarationContext extends ParserRuleContext {
+		public TerminalNode CONST() { return getToken(SankaParser.CONST, 0); }
 		public TerminalNode Identifier() { return getToken(SankaParser.Identifier, 0); }
+		public TerminalNode ASSIGN() { return getToken(SankaParser.ASSIGN, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode SEMI() { return getToken(SankaParser.SEMI, 0); }
 		public ConstDeclarationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -912,14 +957,20 @@ public class SankaParser extends Parser {
 		public TerminalNode Identifier(int i) {
 			return getToken(SankaParser.Identifier, i);
 		}
+		public TerminalNode SEMI() { return getToken(SankaParser.SEMI, 0); }
 		public List<FieldModifierContext> fieldModifier() {
 			return getRuleContexts(FieldModifierContext.class);
 		}
 		public FieldModifierContext fieldModifier(int i) {
 			return getRuleContext(FieldModifierContext.class,i);
 		}
+		public TerminalNode ASSIGN() { return getToken(SankaParser.ASSIGN, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
+		}
+		public List<TerminalNode> COMMA() { return getTokens(SankaParser.COMMA); }
+		public TerminalNode COMMA(int i) {
+			return getToken(SankaParser.COMMA, i);
 		}
 		public FieldDeclarationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -941,6 +992,7 @@ public class SankaParser extends Parser {
 		int _la;
 		try {
 			setState(236);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,18,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -964,6 +1016,7 @@ public class SankaParser extends Parser {
 				setState(212);
 				match(Identifier);
 				setState(215);
+				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==ASSIGN) {
 					{
@@ -1033,6 +1086,9 @@ public class SankaParser extends Parser {
 	}
 
 	public static class FieldModifierContext extends ParserRuleContext {
+		public TerminalNode PRIVATE() { return getToken(SankaParser.PRIVATE, 0); }
+		public TerminalNode STATIC() { return getToken(SankaParser.STATIC, 0); }
+		public TerminalNode INLINE() { return getToken(SankaParser.INLINE, 0); }
 		public FieldModifierContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1058,7 +1114,10 @@ public class SankaParser extends Parser {
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << INLINE) | (1L << PRIVATE) | (1L << STATIC))) != 0)) ) {
 			_errHandler.recoverInline(this);
-			} else {
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
 				consume();
 			}
 			}
@@ -1132,6 +1191,7 @@ public class SankaParser extends Parser {
 		public TypeTypeContext typeType() {
 			return getRuleContext(TypeTypeContext.class,0);
 		}
+		public TerminalNode VOID() { return getToken(SankaParser.VOID, 0); }
 		public List<FieldModifierContext> fieldModifier() {
 			return getRuleContexts(FieldModifierContext.class);
 		}
@@ -1174,6 +1234,7 @@ public class SankaParser extends Parser {
 				_la = _input.LA(1);
 			}
 			setState(252);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case BOOLEAN:
 			case BYTE:
@@ -1242,6 +1303,7 @@ public class SankaParser extends Parser {
 		enterRule(_localctx, 32, RULE_interfaceBodyDeclaration);
 		try {
 			setState(260);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case CONST:
 				enterOuterAlt(_localctx, 1);
@@ -1288,9 +1350,11 @@ public class SankaParser extends Parser {
 		public FormalParametersContext formalParameters() {
 			return getRuleContext(FormalParametersContext.class,0);
 		}
+		public TerminalNode SEMI() { return getToken(SankaParser.SEMI, 0); }
 		public TypeTypeContext typeType() {
 			return getRuleContext(TypeTypeContext.class,0);
 		}
+		public TerminalNode VOID() { return getToken(SankaParser.VOID, 0); }
 		public List<FieldModifierContext> fieldModifier() {
 			return getRuleContexts(FieldModifierContext.class);
 		}
@@ -1333,6 +1397,7 @@ public class SankaParser extends Parser {
 				_la = _input.LA(1);
 			}
 			setState(270);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case BOOLEAN:
 			case BYTE:
@@ -1388,6 +1453,8 @@ public class SankaParser extends Parser {
 		public TypeTypeContext typeType(int i) {
 			return getRuleContext(TypeTypeContext.class,i);
 		}
+		public TerminalNode LBRACK() { return getToken(SankaParser.LBRACK, 0); }
+		public TerminalNode RBRACK() { return getToken(SankaParser.RBRACK, 0); }
 		public TypeTypeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1418,6 +1485,7 @@ public class SankaParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(279);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Identifier:
 				{
@@ -1450,6 +1518,7 @@ public class SankaParser extends Parser {
 					_prevctx = _localctx;
 					{
 					setState(289);
+					_errHandler.sync(this);
 					switch ( getInterpreter().adaptivePredict(_input,25,_ctx) ) {
 					case 1:
 						{
@@ -1502,6 +1571,10 @@ public class SankaParser extends Parser {
 		public TerminalNode Identifier(int i) {
 			return getToken(SankaParser.Identifier, i);
 		}
+		public List<TerminalNode> DOT() { return getTokens(SankaParser.DOT); }
+		public TerminalNode DOT(int i) {
+			return getToken(SankaParser.DOT, i);
+		}
 		public TypeArgumentsContext typeArguments() {
 			return getRuleContext(TypeArgumentsContext.class,0);
 		}
@@ -1547,6 +1620,7 @@ public class SankaParser extends Parser {
 			setState(301);
 			match(Identifier);
 			setState(303);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,28,_ctx) ) {
 			case 1:
 				{
@@ -1569,11 +1643,17 @@ public class SankaParser extends Parser {
 	}
 
 	public static class TypeArgumentsContext extends ParserRuleContext {
+		public TerminalNode LT() { return getToken(SankaParser.LT, 0); }
 		public List<TypeTypeContext> typeType() {
 			return getRuleContexts(TypeTypeContext.class);
 		}
 		public TypeTypeContext typeType(int i) {
 			return getRuleContext(TypeTypeContext.class,i);
+		}
+		public TerminalNode GT() { return getToken(SankaParser.GT, 0); }
+		public List<TerminalNode> COMMA() { return getTokens(SankaParser.COMMA); }
+		public TerminalNode COMMA(int i) {
+			return getToken(SankaParser.COMMA, i);
 		}
 		public TypeArgumentsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1632,6 +1712,13 @@ public class SankaParser extends Parser {
 	}
 
 	public static class PrimitiveTypeContext extends ParserRuleContext {
+		public TerminalNode BOOLEAN() { return getToken(SankaParser.BOOLEAN, 0); }
+		public TerminalNode BYTE() { return getToken(SankaParser.BYTE, 0); }
+		public TerminalNode SHORT() { return getToken(SankaParser.SHORT, 0); }
+		public TerminalNode INT() { return getToken(SankaParser.INT, 0); }
+		public TerminalNode LONG() { return getToken(SankaParser.LONG, 0); }
+		public TerminalNode FLOAT() { return getToken(SankaParser.FLOAT, 0); }
+		public TerminalNode DOUBLE() { return getToken(SankaParser.DOUBLE, 0); }
 		public PrimitiveTypeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1657,7 +1744,10 @@ public class SankaParser extends Parser {
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BOOLEAN) | (1L << BYTE) | (1L << DOUBLE) | (1L << FLOAT) | (1L << INT) | (1L << LONG) | (1L << SHORT))) != 0)) ) {
 			_errHandler.recoverInline(this);
-			} else {
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
 				consume();
 			}
 			}
@@ -1674,6 +1764,8 @@ public class SankaParser extends Parser {
 	}
 
 	public static class FormalParametersContext extends ParserRuleContext {
+		public TerminalNode LPAREN() { return getToken(SankaParser.LPAREN, 0); }
+		public TerminalNode RPAREN() { return getToken(SankaParser.RPAREN, 0); }
 		public FormalParameterListContext formalParameterList() {
 			return getRuleContext(FormalParameterListContext.class,0);
 		}
@@ -1701,6 +1793,7 @@ public class SankaParser extends Parser {
 			setState(318);
 			match(LPAREN);
 			setState(320);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << BOOLEAN) | (1L << BYTE) | (1L << DOUBLE) | (1L << FLOAT) | (1L << INT) | (1L << LONG) | (1L << SHORT))) != 0) || _la==Identifier) {
 				{
@@ -1730,6 +1823,10 @@ public class SankaParser extends Parser {
 		}
 		public FormalParameterContext formalParameter(int i) {
 			return getRuleContext(FormalParameterContext.class,i);
+		}
+		public List<TerminalNode> COMMA() { return getTokens(SankaParser.COMMA); }
+		public TerminalNode COMMA(int i) {
+			return getToken(SankaParser.COMMA, i);
 		}
 		public FormalParameterListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1830,6 +1927,10 @@ public class SankaParser extends Parser {
 		public TerminalNode Identifier(int i) {
 			return getToken(SankaParser.Identifier, i);
 		}
+		public List<TerminalNode> DOT() { return getTokens(SankaParser.DOT); }
+		public TerminalNode DOT(int i) {
+			return getToken(SankaParser.DOT, i);
+		}
 		public QualifiedNameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1885,6 +1986,8 @@ public class SankaParser extends Parser {
 	}
 
 	public static class BlockContext extends ParserRuleContext {
+		public TerminalNode LBRACE() { return getToken(SankaParser.LBRACE, 0); }
+		public TerminalNode RBRACE() { return getToken(SankaParser.RBRACE, 0); }
 		public List<StatementContext> statement() {
 			return getRuleContexts(StatementContext.class);
 		}
@@ -1950,24 +2053,34 @@ public class SankaParser extends Parser {
 		public VariableDeclarationContext variableDeclaration() {
 			return getRuleContext(VariableDeclarationContext.class,0);
 		}
+		public TerminalNode SEMI() { return getToken(SankaParser.SEMI, 0); }
 		public VariableAssignmentContext variableAssignment() {
 			return getRuleContext(VariableAssignmentContext.class,0);
 		}
 		public IfStatementContext ifStatement() {
 			return getRuleContext(IfStatementContext.class,0);
 		}
+		public TerminalNode FOR() { return getToken(SankaParser.FOR, 0); }
+		public TerminalNode LPAREN() { return getToken(SankaParser.LPAREN, 0); }
 		public ForControlContext forControl() {
 			return getRuleContext(ForControlContext.class,0);
 		}
+		public TerminalNode RPAREN() { return getToken(SankaParser.RPAREN, 0); }
+		public TerminalNode WHILE() { return getToken(SankaParser.WHILE, 0); }
 		public ParExpressionContext parExpression() {
 			return getRuleContext(ParExpressionContext.class,0);
 		}
+		public TerminalNode SWITCH() { return getToken(SankaParser.SWITCH, 0); }
 		public SwitchLabelContext switchLabel() {
 			return getRuleContext(SwitchLabelContext.class,0);
 		}
+		public TerminalNode RETURN() { return getToken(SankaParser.RETURN, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode BREAK() { return getToken(SankaParser.BREAK, 0); }
+		public TerminalNode CONTINUE() { return getToken(SankaParser.CONTINUE, 0); }
+		public TerminalNode C__STMT() { return getToken(SankaParser.C__STMT, 0); }
 		public TerminalNode StringLiteral() { return getToken(SankaParser.StringLiteral, 0); }
 		public StatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1989,6 +2102,7 @@ public class SankaParser extends Parser {
 		int _la;
 		try {
 			setState(391);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,35,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -2072,6 +2186,7 @@ public class SankaParser extends Parser {
 				setState(375);
 				match(RETURN);
 				setState(377);
+				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (((((_la - 22)) & ~0x3f) == 0 && ((1L << (_la - 22)) & ((1L << (NEW - 22)) | (1L << (THIS - 22)) | (1L << (IntegerLiteral - 22)) | (1L << (FloatingPointLiteral - 22)) | (1L << (BooleanLiteral - 22)) | (1L << (CharacterLiteral - 22)) | (1L << (StringLiteral - 22)) | (1L << (NullLiteral - 22)) | (1L << (LPAREN - 22)) | (1L << (BANG - 22)) | (1L << (TILDE - 22)) | (1L << (ADD - 22)) | (1L << (SUB - 22)) | (1L << (Identifier - 22)))) != 0)) {
 					{
@@ -2143,7 +2258,10 @@ public class SankaParser extends Parser {
 	}
 
 	public static class VariableDeclarationContext extends ParserRuleContext {
+		public TerminalNode VAR() { return getToken(SankaParser.VAR, 0); }
 		public TerminalNode Identifier() { return getToken(SankaParser.Identifier, 0); }
+		public TerminalNode INLINE() { return getToken(SankaParser.INLINE, 0); }
+		public TerminalNode ASSIGN() { return getToken(SankaParser.ASSIGN, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -2169,6 +2287,7 @@ public class SankaParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(394);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==INLINE) {
 				{
@@ -2182,6 +2301,7 @@ public class SankaParser extends Parser {
 			setState(397);
 			match(Identifier);
 			setState(400);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==ASSIGN) {
 				{
@@ -2209,9 +2329,12 @@ public class SankaParser extends Parser {
 		public AssignableContext assignable() {
 			return getRuleContext(AssignableContext.class,0);
 		}
+		public TerminalNode ASSIGN() { return getToken(SankaParser.ASSIGN, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode INC() { return getToken(SankaParser.INC, 0); }
+		public TerminalNode DEC() { return getToken(SankaParser.DEC, 0); }
 		public VariableAssignmentContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2232,6 +2355,7 @@ public class SankaParser extends Parser {
 		int _la;
 		try {
 			setState(409);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,38,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -2253,7 +2377,10 @@ public class SankaParser extends Parser {
 				_la = _input.LA(1);
 				if ( !(_la==INC || _la==DEC) ) {
 				_errHandler.recoverInline(this);
-				} else {
+				}
+				else {
+					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+					_errHandler.reportMatch(this);
 					consume();
 				}
 				}
@@ -2279,6 +2406,9 @@ public class SankaParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public TerminalNode DOT() { return getToken(SankaParser.DOT, 0); }
+		public TerminalNode LBRACK() { return getToken(SankaParser.LBRACK, 0); }
+		public TerminalNode RBRACK() { return getToken(SankaParser.RBRACK, 0); }
 		public AssignableContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2298,11 +2428,13 @@ public class SankaParser extends Parser {
 		enterRule(_localctx, 60, RULE_assignable);
 		try {
 			setState(422);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,40,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(414);
+				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,39,_ctx) ) {
 				case 1:
 					{
@@ -2344,12 +2476,14 @@ public class SankaParser extends Parser {
 	}
 
 	public static class IfStatementContext extends ParserRuleContext {
+		public TerminalNode IF() { return getToken(SankaParser.IF, 0); }
 		public ParExpressionContext parExpression() {
 			return getRuleContext(ParExpressionContext.class,0);
 		}
 		public BlockContext block() {
 			return getRuleContext(BlockContext.class,0);
 		}
+		public TerminalNode ELSE() { return getToken(SankaParser.ELSE, 0); }
 		public ElseStatementContext elseStatement() {
 			return getRuleContext(ElseStatementContext.class,0);
 		}
@@ -2381,6 +2515,7 @@ public class SankaParser extends Parser {
 			setState(426);
 			block();
 			setState(429);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==ELSE) {
 				{
@@ -2430,6 +2565,7 @@ public class SankaParser extends Parser {
 		enterRule(_localctx, 64, RULE_elseStatement);
 		try {
 			setState(433);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case LBRACE:
 				enterOuterAlt(_localctx, 1);
@@ -2464,6 +2600,10 @@ public class SankaParser extends Parser {
 		public EnhancedForControlContext enhancedForControl() {
 			return getRuleContext(EnhancedForControlContext.class,0);
 		}
+		public List<TerminalNode> SEMI() { return getTokens(SankaParser.SEMI); }
+		public TerminalNode SEMI(int i) {
+			return getToken(SankaParser.SEMI, i);
+		}
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -2493,6 +2633,7 @@ public class SankaParser extends Parser {
 		int _la;
 		try {
 			setState(445);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,45,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -2505,6 +2646,7 @@ public class SankaParser extends Parser {
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(437);
+				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (((((_la - 18)) & ~0x3f) == 0 && ((1L << (_la - 18)) & ((1L << (INLINE - 18)) | (1L << (NEW - 18)) | (1L << (THIS - 18)) | (1L << (VAR - 18)) | (1L << (IntegerLiteral - 18)) | (1L << (FloatingPointLiteral - 18)) | (1L << (BooleanLiteral - 18)) | (1L << (CharacterLiteral - 18)) | (1L << (StringLiteral - 18)) | (1L << (NullLiteral - 18)) | (1L << (LPAREN - 18)) | (1L << (BANG - 18)) | (1L << (TILDE - 18)) | (1L << (ADD - 18)) | (1L << (SUB - 18)) | (1L << (Identifier - 18)))) != 0)) {
 					{
@@ -2520,6 +2662,7 @@ public class SankaParser extends Parser {
 				setState(441);
 				match(SEMI);
 				setState(443);
+				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (((((_la - 22)) & ~0x3f) == 0 && ((1L << (_la - 22)) & ((1L << (NEW - 22)) | (1L << (THIS - 22)) | (1L << (IntegerLiteral - 22)) | (1L << (FloatingPointLiteral - 22)) | (1L << (BooleanLiteral - 22)) | (1L << (CharacterLiteral - 22)) | (1L << (StringLiteral - 22)) | (1L << (NullLiteral - 22)) | (1L << (LPAREN - 22)) | (1L << (BANG - 22)) | (1L << (TILDE - 22)) | (1L << (ADD - 22)) | (1L << (SUB - 22)) | (1L << (Identifier - 22)))) != 0)) {
 					{
@@ -2572,6 +2715,7 @@ public class SankaParser extends Parser {
 		enterRule(_localctx, 68, RULE_forInit);
 		try {
 			setState(450);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,46,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -2633,6 +2777,7 @@ public class SankaParser extends Parser {
 		enterRule(_localctx, 70, RULE_forIncrement);
 		try {
 			setState(454);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,47,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -2662,13 +2807,16 @@ public class SankaParser extends Parser {
 	}
 
 	public static class EnhancedForControlContext extends ParserRuleContext {
+		public TerminalNode VAR() { return getToken(SankaParser.VAR, 0); }
 		public List<TerminalNode> Identifier() { return getTokens(SankaParser.Identifier); }
 		public TerminalNode Identifier(int i) {
 			return getToken(SankaParser.Identifier, i);
 		}
+		public TerminalNode COLON() { return getToken(SankaParser.COLON, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode COMMA() { return getToken(SankaParser.COMMA, 0); }
 		public EnhancedForControlContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2695,6 +2843,7 @@ public class SankaParser extends Parser {
 			setState(457);
 			match(Identifier);
 			setState(460);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==COMMA) {
 				{
@@ -2723,9 +2872,12 @@ public class SankaParser extends Parser {
 	}
 
 	public static class SwitchLabelContext extends ParserRuleContext {
+		public TerminalNode CASE() { return getToken(SankaParser.CASE, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode COLON() { return getToken(SankaParser.COLON, 0); }
+		public TerminalNode DEFAULT() { return getToken(SankaParser.DEFAULT, 0); }
 		public SwitchLabelContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2745,6 +2897,7 @@ public class SankaParser extends Parser {
 		enterRule(_localctx, 74, RULE_switchLabel);
 		try {
 			setState(471);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case CASE:
 				enterOuterAlt(_localctx, 1);
@@ -2782,9 +2935,11 @@ public class SankaParser extends Parser {
 	}
 
 	public static class ParExpressionContext extends ParserRuleContext {
+		public TerminalNode LPAREN() { return getToken(SankaParser.LPAREN, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode RPAREN() { return getToken(SankaParser.RPAREN, 0); }
 		public ParExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2830,6 +2985,10 @@ public class SankaParser extends Parser {
 		}
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
+		}
+		public List<TerminalNode> COMMA() { return getTokens(SankaParser.COMMA); }
+		public TerminalNode COMMA(int i) {
+			return getToken(SankaParser.COMMA, i);
 		}
 		public ExpressionListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2884,19 +3043,45 @@ public class SankaParser extends Parser {
 	}
 
 	public static class ExpressionContext extends ParserRuleContext {
+		public PrimaryContext primary() {
+			return getRuleContext(PrimaryContext.class,0);
+		}
+		public TerminalNode NEW() { return getToken(SankaParser.NEW, 0); }
+		public CreatorContext creator() {
+			return getRuleContext(CreatorContext.class,0);
+		}
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
 		}
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
-		public PrimaryContext primary() {
-			return getRuleContext(PrimaryContext.class,0);
-		}
-		public CreatorContext creator() {
-			return getRuleContext(CreatorContext.class,0);
-		}
+		public TerminalNode ADD() { return getToken(SankaParser.ADD, 0); }
+		public TerminalNode SUB() { return getToken(SankaParser.SUB, 0); }
+		public TerminalNode TILDE() { return getToken(SankaParser.TILDE, 0); }
+		public TerminalNode BANG() { return getToken(SankaParser.BANG, 0); }
+		public TerminalNode MUL() { return getToken(SankaParser.MUL, 0); }
+		public TerminalNode DIV() { return getToken(SankaParser.DIV, 0); }
+		public TerminalNode MOD() { return getToken(SankaParser.MOD, 0); }
+		public TerminalNode LE() { return getToken(SankaParser.LE, 0); }
+		public TerminalNode GE() { return getToken(SankaParser.GE, 0); }
+		public TerminalNode GT() { return getToken(SankaParser.GT, 0); }
+		public TerminalNode LT() { return getToken(SankaParser.LT, 0); }
+		public TerminalNode EQUAL() { return getToken(SankaParser.EQUAL, 0); }
+		public TerminalNode NOTEQUAL() { return getToken(SankaParser.NOTEQUAL, 0); }
+		public TerminalNode BITAND() { return getToken(SankaParser.BITAND, 0); }
+		public TerminalNode CARET() { return getToken(SankaParser.CARET, 0); }
+		public TerminalNode BITOR() { return getToken(SankaParser.BITOR, 0); }
+		public TerminalNode AND() { return getToken(SankaParser.AND, 0); }
+		public TerminalNode OR() { return getToken(SankaParser.OR, 0); }
+		public TerminalNode QUESTION() { return getToken(SankaParser.QUESTION, 0); }
+		public TerminalNode COLON() { return getToken(SankaParser.COLON, 0); }
+		public TerminalNode DOT() { return getToken(SankaParser.DOT, 0); }
 		public TerminalNode Identifier() { return getToken(SankaParser.Identifier, 0); }
+		public TerminalNode LBRACK() { return getToken(SankaParser.LBRACK, 0); }
+		public TerminalNode RBRACK() { return getToken(SankaParser.RBRACK, 0); }
+		public TerminalNode LPAREN() { return getToken(SankaParser.LPAREN, 0); }
+		public TerminalNode RPAREN() { return getToken(SankaParser.RPAREN, 0); }
 		public ExpressionListContext expressionList() {
 			return getRuleContext(ExpressionListContext.class,0);
 		}
@@ -2931,35 +3116,8 @@ public class SankaParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(493);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
-			case ADD:
-			case SUB:
-				{
-				setState(486);
-				_la = _input.LA(1);
-				if ( !(_la==ADD || _la==SUB) ) {
-				_errHandler.recoverInline(this);
-				} else {
-					consume();
-				}
-				setState(487);
-				expression(13);
-				}
-				break;
-			case BANG:
-			case TILDE:
-				{
-				setState(488);
-				_la = _input.LA(1);
-				if ( !(_la==BANG || _la==TILDE) ) {
-				_errHandler.recoverInline(this);
-				} else {
-					consume();
-				}
-				setState(489);
-				expression(12);
-				}
-				break;
 			case THIS:
 			case IntegerLiteral:
 			case FloatingPointLiteral:
@@ -2970,16 +3128,50 @@ public class SankaParser extends Parser {
 			case LPAREN:
 			case Identifier:
 				{
-				setState(490);
+				setState(486);
 				primary();
 				}
 				break;
 			case NEW:
 				{
-				setState(491);
+				setState(487);
 				match(NEW);
-				setState(492);
+				setState(488);
 				creator();
+				}
+				break;
+			case ADD:
+			case SUB:
+				{
+				setState(489);
+				_la = _input.LA(1);
+				if ( !(_la==ADD || _la==SUB) ) {
+				_errHandler.recoverInline(this);
+				}
+				else {
+					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+					_errHandler.reportMatch(this);
+					consume();
+				}
+				setState(490);
+				expression(13);
+				}
+				break;
+			case BANG:
+			case TILDE:
+				{
+				setState(491);
+				_la = _input.LA(1);
+				if ( !(_la==BANG || _la==TILDE) ) {
+				_errHandler.recoverInline(this);
+				}
+				else {
+					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+					_errHandler.reportMatch(this);
+					consume();
+				}
+				setState(492);
+				expression(12);
 				}
 				break;
 			default:
@@ -2995,6 +3187,7 @@ public class SankaParser extends Parser {
 					_prevctx = _localctx;
 					{
 					setState(545);
+					_errHandler.sync(this);
 					switch ( getInterpreter().adaptivePredict(_input,53,_ctx) ) {
 					case 1:
 						{
@@ -3006,7 +3199,10 @@ public class SankaParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(((((_la - 69)) & ~0x3f) == 0 && ((1L << (_la - 69)) & ((1L << (MUL - 69)) | (1L << (DIV - 69)) | (1L << (MOD - 69)))) != 0)) ) {
 						_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(497);
@@ -3023,7 +3219,10 @@ public class SankaParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==ADD || _la==SUB) ) {
 						_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(500);
@@ -3040,7 +3239,10 @@ public class SankaParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==T__0 || _la==T__1) ) {
 						_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(503);
@@ -3057,7 +3259,10 @@ public class SankaParser extends Parser {
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << GT) | (1L << LT) | (1L << LE) | (1L << GE))) != 0)) ) {
 						_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(506);
@@ -3074,7 +3279,10 @@ public class SankaParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==EQUAL || _la==NOTEQUAL) ) {
 						_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(509);
@@ -3192,6 +3400,7 @@ public class SankaParser extends Parser {
 						setState(540);
 						match(LPAREN);
 						setState(542);
+						_errHandler.sync(this);
 						_la = _input.LA(1);
 						if (((((_la - 22)) & ~0x3f) == 0 && ((1L << (_la - 22)) & ((1L << (NEW - 22)) | (1L << (THIS - 22)) | (1L << (IntegerLiteral - 22)) | (1L << (FloatingPointLiteral - 22)) | (1L << (BooleanLiteral - 22)) | (1L << (CharacterLiteral - 22)) | (1L << (StringLiteral - 22)) | (1L << (NullLiteral - 22)) | (1L << (LPAREN - 22)) | (1L << (BANG - 22)) | (1L << (TILDE - 22)) | (1L << (ADD - 22)) | (1L << (SUB - 22)) | (1L << (Identifier - 22)))) != 0)) {
 							{
@@ -3228,6 +3437,7 @@ public class SankaParser extends Parser {
 		public ParExpressionContext parExpression() {
 			return getRuleContext(ParExpressionContext.class,0);
 		}
+		public TerminalNode THIS() { return getToken(SankaParser.THIS, 0); }
 		public LiteralContext literal() {
 			return getRuleContext(LiteralContext.class,0);
 		}
@@ -3251,6 +3461,7 @@ public class SankaParser extends Parser {
 		enterRule(_localctx, 82, RULE_primary);
 		try {
 			setState(554);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case LPAREN:
 				enterOuterAlt(_localctx, 1);
@@ -3333,6 +3544,7 @@ public class SankaParser extends Parser {
 			setState(556);
 			typeType(0);
 			setState(559);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case LBRACK:
 				{
@@ -3363,12 +3575,17 @@ public class SankaParser extends Parser {
 	}
 
 	public static class ArrayCreatorRestContext extends ParserRuleContext {
+		public TerminalNode LBRACK() { return getToken(SankaParser.LBRACK, 0); }
+		public TerminalNode RBRACK() { return getToken(SankaParser.RBRACK, 0); }
+		public TerminalNode LBRACE() { return getToken(SankaParser.LBRACE, 0); }
+		public TerminalNode RBRACE() { return getToken(SankaParser.RBRACE, 0); }
 		public ExpressionListContext expressionList() {
 			return getRuleContext(ExpressionListContext.class,0);
 		}
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode CLASS() { return getToken(SankaParser.CLASS, 0); }
 		public TypeTypeContext typeType() {
 			return getRuleContext(TypeTypeContext.class,0);
 		}
@@ -3395,6 +3612,7 @@ public class SankaParser extends Parser {
 		int _la;
 		try {
 			setState(579);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,59,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -3406,6 +3624,7 @@ public class SankaParser extends Parser {
 				setState(563);
 				match(LBRACE);
 				setState(565);
+				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (((((_la - 22)) & ~0x3f) == 0 && ((1L << (_la - 22)) & ((1L << (NEW - 22)) | (1L << (THIS - 22)) | (1L << (IntegerLiteral - 22)) | (1L << (FloatingPointLiteral - 22)) | (1L << (BooleanLiteral - 22)) | (1L << (CharacterLiteral - 22)) | (1L << (StringLiteral - 22)) | (1L << (NullLiteral - 22)) | (1L << (LPAREN - 22)) | (1L << (BANG - 22)) | (1L << (TILDE - 22)) | (1L << (ADD - 22)) | (1L << (SUB - 22)) | (1L << (Identifier - 22)))) != 0)) {
 					{
@@ -3441,6 +3660,7 @@ public class SankaParser extends Parser {
 				setState(575);
 				match(RBRACK);
 				setState(577);
+				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,58,_ctx) ) {
 				case 1:
 					{
@@ -3465,6 +3685,8 @@ public class SankaParser extends Parser {
 	}
 
 	public static class ClassCreatorRestContext extends ParserRuleContext {
+		public TerminalNode LPAREN() { return getToken(SankaParser.LPAREN, 0); }
+		public TerminalNode RPAREN() { return getToken(SankaParser.RPAREN, 0); }
 		public ExpressionListContext expressionList() {
 			return getRuleContext(ExpressionListContext.class,0);
 		}
@@ -3495,6 +3717,7 @@ public class SankaParser extends Parser {
 			setState(581);
 			match(LPAREN);
 			setState(583);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (((((_la - 22)) & ~0x3f) == 0 && ((1L << (_la - 22)) & ((1L << (NEW - 22)) | (1L << (THIS - 22)) | (1L << (IntegerLiteral - 22)) | (1L << (FloatingPointLiteral - 22)) | (1L << (BooleanLiteral - 22)) | (1L << (CharacterLiteral - 22)) | (1L << (StringLiteral - 22)) | (1L << (NullLiteral - 22)) | (1L << (LPAREN - 22)) | (1L << (BANG - 22)) | (1L << (TILDE - 22)) | (1L << (ADD - 22)) | (1L << (SUB - 22)) | (1L << (Identifier - 22)))) != 0)) {
 				{
@@ -3506,6 +3729,7 @@ public class SankaParser extends Parser {
 			setState(585);
 			match(RPAREN);
 			setState(587);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,61,_ctx) ) {
 			case 1:
 				{
@@ -3528,11 +3752,17 @@ public class SankaParser extends Parser {
 	}
 
 	public static class MapDefinitionContext extends ParserRuleContext {
+		public TerminalNode LBRACE() { return getToken(SankaParser.LBRACE, 0); }
+		public TerminalNode RBRACE() { return getToken(SankaParser.RBRACE, 0); }
 		public List<MapEntryContext> mapEntry() {
 			return getRuleContexts(MapEntryContext.class);
 		}
 		public MapEntryContext mapEntry(int i) {
 			return getRuleContext(MapEntryContext.class,i);
+		}
+		public List<TerminalNode> COMMA() { return getTokens(SankaParser.COMMA); }
+		public TerminalNode COMMA(int i) {
+			return getToken(SankaParser.COMMA, i);
 		}
 		public MapDefinitionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -3554,6 +3784,7 @@ public class SankaParser extends Parser {
 		int _la;
 		try {
 			setState(602);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,63,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -3611,6 +3842,7 @@ public class SankaParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public TerminalNode COLON() { return getToken(SankaParser.COLON, 0); }
 		public MapEntryContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -3656,6 +3888,7 @@ public class SankaParser extends Parser {
 		public TerminalNode CharacterLiteral() { return getToken(SankaParser.CharacterLiteral, 0); }
 		public TerminalNode StringLiteral() { return getToken(SankaParser.StringLiteral, 0); }
 		public TerminalNode BooleanLiteral() { return getToken(SankaParser.BooleanLiteral, 0); }
+		public TerminalNode NullLiteral() { return getToken(SankaParser.NullLiteral, 0); }
 		public LiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -3681,7 +3914,10 @@ public class SankaParser extends Parser {
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << IntegerLiteral) | (1L << FloatingPointLiteral) | (1L << BooleanLiteral) | (1L << CharacterLiteral) | (1L << StringLiteral) | (1L << NullLiteral))) != 0)) ) {
 			_errHandler.recoverInline(this);
-			} else {
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
 				consume();
 			}
 			}
@@ -3750,7 +3986,7 @@ public class SankaParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3Q\u0265\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3Q\u0265\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -3796,11 +4032,11 @@ public class SankaParser extends Parser {
 		"/\3/\5/\u025d\n/\3\60\3\60\3\60\3\60\3\61\3\61\3\61\2\4&R\62\2\4\6\b\n"+
 		"\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@BDFHJLNPRTVXZ\\"+
 		"^`\2\f\5\2\24\24\32\32\36\36\t\2\5\5\7\7\r\r\20\20\25\25\27\27\35\35\3"+
-		"\2CD\3\2EF\3\29:\4\2GHLL\3\2\3\4\4\2\678>?\4\2==@@\3\2\',\u0297\2c\3\2"+
-		"\2\2\4s\3\2\2\2\6w\3\2\2\2\b\u0081\3\2\2\2\n\u0084\3\2\2\2\f\u008d\3\2"+
-		"\2\2\16\u008f\3\2\2\2\20\u009b\3\2\2\2\22\u00a4\3\2\2\2\24\u00ad\3\2\2"+
-		"\2\26\u00c7\3\2\2\2\30\u00c9\3\2\2\2\32\u00ee\3\2\2\2\34\u00f0\3\2\2\2"+
-		"\36\u00f2\3\2\2\2 \u00f9\3\2\2\2\"\u0106\3\2\2\2$\u010b\3\2\2\2&\u0119"+
+		"\2CD\3\2EF\3\29:\4\2GHLL\3\2\3\4\4\2\678>?\4\2==@@\3\2\',\2\u0297\2c\3"+
+		"\2\2\2\4s\3\2\2\2\6w\3\2\2\2\b\u0081\3\2\2\2\n\u0084\3\2\2\2\f\u008d\3"+
+		"\2\2\2\16\u008f\3\2\2\2\20\u009b\3\2\2\2\22\u00a4\3\2\2\2\24\u00ad\3\2"+
+		"\2\2\26\u00c7\3\2\2\2\30\u00c9\3\2\2\2\32\u00ee\3\2\2\2\34\u00f0\3\2\2"+
+		"\2\36\u00f2\3\2\2\2 \u00f9\3\2\2\2\"\u0106\3\2\2\2$\u010b\3\2\2\2&\u0119"+
 		"\3\2\2\2(\u012c\3\2\2\2*\u0133\3\2\2\2,\u013e\3\2\2\2.\u0140\3\2\2\2\60"+
 		"\u0146\3\2\2\2\62\u014e\3\2\2\2\64\u0151\3\2\2\2\66\u0159\3\2\2\28\u0189"+
 		"\3\2\2\2:\u018c\3\2\2\2<\u019b\3\2\2\2>\u01a8\3\2\2\2@\u01aa\3\2\2\2B"+
@@ -3930,54 +4166,54 @@ public class SankaParser extends Parser {
 		"\5R*\2\u01dd\u01de\7.\2\2\u01deO\3\2\2\2\u01df\u01e4\5R*\2\u01e0\u01e1"+
 		"\7\64\2\2\u01e1\u01e3\5R*\2\u01e2\u01e0\3\2\2\2\u01e3\u01e6\3\2\2\2\u01e4"+
 		"\u01e2\3\2\2\2\u01e4\u01e5\3\2\2\2\u01e5Q\3\2\2\2\u01e6\u01e4\3\2\2\2"+
-		"\u01e7\u01e8\b*\1\2\u01e8\u01e9\t\5\2\2\u01e9\u01f0\5R*\17\u01ea\u01eb"+
-		"\t\6\2\2\u01eb\u01f0\5R*\16\u01ec\u01f0\5T+\2\u01ed\u01ee\7\30\2\2\u01ee"+
-		"\u01f0\5V,\2\u01ef\u01e7\3\2\2\2\u01ef\u01ea\3\2\2\2\u01ef\u01ec\3\2\2"+
-		"\2\u01ef\u01ed\3\2\2\2\u01f0\u0225\3\2\2\2\u01f1\u01f2\f\r\2\2\u01f2\u01f3"+
-		"\t\7\2\2\u01f3\u0224\5R*\16\u01f4\u01f5\f\f\2\2\u01f5\u01f6\t\5\2\2\u01f6"+
-		"\u0224\5R*\r\u01f7\u01f8\f\13\2\2\u01f8\u01f9\t\b\2\2\u01f9\u0224\5R*"+
-		"\f\u01fa\u01fb\f\n\2\2\u01fb\u01fc\t\t\2\2\u01fc\u0224\5R*\13\u01fd\u01fe"+
-		"\f\t\2\2\u01fe\u01ff\t\n\2\2\u01ff\u0224\5R*\n\u0200\u0201\f\b\2\2\u0201"+
-		"\u0202\7I\2\2\u0202\u0224\5R*\t\u0203\u0204\f\7\2\2\u0204\u0205\7K\2\2"+
-		"\u0205\u0224\5R*\b\u0206\u0207\f\6\2\2\u0207\u0208\7J\2\2\u0208\u0224"+
-		"\5R*\7\u0209\u020a\f\5\2\2\u020a\u020b\7A\2\2\u020b\u0224\5R*\6\u020c"+
-		"\u020d\f\4\2\2\u020d\u020e\7B\2\2\u020e\u0224\5R*\5\u020f\u0210\f\3\2"+
-		"\2\u0210\u0211\7;\2\2\u0211\u0212\5R*\2\u0212\u0213\7<\2\2\u0213\u0214"+
-		"\5R*\4\u0214\u0224\3\2\2\2\u0215\u0216\f\23\2\2\u0216\u0217\7\65\2\2\u0217"+
-		"\u0224\7M\2\2\u0218\u0219\f\22\2\2\u0219\u021a\7\61\2\2\u021a\u021b\5"+
-		"R*\2\u021b\u021c\7\62\2\2\u021c\u0224\3\2\2\2\u021d\u021e\f\21\2\2\u021e"+
-		"\u0220\7-\2\2\u021f\u0221\5P)\2\u0220\u021f\3\2\2\2\u0220\u0221\3\2\2"+
-		"\2\u0221\u0222\3\2\2\2\u0222\u0224\7.\2\2\u0223\u01f1\3\2\2\2\u0223\u01f4"+
-		"\3\2\2\2\u0223\u01f7\3\2\2\2\u0223\u01fa\3\2\2\2\u0223\u01fd\3\2\2\2\u0223"+
-		"\u0200\3\2\2\2\u0223\u0203\3\2\2\2\u0223\u0206\3\2\2\2\u0223\u0209\3\2"+
-		"\2\2\u0223\u020c\3\2\2\2\u0223\u020f\3\2\2\2\u0223\u0215\3\2\2\2\u0223"+
-		"\u0218\3\2\2\2\u0223\u021d\3\2\2\2\u0224\u0227\3\2\2\2\u0225\u0223\3\2"+
-		"\2\2\u0225\u0226\3\2\2\2\u0226S\3\2\2\2\u0227\u0225\3\2\2\2\u0228\u022d"+
-		"\5N(\2\u0229\u022d\7 \2\2\u022a\u022d\5`\61\2\u022b\u022d\7M\2\2\u022c"+
-		"\u0228\3\2\2\2\u022c\u0229\3\2\2\2\u022c\u022a\3\2\2\2\u022c\u022b\3\2"+
-		"\2\2\u022dU\3\2\2\2\u022e\u0231\5&\24\2\u022f\u0232\5X-\2\u0230\u0232"+
-		"\5Z.\2\u0231\u022f\3\2\2\2\u0231\u0230\3\2\2\2\u0232W\3\2\2\2\u0233\u0234"+
-		"\7\61\2\2\u0234\u0235\7\62\2\2\u0235\u0237\7/\2\2\u0236\u0238\5P)\2\u0237"+
-		"\u0236\3\2\2\2\u0237\u0238\3\2\2\2\u0238\u0239\3\2\2\2\u0239\u0246\7\60"+
-		"\2\2\u023a\u023b\7\61\2\2\u023b\u023c\5R*\2\u023c\u023d\7\62\2\2\u023d"+
-		"\u0246\3\2\2\2\u023e\u023f\7\61\2\2\u023f\u0240\7\t\2\2\u0240\u0241\5"+
-		"&\24\2\u0241\u0243\7\62\2\2\u0242\u0244\5\\/\2\u0243\u0242\3\2\2\2\u0243"+
-		"\u0244\3\2\2\2\u0244\u0246\3\2\2\2\u0245\u0233\3\2\2\2\u0245\u023a\3\2"+
-		"\2\2\u0245\u023e\3\2\2\2\u0246Y\3\2\2\2\u0247\u0249\7-\2\2\u0248\u024a"+
-		"\5P)\2\u0249\u0248\3\2\2\2\u0249\u024a\3\2\2\2\u024a\u024b\3\2\2\2\u024b"+
-		"\u024d\7.\2\2\u024c\u024e\5\22\n\2\u024d\u024c\3\2\2\2\u024d\u024e\3\2"+
-		"\2\2\u024e[\3\2\2\2\u024f\u0250\7/\2\2\u0250\u025d\7\60\2\2\u0251\u0252"+
-		"\7/\2\2\u0252\u0257\5^\60\2\u0253\u0254\7\64\2\2\u0254\u0256\5^\60\2\u0255"+
-		"\u0253\3\2\2\2\u0256\u0259\3\2\2\2\u0257\u0255\3\2\2\2\u0257\u0258\3\2"+
-		"\2\2\u0258\u025a\3\2\2\2\u0259\u0257\3\2\2\2\u025a\u025b\7\60\2\2\u025b"+
-		"\u025d\3\2\2\2\u025c\u024f\3\2\2\2\u025c\u0251\3\2\2\2\u025d]\3\2\2\2"+
-		"\u025e\u025f\5R*\2\u025f\u0260\7<\2\2\u0260\u0261\5R*\2\u0261_\3\2\2\2"+
-		"\u0262\u0263\t\13\2\2\u0263a\3\2\2\2Bchn{\u0081\u0084\u0089\u0095\u009b"+
-		"\u00a0\u00a8\u00b1\u00bc\u00c7\u00d2\u00d9\u00e0\u00e9\u00ee\u00f9\u00fe"+
-		"\u0106\u010b\u0110\u0119\u0123\u0125\u012c\u0131\u0139\u0142\u014b\u0156"+
-		"\u015d\u017b\u0189\u018c\u0192\u019b\u01a0\u01a8\u01af\u01b3\u01b7\u01bd"+
-		"\u01bf\u01c4\u01c8\u01ce\u01d9\u01e4\u01ef\u0220\u0223\u0225\u022c\u0231"+
-		"\u0237\u0243\u0245\u0249\u024d\u0257\u025c";
+		"\u01e7\u01e8\b*\1\2\u01e8\u01f0\5T+\2\u01e9\u01ea\7\30\2\2\u01ea\u01f0"+
+		"\5V,\2\u01eb\u01ec\t\5\2\2\u01ec\u01f0\5R*\17\u01ed\u01ee\t\6\2\2\u01ee"+
+		"\u01f0\5R*\16\u01ef\u01e7\3\2\2\2\u01ef\u01e9\3\2\2\2\u01ef\u01eb\3\2"+
+		"\2\2\u01ef\u01ed\3\2\2\2\u01f0\u0225\3\2\2\2\u01f1\u01f2\f\r\2\2\u01f2"+
+		"\u01f3\t\7\2\2\u01f3\u0224\5R*\16\u01f4\u01f5\f\f\2\2\u01f5\u01f6\t\5"+
+		"\2\2\u01f6\u0224\5R*\r\u01f7\u01f8\f\13\2\2\u01f8\u01f9\t\b\2\2\u01f9"+
+		"\u0224\5R*\f\u01fa\u01fb\f\n\2\2\u01fb\u01fc\t\t\2\2\u01fc\u0224\5R*\13"+
+		"\u01fd\u01fe\f\t\2\2\u01fe\u01ff\t\n\2\2\u01ff\u0224\5R*\n\u0200\u0201"+
+		"\f\b\2\2\u0201\u0202\7I\2\2\u0202\u0224\5R*\t\u0203\u0204\f\7\2\2\u0204"+
+		"\u0205\7K\2\2\u0205\u0224\5R*\b\u0206\u0207\f\6\2\2\u0207\u0208\7J\2\2"+
+		"\u0208\u0224\5R*\7\u0209\u020a\f\5\2\2\u020a\u020b\7A\2\2\u020b\u0224"+
+		"\5R*\6\u020c\u020d\f\4\2\2\u020d\u020e\7B\2\2\u020e\u0224\5R*\5\u020f"+
+		"\u0210\f\3\2\2\u0210\u0211\7;\2\2\u0211\u0212\5R*\2\u0212\u0213\7<\2\2"+
+		"\u0213\u0214\5R*\4\u0214\u0224\3\2\2\2\u0215\u0216\f\23\2\2\u0216\u0217"+
+		"\7\65\2\2\u0217\u0224\7M\2\2\u0218\u0219\f\22\2\2\u0219\u021a\7\61\2\2"+
+		"\u021a\u021b\5R*\2\u021b\u021c\7\62\2\2\u021c\u0224\3\2\2\2\u021d\u021e"+
+		"\f\21\2\2\u021e\u0220\7-\2\2\u021f\u0221\5P)\2\u0220\u021f\3\2\2\2\u0220"+
+		"\u0221\3\2\2\2\u0221\u0222\3\2\2\2\u0222\u0224\7.\2\2\u0223\u01f1\3\2"+
+		"\2\2\u0223\u01f4\3\2\2\2\u0223\u01f7\3\2\2\2\u0223\u01fa\3\2\2\2\u0223"+
+		"\u01fd\3\2\2\2\u0223\u0200\3\2\2\2\u0223\u0203\3\2\2\2\u0223\u0206\3\2"+
+		"\2\2\u0223\u0209\3\2\2\2\u0223\u020c\3\2\2\2\u0223\u020f\3\2\2\2\u0223"+
+		"\u0215\3\2\2\2\u0223\u0218\3\2\2\2\u0223\u021d\3\2\2\2\u0224\u0227\3\2"+
+		"\2\2\u0225\u0223\3\2\2\2\u0225\u0226\3\2\2\2\u0226S\3\2\2\2\u0227\u0225"+
+		"\3\2\2\2\u0228\u022d\5N(\2\u0229\u022d\7 \2\2\u022a\u022d\5`\61\2\u022b"+
+		"\u022d\7M\2\2\u022c\u0228\3\2\2\2\u022c\u0229\3\2\2\2\u022c\u022a\3\2"+
+		"\2\2\u022c\u022b\3\2\2\2\u022dU\3\2\2\2\u022e\u0231\5&\24\2\u022f\u0232"+
+		"\5X-\2\u0230\u0232\5Z.\2\u0231\u022f\3\2\2\2\u0231\u0230\3\2\2\2\u0232"+
+		"W\3\2\2\2\u0233\u0234\7\61\2\2\u0234\u0235\7\62\2\2\u0235\u0237\7/\2\2"+
+		"\u0236\u0238\5P)\2\u0237\u0236\3\2\2\2\u0237\u0238\3\2\2\2\u0238\u0239"+
+		"\3\2\2\2\u0239\u0246\7\60\2\2\u023a\u023b\7\61\2\2\u023b\u023c\5R*\2\u023c"+
+		"\u023d\7\62\2\2\u023d\u0246\3\2\2\2\u023e\u023f\7\61\2\2\u023f\u0240\7"+
+		"\t\2\2\u0240\u0241\5&\24\2\u0241\u0243\7\62\2\2\u0242\u0244\5\\/\2\u0243"+
+		"\u0242\3\2\2\2\u0243\u0244\3\2\2\2\u0244\u0246\3\2\2\2\u0245\u0233\3\2"+
+		"\2\2\u0245\u023a\3\2\2\2\u0245\u023e\3\2\2\2\u0246Y\3\2\2\2\u0247\u0249"+
+		"\7-\2\2\u0248\u024a\5P)\2\u0249\u0248\3\2\2\2\u0249\u024a\3\2\2\2\u024a"+
+		"\u024b\3\2\2\2\u024b\u024d\7.\2\2\u024c\u024e\5\22\n\2\u024d\u024c\3\2"+
+		"\2\2\u024d\u024e\3\2\2\2\u024e[\3\2\2\2\u024f\u0250\7/\2\2\u0250\u025d"+
+		"\7\60\2\2\u0251\u0252\7/\2\2\u0252\u0257\5^\60\2\u0253\u0254\7\64\2\2"+
+		"\u0254\u0256\5^\60\2\u0255\u0253\3\2\2\2\u0256\u0259\3\2\2\2\u0257\u0255"+
+		"\3\2\2\2\u0257\u0258\3\2\2\2\u0258\u025a\3\2\2\2\u0259\u0257\3\2\2\2\u025a"+
+		"\u025b\7\60\2\2\u025b\u025d\3\2\2\2\u025c\u024f\3\2\2\2\u025c\u0251\3"+
+		"\2\2\2\u025d]\3\2\2\2\u025e\u025f\5R*\2\u025f\u0260\7<\2\2\u0260\u0261"+
+		"\5R*\2\u0261_\3\2\2\2\u0262\u0263\t\13\2\2\u0263a\3\2\2\2Bchn{\u0081\u0084"+
+		"\u0089\u0095\u009b\u00a0\u00a8\u00b1\u00bc\u00c7\u00d2\u00d9\u00e0\u00e9"+
+		"\u00ee\u00f9\u00fe\u0106\u010b\u0110\u0119\u0123\u0125\u012c\u0131\u0139"+
+		"\u0142\u014b\u0156\u015d\u017b\u0189\u018c\u0192\u019b\u01a0\u01a8\u01af"+
+		"\u01b3\u01b7\u01bd\u01bf\u01c4\u01c8\u01ce\u01d9\u01e4\u01ef\u0220\u0223"+
+		"\u0225\u022c\u0231\u0237\u0243\u0245\u0249\u024d\u0257\u025c";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
