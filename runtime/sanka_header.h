@@ -17,12 +17,12 @@ static inline void DIVISIONCHECK(long d) {
 
 /* Part 2: string_add.c */
 
-extern int STRING_EQUALS(char *, char *);
-extern char *STRING_ADD(char **, int);
+extern int STRING_EQUALS(const char *, const char *);
+extern char *STRING_ADD(const char **, int);
 extern void INT_TO_STRING(int, char *);
 extern void LONG_TO_STRING(long, char *);
 extern void DOUBLE_TO_STRING(double, char *);
-extern char *STRING_SUBSTRING(char *, int, int);
+extern char *STRING_SUBSTRING(const char *, int, int);
 
 /* Part 3: array.c */
 

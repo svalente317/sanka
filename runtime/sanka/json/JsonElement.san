@@ -11,7 +11,7 @@ class JsonElement {
     const OBJECT_TYPE = 6;
 
     int type;
-    c__field "union { int i; double d; char *s; struct array *arr; struct JsonObject *obj; } data";
+    c__field "union { int i; double d; const char *s; struct array *arr; struct JsonObject *obj; } data";
 
     JsonElement() {
         this.type = NULL_TYPE;

@@ -156,7 +156,7 @@ class TypeDefinition implements Comparable<TypeDefinition> {
             return this.name;
         }
         if (this.isStringType()) {
-            return "char *"; // or "const char *"
+            return "const char *";
         }
         return "struct " + this.name + " *";
     }

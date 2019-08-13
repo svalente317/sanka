@@ -47,7 +47,7 @@ enum rb_color
 union rb_key
   {
     int i;
-    char *cp;
+    const char *cp;
   };
 
 union rb_value

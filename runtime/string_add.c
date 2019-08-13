@@ -2,14 +2,14 @@
 #include <string.h>
 #include "sanka_header.h"
 
-int STRING_EQUALS(char *s1, char *s2) {
+int STRING_EQUALS(const char *s1, const char *s2) {
     if (s1 == NULL) {
         return (s2 == NULL);
     }
     return (s2 != NULL) && (strcmp(s1, s2) == 0);
 }
 
-char *STRING_ADD(char **arr, int size) {
+char *STRING_ADD(const char **arr, int size) {
     int length, idx;
     char *cp;
     int lens[size];
@@ -94,7 +94,7 @@ void DOUBLE_TO_STRING(double d, char *str) {
     sprintf(str, "%g", d);
 }
 
-char *STRING_SUBSTRING(char *this, int beginIndex, int endIndex) {
+char *STRING_SUBSTRING(const char *this, int beginIndex, int endIndex) {
     if (beginIndex < 0 || endIndex < 0) {
         return NULL;
     }

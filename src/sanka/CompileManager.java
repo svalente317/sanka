@@ -99,7 +99,7 @@ class CompileManager {
         env.print(TranslationUtils.INCLUDE_SANKA_HEADER);
         env.print("#include <" + TranslationUtils.getHeaderFileName(packageName, className) + ">");
         env.print("");
-        env.print("int main(int argc, char **argv) {");
+        env.print("int main(int argc, char *const *argv) {");
         env.level++;
         env.print("GC_INIT();");
         env.print("struct array arr;");

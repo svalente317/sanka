@@ -1004,7 +1004,7 @@ class ExpressionDefinition {
         List<ExpressionDefinition> exprList = new ArrayList<>();
         addLeftAndRightToList(exprList, this);
         String arrayName = env.getTmpVariable();
-        env.print("char *" + arrayName + "[" + exprList.size() + "];");
+        env.print("const char *" + arrayName + "[" + exprList.size() + "];");
         for (int idx = 0; idx < exprList.size(); idx++) {
             String text = TranslationUtils.translateToString(exprList.get(idx));
             env.print(arrayName + "[" + idx + "]" + " = " + text + ";");
