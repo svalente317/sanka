@@ -7,6 +7,7 @@ class System {
     c__include "string.h";
     c__include "unistd.h";
     c__include "sys/time.h";
+    c__include "time.h";
 
     static void print(String text) {
         c__stmt "fputs(text, stdout)";
@@ -35,6 +36,17 @@ class System {
         c__stmt "struct timeval now";
         c__stmt "gettimeofday(&now, NULL)";
         c__stmt "return ((long long)now.tv_sec)*1000 + (now.tv_usec/1000)";
+    }
+
+    static String formatTime(String format, long time) {
+        c__stmt "time_t t = (time_t)(time / 1000)";
+        c__stmt "struct tm tm";
+        c__stmt "gmtime_r(&t, &tm)";
+        c__stmt "char buffer[80]";
+        c__stmt "struct array a";
+        c__stmt "a.data = buffer";
+        c__stmt "a.length = strftime(buffer, 80, format, &tm)";
+        c__stmt "return NEW_STRING(&a)";
     }
 
     static void sleep(int millis) {

@@ -111,7 +111,48 @@ class LineReader {
         line.setLength(eol);
     }
 
+    /**
+     * Read buffer.length bytes from the cache and stream into the buffer.
+     * This blocks as long as necessary, and it issues as many read
+     * operations as necessary to fully fill the buffer.
+     *
+     * @return true if the buffer was filled, and false if the stream
+     * was closed or there was an error
+     */
     boolean readFully(byte[] buffer) {
-        // TODO
+        var idx = 0;
+        var data = null;
+        var dlen = 0;
+        var readBuffer = null;
+        while (idx < buffer.length) {
+            if (this.prefix != null) {
+                data = this.prefix;
+                dlen = data.length;
+                this.prefix = null;
+            } else {
+                if (readBuffer == null) {
+                    readBuffer = new byte[1024];
+                    data = readBuffer;
+                }
+                dlen = this.reader.read(data);
+                if (dlen <= 0) {
+                    return false;
+                }
+            }
+            var count = buffer.length - idx;
+            if (count > dlen) {
+                count = dlen;
+            }
+            for (var i = 0; i < count; i++) {
+                buffer[idx] = data[i];
+                idx++;
+            }
+            if (dlen > count) {
+                data.setLength(dlen);
+                data.delete(0, count);
+                this.prefix = data;
+            }
+        }
+        return true;
     }
 }

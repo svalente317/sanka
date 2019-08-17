@@ -158,6 +158,7 @@ class SerializableUtils {
         stmt.expression = new ExpressionDefinition();
         stmt.expression.expressionType = ExpressionType.NEW_INSTANCE;
         stmt.expression.type = JSON_OBJECT_TYPE;
+        env.symbolTable.put(stmt.name, stmt.expression.type);
         stmt.translate();
         for (FieldDefinition field : classdef.fieldList) {
             if (field.isPrivate || field.isStatic) {

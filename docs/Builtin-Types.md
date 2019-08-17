@@ -136,10 +136,12 @@ The expression `str[n]` evaluates to the n'th byte in the string.
 The `String` class has these methods:
 * `int length()` Return the number of bytes in the string
 * `int indexOf(byte b)` Return the index of the first occurrence of `b`
+* `int lastIndexOf(byte b)` Return the index of the last occurrence of `b`
 * `int find(String s)` Return the index of the first occurrence of `s`
 * `boolean startsWith(String s)` Return true if this string starts with `s`
 * `boolean endsWith(String s)` Return true if this string ends with `s`
 * `String substring(int beginIndex, int endIndex)` Return a substring
+* `byte[] toByteArray()` Return a copy of the bytes in the String
 
 ## Array
 

@@ -152,7 +152,9 @@ class MethodDefinition {
                 builder.append(");");
                 env.print(builder.toString());
             } else if (this.generator != null) {
+                env.symbolTable.push(this.frame);
                 this.generator.translate();
+                env.symbolTable.pop();
             } else if (classdef.isInterface) {
                 translateInterfaceBody();
             }

@@ -9,6 +9,12 @@ class String {
         // NEW_STRING(). So this method is never called.
     }
 
+    byte[] toByteArray() {
+        var bytes = new byte[length()];
+        c__stmt "memcpy(bytes->data, this, bytes->length)";
+        return bytes;
+    }
+
     int length() {
         c__stmt "return strlen(this)";
     }
@@ -16,6 +22,15 @@ class String {
     int indexOf(byte b) {
         c__stmt "for (int idx = 0; this[idx] != 0; idx++) if (this[idx] == b) return idx";
         c__stmt "return -1";
+    }
+
+    int lastIndexOf(byte b) {
+        for (var idx = length()-1; idx >= 0; idx--) {
+            if (this[idx] == b) {
+                return idx;
+            }
+        }
+        return -1;
     }
 
     int find(String s) {
@@ -35,5 +50,9 @@ class String {
 
     String substring(int beginIndex, int endIndex) {
         c__stmt "return STRING_SUBSTRING(this, beginIndex, endIndex)";
+    }
+
+    String toString() {
+        return this;
     }
 }
