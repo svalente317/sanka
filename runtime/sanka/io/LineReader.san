@@ -34,7 +34,7 @@ class LineReader {
      *
      * @return the next line from the stream
      */
-    byte[] readline() {
+    String readline() {
         var eol = -1;
         if (this.prefix != null) {
             eol = findByte(this.prefix, '\n');
@@ -42,7 +42,7 @@ class LineReader {
                 var line = this.prefix;
                 this.prefix = arraySuffix(this.prefix, eol+1);
                 stripLine(line, eol);
-                return line;
+                return new String(line);
             }
         }
         var buffer = null;
@@ -72,7 +72,7 @@ class LineReader {
             line.setLength(line.length-1);
             buffer.delete(0, 1);
             this.prefix = buffer;
-            return line;
+            return new String(line);
         }
         var newPrefix = arraySuffix(buffer, eol+1);
         stripLine(buffer, eol);
@@ -81,7 +81,7 @@ class LineReader {
             buffer = this.prefix;
         }
         this.prefix = newPrefix;
-        return buffer;
+        return new String(buffer);
     }
 
     private int findByte(byte[] arr, byte target) {
