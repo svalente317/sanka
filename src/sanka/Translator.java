@@ -62,6 +62,10 @@ public class Translator {
                 translator.skipImports = true;
                 continue;
             }
+            if (arg.startsWith("-l")) {
+                env.addLibrary(arg);
+                continue;
+            }
             if ((mainClass != null && exeName == null) ||
                 (mainClass == null && exeName != null)) {
                 System.err.println("Specify --main and --exe together");

@@ -17,6 +17,7 @@ class Environment {
     // Pass 1.
     List<String> importPath;
     List<String> libPath;
+    List<String> libraries;
     List<ClassDefinition> classList;
     String currentPackage;
     Map<String, String> classPackageMap;
@@ -54,6 +55,13 @@ class Environment {
             this.libPath = new LinkedList<>();
         }
         this.libPath.add(libDir);
+    }
+
+    void addLibrary(String arg) {
+        if (this.libraries == null) {
+            this.libraries = new LinkedList<>();
+        }
+        this.libraries.add(arg);
     }
 
     /**

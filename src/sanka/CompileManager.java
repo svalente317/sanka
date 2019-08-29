@@ -18,13 +18,8 @@ class CompileManager {
             if (classdef.isImport) {
                 continue;
             }
-            // Should use TranslationUtils to get generated file name including $top.
-            String filename = classdef.name + ".c";
-            if (classdef.packageName != null) {
-                filename = TranslationUtils.replaceDot(classdef.packageName, File.separatorChar) +
-                    File.separatorChar + filename;
-            }
-            compileFile(filename, linkcommand);
+            File cfile = TranslationUtils.getClassFilename(classdef, false);
+            compileFile(cfile.getPath(), linkcommand);
         }
         String filename = generateMainFile(mainClass);
         compileFile(filename, linkcommand);
@@ -38,6 +33,9 @@ class CompileManager {
         linkcommand.add("-lsankaruntime");
         linkcommand.add("-lgc");
         linkcommand.add("-lpthread");
+        if (env.libraries != null) {
+            linkcommand.addAll(env.libraries);
+        }
         linkcommand.add("-o");
         linkcommand.add(exeName);
         int status = executeCommand(linkcommand);
@@ -54,7 +52,8 @@ class CompileManager {
         for (String importPath : env.importPath) {
             command.add("-I" + importPath);
         }
-        command.add("-I.");
+        String top = env.topDirectory == null ? "." : env.topDirectory;
+        command.add("-I" + top);
         String objfilename = filename.substring(0, filename.length()-1) + "o";
         command.add("-o");
         command.add(objfilename);

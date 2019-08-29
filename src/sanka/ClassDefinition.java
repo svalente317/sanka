@@ -338,6 +338,11 @@ class ClassDefinition {
         }
     }
 
+    void translateForward() {
+        Environment env = Environment.getInstance();
+        env.print("struct " + this.name + ";");
+    }
+
     StringBuilder makeInterfaceConstructor() {
         StringBuilder builder = new StringBuilder();
         builder.append("void ");

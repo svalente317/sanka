@@ -32,6 +32,24 @@ class TranslationUtils {
     }
 
     /**
+     * @return the C or H file for a class
+     */
+    static File getClassFilename(ClassDefinition classdef, boolean isHeader) {
+        Environment env = Environment.getInstance();
+        String suffix = isHeader ? ".h" : ".c";
+        String filename = classdef.name + suffix;
+        if (classdef.packageName == null) {
+            return env.topDirectory == null ? new File(filename) :
+                new File(env.topDirectory, filename);
+        }
+        String path = replaceDot(classdef.packageName, File.separatorChar);
+        File packageDirectory = env.topDirectory == null ? new File(path) :
+            new File(env.topDirectory, path);
+        packageDirectory.mkdirs();
+        return new File(packageDirectory, filename);
+    }
+
+    /**
      * Write Class.h and/or Class.c files in the output directory.
      */
     static void translateClass(ClassDefinition classdef, boolean isHeader) throws IOException {
@@ -46,22 +64,9 @@ class TranslationUtils {
         env.writer.close();
         env.writer = null;
 
-        String suffix = isHeader ? ".h" : ".c";
-        String filename = classdef.name + suffix;
-        File destFile;
-        String symbol;
-        if (classdef.packageName != null) {
-            String path = replaceDot(classdef.packageName, File.separatorChar);
-            File packageDirectory = env.topDirectory == null ? new File(path) :
-                new File(env.topDirectory, path);
-            packageDirectory.mkdirs();
-            destFile = new File(packageDirectory, filename);
-            symbol = replaceDot(classdef.packageName, '_') + "_" + classdef.name;
-        } else {
-            destFile = env.topDirectory == null ? new File(filename) :
-                new File(env.topDirectory, filename);
-            symbol = classdef.name;
-        }
+        File destFile = getClassFilename(classdef, isHeader);
+        String symbol = classdef.packageName == null ? classdef.name :
+                replaceDot(classdef.packageName, '_') + "_" + classdef.name;
         env.writer = new BufferedWriter(new FileWriter(destFile));
         if (classdef.c_includes != null) {
             for (String c_include : classdef.c_includes) {
@@ -72,6 +77,7 @@ class TranslationUtils {
             symbol = symbol + "_h_INCLUDED";
             env.print("#ifndef " + symbol);
             env.print("#define " + symbol + " 1");
+            classdef.translateForward();
             env.print("");
             env.typeList.remove(classdef.toTypeDefinition());
         } else {
