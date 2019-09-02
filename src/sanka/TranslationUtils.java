@@ -11,11 +11,26 @@ class TranslationUtils {
     static final String INCLUDE_SANKA_HEADER = "#include <sanka_header.h>";
 
     /**
-     * @return the translated C name of a static field, constructor, or method.
+     * @return the translated C name of a static field.
      */
-    static String translateClassItem(String className, String itemName) {
-        String s = className + "__" + itemName;
-        return s;
+    static String translateStaticField(String className, String itemName) {
+        return className + "__" + itemName;
+    }
+
+    /**
+     * @return the translated C name of a method or constructor that is definitely not
+     *         overloaded, like String.length(), or main(), or an interface constructor.
+     */
+    static String translateMethodName(String className, String methodName) {
+        return translateStaticField(className, methodName);
+    }
+
+    /**
+     * @return the translated C name of a method or constructor.
+     */
+    static String translateMethodName(String className, MethodDefinition method) {
+        String name = translateMethodName(className, method.name);
+        return method.isOverloaded ? name + "__" + method.parameters.size() : name;
     }
 
     static String replaceDot(String s, char ch) {

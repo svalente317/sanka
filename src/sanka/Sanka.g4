@@ -233,6 +233,7 @@ enhancedForControl
 
 switchLabel
     :   'case' expression ':'
+    |   'case' typeType Identifier ':'
     |   'default' ':'
     ;
 

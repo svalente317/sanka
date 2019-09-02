@@ -1,0 +1,5 @@
+// -*- mode: Java; -*-
+package sanka.lang;
+
+interface Object {
+}

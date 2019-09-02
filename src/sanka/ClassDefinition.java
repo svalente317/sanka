@@ -39,7 +39,6 @@ class ClassDefinition {
     String name;
     List<FieldDefinition> fieldList;
     List<String> exports;
-    MethodDefinition constructor;
     List<MethodDefinition> methodList;
     List<String> c_includes;
     List<String> c_fields;
@@ -86,15 +85,22 @@ class ClassDefinition {
                     env.printError(ctx, "method " + this.name + "." + name + " missing return type");
                     continue;
                 }
-                if (this.constructor != null) {
-                    env.printError(ctx, "class " + this.name + " constructor already defined");
-                    continue;
-                }
                 MethodDefinition method = new MethodDefinition();
                 method.parse(null, null, name,
                         item.constructorDeclaration().formalParameters(),
                         item.constructorDeclaration().block());
-                this.constructor = method;
+                int numArgs = method.parameters.size();
+                MethodDefinition prevMethod = getMethod(method.name, numArgs);
+                if (prevMethod != null) {
+                    env.printError(ctx, "class " + this.name + " constructor already defined" +
+                            " with " + numArgs + " parameters");
+                }
+                prevMethod = getMethod(method.name, null);
+                if (prevMethod != null) {
+                    prevMethod.isOverloaded = true;
+                    method.isOverloaded = true;
+                }
+                this.methodList.add(method);
             }
             if (item.methodDeclaration() != null) {
                 MethodDefinition method = new MethodDefinition();
@@ -103,9 +109,16 @@ class ClassDefinition {
                     env.printError(ctx, "class " + this.name +
                             " constructor cannot have return type");
                 }
-                if (getMethod(method.name) != null) {
+                int numArgs = method.parameters.size();
+                MethodDefinition prevMethod = getMethod(method.name, numArgs);
+                if (prevMethod != null) {
                     env.printError(ctx, "class " + this.name + " method " + method.name +
-                            " already defined");
+                            " already defined with " + numArgs + " parameters");
+                }
+                prevMethod = getMethod(method.name, null);
+                if (prevMethod != null) {
+                    prevMethod.isOverloaded = true;
+                    method.isOverloaded = true;
                 }
                 this.methodList.add(method);
             }
@@ -129,13 +142,22 @@ class ClassDefinition {
         }
     }
 
-    MethodDefinition getMethod(String name) {
+    MethodDefinition getMethod(String name, Integer numArgs) {
         for (MethodDefinition method : this.methodList) {
             if (method.name.equals(name)) {
-                return method;
+                if (numArgs == null || numArgs == method.parameters.size()) {
+                    return method;
+                }
             }
         }
         return null;
+    }
+
+    /**
+     * Get a non-contructor method.
+     */
+    MethodDefinition getNamedMethod(String methodName) {
+        return methodName.equals(this.name) ? null : getMethod(methodName, null);
     }
 
     FieldDefinition getField(String name) {
@@ -227,9 +249,15 @@ class ClassDefinition {
                 if (method.isPrivate) {
                     env.printError(ctx, "interface " + this.name + " methods cannot be private");
                 }
-                if (getMethod(method.name) != null) {
+                MethodDefinition prevMethod = getMethod(method.name, method.parameters.size());
+                if (prevMethod != null) {
                     env.printError(ctx, "interface " + this.name + " method " + method.name +
                             " already defined");
+                }
+                prevMethod = getMethod(method.name, null);
+                if (prevMethod != null) {
+                    prevMethod.isOverloaded = true;
+                    method.isOverloaded = true;
                 }
                 this.methodList.add(method);
             }
@@ -256,9 +284,6 @@ class ClassDefinition {
         }
         if (this.isInterface) {
             return;
-        }
-        if (this.constructor != null) {
-            this.constructor.evaluate();
         }
         for (MethodDefinition method : this.methodList) {
             method.evaluate();
@@ -304,14 +329,10 @@ class ClassDefinition {
                 }
                 env.addType(field.type);
                 builder.append(field.type.translateSpace());
-                builder.append(TranslationUtils.translateClassItem(this.name, field.name));
+                builder.append(TranslationUtils.translateStaticField(this.name, field.name));
                 builder.append(";");
                 env.print(builder.toString());
             }
-        }
-        if (this.constructor != null) {
-            this.constructor.returnType = TypeDefinition.VOID_TYPE;
-            this.constructor.translate(this, true);
         }
         for (MethodDefinition method : this.methodList) {
             method.translate(this, true);
@@ -346,7 +367,7 @@ class ClassDefinition {
     StringBuilder makeInterfaceConstructor() {
         StringBuilder builder = new StringBuilder();
         builder.append("void ");
-        builder.append(TranslationUtils.translateClassItem(this.name, this.name));
+        builder.append(TranslationUtils.translateMethodName(this.name, this.name));
         builder.append("(");
         builder.append(toTypeDefinition().translateSpace());
         builder.append("this, void *object");
@@ -374,20 +395,13 @@ class ClassDefinition {
                 }
                 env.addType(field.type);
                 builder.append(field.type.translateSpace());
-                builder.append(TranslationUtils.translateClassItem(this.name, field.name));
+                builder.append(TranslationUtils.translateStaticField(this.name, field.name));
                 builder.append(" = ");
                 builder.append(field.value == null ? "0" : field.value.translate(null));
                 builder.append(";");
                 env.print(builder.toString());
                 printedSomething = true;
             }
-        }
-        if (this.constructor != null) {
-            if (printedSomething) {
-                env.print("");
-            }
-            this.constructor.translate(this, false);
-            printedSomething = true;
         }
         for (MethodDefinition method : this.methodList) {
             if (printedSomething) {

@@ -54,6 +54,13 @@ public class StatementDefinition {
                 if (this.expression.type != null && this.expression.value == null) {
                     env.printError(ctx, "constant expression required");
                 }
+            } else if (ctx.switchLabel().typeType() != null) {
+                this.expression = new ExpressionDefinition();
+                this.expression.type = new TypeDefinition();
+                this.expression.type.parse(ctx.switchLabel().typeType());
+                this.name = ctx.switchLabel().Identifier().getText();
+                verifyVariableNotDefined(ctx.switchLabel(), this.name);
+                env.symbolTable.put(this.name, this.expression.type);
             } else {
                 this.statementType = SankaLexer.DEFAULT;
             }
@@ -87,13 +94,18 @@ public class StatementDefinition {
             this.expression = new ExpressionDefinition();
             this.expression.evaluate(ctx.parExpression().expression());
             TypeDefinition type = this.expression.type;
+            boolean isInterface = false;
             if (type != null && !(type.isIntegralType() || type.isStringType())) {
-                env.printError(ctx, "incompatible types: switch statement must use " +
-                        "integral type or String");
+                ClassDefinition classdef = env.getClassDefinition(type);
+                isInterface = classdef != null && classdef.isInterface;
+                if (!isInterface) {
+                    env.printError(ctx, "incompatible types: switch statement must use " +
+                            "integral type or String or interface");
+                }
             }
             this.block = new BlockDefinition();
             this.block.evaluate(ctx.block());
-            SwitchUtils.evaluateSwitchStatement(ctx, this);
+            SwitchUtils.evaluateSwitchStatement(ctx, this, isInterface);
             return;
         case SankaLexer.RETURN:
             if (ctx.expression() == null) {
@@ -500,7 +512,7 @@ public class StatementDefinition {
                 if (exprType.isStringType()) {
                     lenCode = env.getTmpVariable();
                     env.print(TypeDefinition.INT_TYPE.translateSpace() + lenCode + " = " +
-                            TranslationUtils.translateClassItem(exprType.name, "length") +
+                            TranslationUtils.translateMethodName(exprType.name, "length") +
                             "(" + exprVar + ");");
                 } else {
                     lenCode = exprVar + "->length";
@@ -553,6 +565,7 @@ public class StatementDefinition {
             if (this.valueName == null) {
                 env.printError(null, "case statement must be inside a switch block");
             } else {
+                // TODO typecase
                 env.print("case " + this.expression.translate(null) + ":;");
             }
             return;
@@ -599,12 +612,16 @@ public class StatementDefinition {
 
     void translateMapAssignment() {
         Environment env = Environment.getInstance();
-        ExpressionDefinition ts = this.lhsExpression;
-        String text1 = ts.expression1.translate(null);
-        String text2 = ts.expression2.translate(null);
+        ExpressionDefinition lhs = this.lhsExpression;
+        String text1 = lhs.expression1.translate(null);
+        String text2 = lhs.expression2.translate(null);
         env.print("NULLCHECK(" + text1 + ");");
-        if (ts.expression1.type.keyType.isStringType()) {
-            env.print("NULLCHECK(" + text2 + ");");
+        if (lhs.expression1.type.keyType.isStringType()) {
+            if (lhs.expression2.expressionType == ExpressionType.LITERAL) {
+                text2 = "(" + TypeDefinition.STRING_TYPE.translate() + ")" + text2;
+            } else {
+                env.print("NULLCHECK(" + text2 + ");");
+            }
         }
         String valueName = env.getTmpVariable();
         env.print("union rb_value " + valueName + ";");
@@ -618,8 +635,12 @@ public class StatementDefinition {
         Environment env = Environment.getInstance();
         String keyText = keyExpr.translate(null);
         String valueText = valueExpr.translate(null);
-        if (keyExpr.type.isStringType() && keyExpr.expressionType != ExpressionType.LITERAL) {
-            env.print("NULLCHECK(" + keyText + ");");
+        if (keyExpr.type.isStringType()) {
+            if (keyExpr.expressionType == ExpressionType.LITERAL) {
+                keyText = "(" + TypeDefinition.STRING_TYPE.translate() + ")" + keyText;
+            } else {
+                env.print("NULLCHECK(" + keyText + ");");
+            }
         }
         if (valueName == null) {
             valueName = env.getTmpVariable();

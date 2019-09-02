@@ -30,6 +30,7 @@ class MethodDefinition {
     TypeDefinition returnType;
     String name;
     List<ParameterDefinition> parameters;
+    boolean isOverloaded;
     BlockContext blockContext;
     BlockDefinition block;
     SymbolTable.Frame frame;
@@ -104,7 +105,7 @@ class MethodDefinition {
         }
         env.addType(this.returnType);
         builder.append(this.returnType.translateSpace());
-        builder.append(TranslationUtils.translateClassItem(classdef.name, this.name));
+        builder.append(TranslationUtils.translateMethodName(classdef.name, this));
         builder.append("(");
         boolean needComma = false;
         if (!this.isStatic) {
@@ -142,7 +143,7 @@ class MethodDefinition {
                     builder.append("return ");
                 }
                 FieldDefinition fielddef = classdef.getField(this.exportFrom);
-                builder.append(TranslationUtils.translateClassItem(fielddef.type.name, this.name));
+                builder.append(TranslationUtils.translateMethodName(fielddef.type.name, this));
                 builder.append("(this->");
                 builder.append(this.exportFrom);
                 for (ParameterDefinition param : this.parameters) {

@@ -27,7 +27,7 @@ class SerializableUtils {
         method.isStatic = false;
         method.returnType = JSON_OBJECT_TYPE;
         method.name = "toJson";
-        current = classdef.getMethod(method.name);
+        current = classdef.getMethod(method.name, 0);
         if (current != null) {
             if (!sameSignature(method, current)) {
                 env.printError(null, "serializable class " + classdef.name +
@@ -57,7 +57,7 @@ class SerializableUtils {
         param.type = JSON_OBJECT_TYPE;
         param.name = "obj";
         method.parameters.add(param);
-        current = classdef.getMethod(method.name);
+        current = classdef.getMethod(method.name, 1);
         if (current != null) {
             if (!sameSignature(method, current)) {
                 env.printError(null, "serializable class " + classdef.name +
@@ -174,7 +174,7 @@ class SerializableUtils {
             expr.expression1.type = JSON_OBJECT_TYPE;
             expr.name = get_toJson_method(field.type);
             expr.type = TypeDefinition.METHOD_TYPE;
-            expr.method = joClass.getMethod(expr.name);
+            expr.method = joClass.getMethod(expr.name, 2);
             ExpressionDefinition func = new ExpressionDefinition();
             func.expressionType = ExpressionType.FUNCTION_CALL;
             func.expression1 = expr;
@@ -202,7 +202,7 @@ class SerializableUtils {
                 tmp.name = "toJson";
                 tmp.type = TypeDefinition.METHOD_TYPE;
                 ClassDefinition fieldClass = env.getClassDefinition(field.type);
-                tmp.method = fieldClass.getMethod(tmp.name);
+                tmp.method = fieldClass.getMethod(tmp.name, 0);
                 expr = new ExpressionDefinition();
                 expr.expressionType = ExpressionType.FUNCTION_CALL;
                 expr.expression1 = tmp;
@@ -278,7 +278,7 @@ class SerializableUtils {
             expr.expression1.type = JSON_OBJECT_TYPE;
             expr.name = get_fromJson_method(field.type);
             expr.type = TypeDefinition.METHOD_TYPE;
-            expr.method = joClass.getMethod(expr.name);
+            expr.method = joClass.getMethod(expr.name, 1);
             ExpressionDefinition func = new ExpressionDefinition();
             func.expressionType = ExpressionType.FUNCTION_CALL;
             func.expression1 = expr;

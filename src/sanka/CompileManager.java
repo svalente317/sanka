@@ -104,7 +104,7 @@ class CompileManager {
         env.print("struct array arr;");
         env.print("arr.data = argv;");
         env.print("arr.length = argc;");
-        env.print(TranslationUtils.translateClassItem(className, "main") + "(&arr);");
+        env.print(TranslationUtils.translateMethodName(className, "main") + "(&arr);");
         env.print("return 0;");
         env.level--;
         env.print("}");

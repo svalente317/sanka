@@ -42,7 +42,7 @@ public class TypeUtils {
         if (expr.type.equals(type)) {
             return true;
         }
-        if (expr.type.arrayOf != null) {
+        if (expr.type.arrayOf != null || type.arrayOf != null) {
             // With arrays and maps, there's no promotion.
             // If the expression is an array of ints, then the parameter must be
             // an array of ints. An array of shorts is not a match.
@@ -116,7 +116,8 @@ public class TypeUtils {
                                           ClassDefinition classDef) {
         List<String> failureList = new ArrayList<>();
         for (MethodDefinition method : interfaceDef.methodList) {
-            MethodDefinition implementer = classDef.getMethod(method.name);
+            MethodDefinition implementer = classDef.getMethod(method.name,
+                    method.parameters.size());
             if (implementer == null ||
                 implementer.isPrivate ||
                 implementer.isStatic != method.isStatic ||

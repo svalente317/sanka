@@ -11,7 +11,8 @@ import sanka.antlr4.SankaParser.StatementContext;
 
 public class SwitchUtils {
 
-    static void evaluateSwitchStatement(StatementContext ctx, StatementDefinition stmt) {
+    static void evaluateSwitchStatement(StatementContext ctx, StatementDefinition stmt,
+            boolean isInterface) {
         Environment env = Environment.getInstance();
         if (stmt.expression.type == null) {
             return;
@@ -30,6 +31,18 @@ public class SwitchUtils {
             // Approve the "case" statements that are directly in the block. This is not
             // recursive. You cannot have a "case" statement inside an "if" statement.
             if (item.statementType == SankaLexer.CASE && item.expression.type != null) {
+                item.valueName = "approved";
+                if (isInterface) {
+                    if (item.name == null) {
+                        env.printError(ctx, "case statement must include variable declaration");
+                    }
+                    continue;
+                }
+                if (item.name != null) {
+                    env.printError(ctx, "case statement must include constant " +
+                            stmt.expression.type);
+                    continue;
+                }
                 if (item.expression.value != null && !labels.add(item.expression.value)) {
                     env.printError(ctx, "duplicate case label: " + item.expression.value);
                 }
@@ -37,7 +50,6 @@ public class SwitchUtils {
                     env.printError(ctx, "incompatible types: " + item.expression.type +
                             " cannot be converted to " + stmt.expression.type);
                 }
-                item.valueName = "approved";
             }
             else if (item.statementType == SankaLexer.DEFAULT) {
                 if (haveDefault) {

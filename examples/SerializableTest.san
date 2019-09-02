@@ -15,7 +15,7 @@ serializable class PlainObject {
     double d;
     double ratio;
     MiniObject mini;
-    int[String] map;
+    // int[String] map;
 }
 
 class Tester {

@@ -123,6 +123,19 @@ class ExpressionDefinition {
     }
 
     /**
+     * Assuming that this.expressionType is FIELD_ACCESS, and that this accesses a
+     * field or method of a regular class (as opposed to an array or map), return
+     * the ClassDefinition of the accessed field.
+     */
+    ClassDefinition getAccessedClass() {
+        Environment env = Environment.getInstance();
+        if (this.expression1.expressionType == ExpressionType.CLASS_IDENTIFIER) {
+            return env.getClassDefinition(this.expression1.identifiedClass);
+        }
+        return env.getClassDefinition(this.expression1.type);
+    }
+
+    /**
      * primary is parExpression or 'this' or literal or Identifier
      */
     void evaluatePrimary(PrimaryContext primary) {
@@ -176,7 +189,7 @@ class ExpressionDefinition {
                 this.expressionType = ExpressionType.IDENTIFIER;
                 return;
             }
-            this.method = env.currentClass.getMethod(this.name);
+            this.method = env.currentClass.getNamedMethod(this.name);
             if (this.method != null) {
                 this.expressionType = ExpressionType.FIELD_ACCESS;
                 this.type = TypeDefinition.METHOD_TYPE;
@@ -263,13 +276,16 @@ class ExpressionDefinition {
             return;
         }
         ExpressionListContext exprlist = creator.classCreatorRest().expressionList();
-        if (classdef.constructor == null) {
-            if (exprlist != null && exprlist.expression().size() > 0) {
-                env.printError(creator, "class " + this.type + " constructor takes no arguments");
+        int numArgs = exprlist == null ? 0 : exprlist.expression().size();
+        MethodDefinition method = classdef.getMethod(classdef.name, numArgs);
+        if (method == null) {
+            if (numArgs > 0) {
+                env.printError(creator, "class " + this.type + " constructor does not take " +
+                        numArgs + " parameters");
             }
             return;
         }
-        evaluateFunctionArguments(creator, classdef.constructor, exprlist);
+        evaluateFunctionArguments(creator, method, exprlist);
     }
 
     /**
@@ -412,11 +428,7 @@ class ExpressionDefinition {
         }
         ClassDefinition classdef;
         if (this.expression1.type.arrayOf == null) {
-            if (this.expression1.expressionType == ExpressionType.CLASS_IDENTIFIER) {
-                classdef = env.getClassDefinition(this.expression1.identifiedClass);
-            } else {
-                classdef = env.getClassDefinition(this.expression1.type);
-            }
+            classdef = getAccessedClass();
             if (classdef == null) {
                 env.printError(expr, "class " + this.expression1.type + " undefined");
                 return;
@@ -429,7 +441,7 @@ class ExpressionDefinition {
         FieldDefinition fielddef = classdef.getField(this.name);
         boolean isPrivate;
         if (fielddef == null) {
-             this.method = classdef.getMethod(this.name);
+             this.method = classdef.getMethod(this.name, null);
              if (this.method == null) {
                  env.printError(expr, "class " + classdef.name +
                          " does not have field " + this.name);
@@ -550,17 +562,25 @@ class ExpressionDefinition {
     void evaluateFunctionCall(ExpressionContext expr, ExpressionListContext argumentList) {
         this.expressionType = ExpressionType.FUNCTION_CALL;
         Environment env = Environment.getInstance();
-        this.expression1 = new ExpressionDefinition();
-        this.expression1.evaluate(expr);
-        if (this.expression1.type == null) {
+        ExpressionDefinition methodExpr = new ExpressionDefinition();
+        this.expression1 = methodExpr;
+        methodExpr.evaluate(expr);
+        if (methodExpr.type == null) {
             return;
         }
-        if (this.expression1.method == null) {
-            env.printError(expr, "expression of type " + this.expression1.type +
+        if (methodExpr.method == null) {
+            env.printError(expr, "expression of type " + methodExpr.type +
                     " cannot be called as a function");
             return;
         }
-        evaluateFunctionArguments(expr, this.expression1.method, argumentList);
+        if (methodExpr.method.isOverloaded) {
+            ClassDefinition classdef = methodExpr.getAccessedClass();
+            if (classdef != null) {
+                int numArgs = argumentList == null ? 0 : argumentList.expression().size();
+                methodExpr.method = classdef.getMethod(methodExpr.method.name, numArgs);
+            }
+        }
+        evaluateFunctionArguments(expr, methodExpr.method, argumentList);
         this.type = this.expression1.method.returnType;
     }
 
@@ -681,9 +701,11 @@ class ExpressionDefinition {
         builder.append("));");
         StringBuilder builder2 = null;
         ClassDefinition classdef = env.getClassDefinition(this.type);
-        if (classdef.constructor != null) {
+        int numArgs = this.argList == null ? 0 : this.argList.length;
+        MethodDefinition constructor = classdef.getMethod(classdef.name, numArgs);
+        if (constructor != null) {
             builder2 = new StringBuilder();
-            builder2.append(TranslationUtils.translateClassItem(classdef.name, classdef.name));
+            builder2.append(TranslationUtils.translateMethodName(classdef.name, constructor));
             builder2.append("(");
             builder2.append(variableName);
             if (this.argList != null) {
@@ -697,14 +719,14 @@ class ExpressionDefinition {
         if (classdef.isInterface) {
             String typeName = this.expression1.type.name;
             builder2 = new StringBuilder();
-            builder2.append(TranslationUtils.translateClassItem(classdef.name, classdef.name));
+            builder2.append(TranslationUtils.translateMethodName(classdef.name, classdef.name));
             builder2.append("(");
             builder2.append(variableName);
             builder2.append(", ");
             builder2.append(this.expression1.translate(null));
             for (MethodDefinition method : classdef.methodList) {
                 builder2.append(", ");
-                builder2.append(TranslationUtils.translateClassItem(typeName, method.name));
+                builder2.append(TranslationUtils.translateMethodName(typeName, method));
             }
             builder2.append(");");
         }
@@ -807,7 +829,10 @@ class ExpressionDefinition {
                 return null;
             }
             String className = isClassAccess ? this.expression1.name : this.expression1.type.name;
-            return TranslationUtils.translateClassItem(className, this.name);
+            if (this.method == null) {
+                return TranslationUtils.translateStaticField(className, this.name);
+            }
+            return TranslationUtils.translateMethodName(className, this.method);
         }
         return text + "->" + this.name;
     }
@@ -908,7 +933,11 @@ class ExpressionDefinition {
         }
         env.print("NULLCHECK(" + text1 + ");");
         if (this.expression1.type.keyType.isStringType()) {
-            env.print("NULLCHECK(" + text2 + ");");
+            if (this.expression2.expressionType == ExpressionType.LITERAL) {
+                text2 = "(" + TypeDefinition.STRING_TYPE.translate() + ")" + text2;
+            } else {
+                env.print("NULLCHECK(" + text2 + ");");
+            }
         }
         if (variableName == null) {
             variableName = env.getTmpVariable();
