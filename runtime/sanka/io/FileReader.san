@@ -12,14 +12,11 @@ class FileReader {
         c__stmt "return this->fp != NULL ? 0 : errno";
     }
 
-    String readline() {
-        c__stmt "char buf[256]";
-        c__stmt "if (fgets(buf, sizeof(buf), this->fp) == NULL) return NULL";
-        c__stmt "buf[sizeof(buf)-1] = 0";
-        c__stmt "int len = strlen(buf)";
-        c__stmt "while (len > 0 && (buf[len-1] == '\n' || buf[len-1] == '\r')) len--";
-        c__stmt "buf[len] = 0";
-        c__stmt "return strdup(buf)";
+    /**
+     * See Reader.read().
+     */
+    int read(byte[] buffer) {
+        c__stmt "return fread(buffer->data, 1, buffer->length, this->fp)";
     }
 
     int close() {

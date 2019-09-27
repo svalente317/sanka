@@ -1,3 +1,4 @@
+#define GC_THREADS 1
 #include <gc.h>
 #include <rb.h>
 
@@ -23,6 +24,7 @@ extern void INT_TO_STRING(int, char *);
 extern void LONG_TO_STRING(long, char *);
 extern void DOUBLE_TO_STRING(double, char *);
 extern char *STRING_SUBSTRING(const char *, int, int);
+extern int STRING_QSORT_CMP(const void *p1, const void *p2);
 
 /* Part 3: array.c */
 

@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import sanka.ClassDefinition.FieldDefinition;
 import sanka.ExpressionDefinition.ExpressionType;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser.AssignableContext;
@@ -222,8 +223,19 @@ public class StatementDefinition {
             this.name = assignable.Identifier().getText();
             lhsType = env.symbolTable.get(this.name);
             if (lhsType == null) {
-                env.printError(assignment, "variable " + this.name + " undefined");
-                return;
+                FieldDefinition fielddef = env.currentClass.getField(this.name);
+                if (fielddef == null || !fielddef.isStatic || fielddef.isConst) {
+                    env.printError(assignment, "variable " + this.name + " undefined");
+                    return;
+                }
+                this.lhsExpression = new ExpressionDefinition();
+                this.lhsExpression.expressionType = ExpressionType.FIELD_ACCESS;
+                this.lhsExpression.type = fielddef.type;
+                this.lhsExpression.name = this.name;
+                this.lhsExpression.expression1 = new ExpressionDefinition();
+                this.lhsExpression.expression1.evaluateThisClass();
+                this.lhsExpression.isStatic = true;
+                lhsType = fielddef.type;
             }
             if (this.statementType == SankaLexer.EQUAL && lhsType.isNullType()) {
                 lhsType = this.expression.type;

@@ -1,0 +1,104 @@
+// -*- mode: Java; -*-
+package sanka.io;
+
+class FileStats {
+    boolean isFile;
+    boolean isDirectory;
+    boolean isLink;
+    long lastModified;
+    long length;
+}
+
+/**
+ * An abstract representation of file and directory pathnames.
+ */
+class File {
+    c__include "sys/types.h";
+    c__include "sys/stat.h";
+    c__include "unistd.h";
+    c__include "errno.h";
+    c__include "dirent.h";
+
+    const PATH_SEPARATOR = "/";
+
+    private String pathname;
+
+    /**
+     * Creates a new File instance by converting the given pathname
+     * string into an abstract pathname. The pathname may be absolute
+     * or relative.
+     */
+    File(String pathname) {
+        this.pathname = pathname;
+    }
+
+    /**
+     * Creates a new File instance from a parent directory and a child
+     * pathname. The child must be relative, not absolute.
+     */
+    File(File parent, String child) {
+        this.pathname = parent.getPath() + PATH_SEPARATOR + child;
+    }
+
+    /**
+     * Get the unprocessed pathname that this File represents.
+     * Since the pathname is unprocessed and non-canonical, it may be
+     * absolute or relative, it may contain segments that are links
+     * including "..", etc., it may name subdirectories that do not
+     * currently exist or that are currently not directories, etc.
+     */
+    String getPath() {
+        return this.pathname;
+    }
+
+    String toString() {
+        return this.pathname;
+    }
+
+    /**
+     * Get stats about a file or directory.
+     *
+     * If the named file or directory does not exist in the filesystem
+     * then return null.
+     */
+    int getStats(FileStats stats, boolean followLink) {
+        c__stmt "struct stat statbuf";
+        c__stmt "int status";
+        if (followLink) {
+            c__stmt "status = stat(this->pathname, &statbuf)";
+        } else {
+            c__stmt "status = lstat(this->pathname, &statbuf)";
+        }
+        c__stmt "if (status < 0) return errno";
+        c__stmt "stats->isFile = S_ISREG(statbuf.st_mode)";
+        c__stmt "stats->isDirectory = S_ISDIR(statbuf.st_mode)";
+        c__stmt "stats->isLink = S_ISLNK(statbuf.st_mode)";
+        c__stmt "stats->lastModified = statbuf.st_mtim.tv_sec*1000 + (statbuf.st_mtim.tv_nsec/1000000)";
+        c__stmt "stats->length = statbuf.st_size";
+        return 0;
+    }
+
+    /**
+     * If this file is a directory, then return the names of the files
+     * and subdirectories in this directory.
+     *
+     * (Do not return "." or "..")
+     */
+    String[] list() {
+        var results = new String[0];
+        var filename = "";
+        c__stmt "struct dirent *entry";
+        c__stmt "DIR *dir = opendir(this->pathname)";
+        c__stmt "if (dir == NULL) return NULL";
+        while (true) {
+            c__stmt "entry = readdir(dir)";
+            c__stmt "if (entry == NULL) break";
+            c__stmt "char *name = entry->d_name";
+            c__stmt "if (name[0] == '.' && (name[1] == 0 || (name[1] == '.' && name[2] == 0))) continue";
+            c__stmt "filename = STRING_SUBSTRING(name, 0, 0)";
+            results.add(filename);
+        }
+        c__stmt "closedir(dir)";
+        return results;
+    }
+}

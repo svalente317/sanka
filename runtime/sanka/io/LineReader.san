@@ -116,10 +116,10 @@ class LineReader {
      * This blocks as long as necessary, and it issues as many read
      * operations as necessary to fully fill the buffer.
      *
-     * @return true if the buffer was filled, and false if the stream
-     * was closed or there was an error
+     * @return the number of bytes read, which will be buffer.length unless
+     *         the stream closed or ther was an error.
      */
-    boolean readFully(byte[] buffer) {
+    int read(byte[] buffer) {
         var idx = 0;
         var data = null;
         var dlen = 0;
@@ -136,7 +136,7 @@ class LineReader {
                 }
                 dlen = this.reader.read(data);
                 if (dlen <= 0) {
-                    return false;
+                    return idx;
                 }
             }
             var count = buffer.length - idx;
@@ -153,6 +153,10 @@ class LineReader {
                 this.prefix = data;
             }
         }
-        return true;
+        return idx;
+    }
+
+    int close() {
+        return this.reader.close();
     }
 }

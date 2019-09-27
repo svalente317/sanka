@@ -111,3 +111,7 @@ char *STRING_SUBSTRING(const char *this, int beginIndex, int endIndex) {
     that[n] = 0;
     return that;
 }
+
+int STRING_QSORT_CMP(const void *p1, const void *p2) {
+   return strcmp(* (char * const *) p1, * (char * const *) p2);
+}

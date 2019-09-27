@@ -18,7 +18,6 @@ class System {
     }
 
     static String readline() {
-        // Should share this function with FileReader.readline().
         c__stmt "char buf[256]";
         c__stmt "if (fgets(buf, sizeof(buf), stdin) == NULL) return NULL";
         c__stmt "buf[sizeof(buf)-1] = 0";
@@ -38,10 +37,10 @@ class System {
         c__stmt "return ((long long)now.tv_sec)*1000 + (now.tv_usec/1000)";
     }
 
-    static String formatTime(String format, long time) {
+    static String formatTime(String format, long time, boolean local) {
         c__stmt "time_t t = (time_t)(time / 1000)";
         c__stmt "struct tm tm";
-        c__stmt "gmtime_r(&t, &tm)";
+        c__stmt "if (local) localtime_r(&t, &tm); else gmtime_r(&t, &tm)";
         c__stmt "char buffer[80]";
         c__stmt "struct array a";
         c__stmt "a.data = buffer";
@@ -61,7 +60,15 @@ class System {
         c__stmt "while (GC_collect_a_little() != 0)";
     }
 
+    static int parseInt(String text) {
+        c__stmt "return strtol(text, NULL, 0)";
+    }
+
     static long parseLong(String text) {
         c__stmt "return strtol(text, NULL, 0)";
+    }
+
+    static void sort(String[] arr) {
+        c__stmt "qsort(arr->data, arr->length, sizeof(char*), STRING_QSORT_CMP)";
     }
 }

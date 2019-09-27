@@ -2,6 +2,7 @@
 package sanka.examples;
 
 import sanka.io.FileReader;
+import sanka.io.LineReader;
 
 class WordMap {
 
@@ -16,12 +17,13 @@ class WordMap {
      * For each word, record its last line in the file.
      */
     void readFromFile(String filename) {
-        var reader = new FileReader();
-        var status = reader.open(filename);
+        var fileReader = new FileReader();
+        var status = fileReader.open(filename);
         if (status != 0) {
             System.println(filename + ": " + System.strerror(status));
             return;
         }
+        var reader = new LineReader(fileReader);
         var count = 0;
         while (true) {
             var word = reader.readline();
@@ -39,8 +41,9 @@ class WordMap {
      * Print the line number where the word was found in the first file.
      */
     void printWords(String filename) {
-        var reader = new FileReader();
-        reader.open(filename);
+        var fileReader = new FileReader();
+        fileReader.open(filename);
+        var reader = new LineReader(fileReader);
         while (true) {
             var word = reader.readline();
             if (word == null) {

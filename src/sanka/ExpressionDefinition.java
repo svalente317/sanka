@@ -195,11 +195,7 @@ class ExpressionDefinition {
                 this.type = TypeDefinition.METHOD_TYPE;
                 this.expression1 = new ExpressionDefinition();
                 if (this.method.isStatic) {
-                    this.expression1.expressionType = ExpressionType.CLASS_IDENTIFIER;
-                    this.expression1.type = TypeDefinition.VOID_TYPE;
-                    this.expression1.name = env.currentClass.name;
-                    this.expression1.identifiedClass = new TypeDefinition(
-                            env.currentClass.packageName, env.currentClass.name);
+                    this.expression1.evaluateThisClass();
                 } else {
                     this.expression1.evaluateThis(primary);
                 }
@@ -210,12 +206,14 @@ class ExpressionDefinition {
                 this.expressionType = ExpressionType.FIELD_ACCESS;
                 this.type = fielddef.type;
                 this.expression1 = new ExpressionDefinition();
-                this.expression1.evaluateThis(primary);
+                this.expression1.evaluateThisClass();
                 this.isStatic = true;
-                if (this.type != null && !this.type.isStringType()) {
-                    this.expressionType = ExpressionType.LITERAL;
+                if (fielddef.isConst && fielddef.value != null) {
+                    if (this.type != null && !this.type.isStringType()) {
+                        this.expressionType = ExpressionType.LITERAL;
+                    }
+                    this.value = fielddef.value.value;
                 }
-                this.value = fielddef.value.value;
                 return;
             }
             if (env.classPackageMap.containsKey(this.name)) {
@@ -248,6 +246,13 @@ class ExpressionDefinition {
         if (env.currentMethod.isStatic) {
             env.printError(primary, "'this' cannot be referenced from a static context");
         }
+    }
+
+    void evaluateThisClass() {
+        Environment env = Environment.getInstance();
+        this.expressionType = ExpressionType.CLASS_IDENTIFIER;
+        this.type = TypeDefinition.VOID_TYPE;
+        this.identifiedClass = env.currentClass.toTypeDefinition();
     }
 
     /**
@@ -828,7 +833,8 @@ class ExpressionDefinition {
             if (this.expression1.type.arrayOf != null) {
                 return null;
             }
-            String className = isClassAccess ? this.expression1.name : this.expression1.type.name;
+            String className = isClassAccess ? this.expression1.identifiedClass.name :
+                this.expression1.type.name;
             if (this.method == null) {
                 return TranslationUtils.translateStaticField(className, this.name);
             }
