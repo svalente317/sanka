@@ -3,6 +3,7 @@ package sanka;
 import java.util.ArrayList;
 
 import sanka.ClassDefinition.FieldDefinition;
+import sanka.ExpressionDefinition.ExpressionType;
 import sanka.MethodDefinition.ParameterDefinition;
 
 /**
@@ -156,6 +157,9 @@ public class ArrayUtils {
                 variableName = env.getTmpVariable();
             }
             String keyName = expr.argList[0].translate(null);
+            if (expr.argList[0].expressionType == ExpressionType.LITERAL) {
+                keyName = "(" + TypeDefinition.STRING_TYPE.translate() + ")" + keyName;
+            }
             String valueName = env.getTmpVariable();
             env.print("union rb_value " + valueName + ";");
             env.print(decl + variableName + " = " + function + "(" + arrayName +

@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define GC_THREADS 1
 #include <gc.h>
 #include "rb.h"
 
@@ -385,7 +386,7 @@ rb_delete (struct rb_table *tree, union rb_key key,
 
     }
 
-  free (p);
+  GC_FREE (p);
   tree->rb_count--;
   tree->rb_generation++;
   return 1;

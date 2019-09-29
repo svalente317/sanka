@@ -60,12 +60,12 @@ class System {
         c__stmt "while (GC_collect_a_little() != 0)";
     }
 
-    static int parseInt(String text) {
+    static long parseLong(String text) {
         c__stmt "return strtol(text, NULL, 0)";
     }
 
-    static long parseLong(String text) {
-        c__stmt "return strtol(text, NULL, 0)";
+    static int l2i(long value) {
+        c__stmt "return (int) value";
     }
 
     static void sort(String[] arr) {

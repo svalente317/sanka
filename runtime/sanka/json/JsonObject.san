@@ -31,6 +31,18 @@ class JsonObject {
         return this.map;
     }
 
+    JsonElement get(String fieldName) {
+        return this.map[fieldName];
+    }
+
+    void set(String fieldName, JsonElement value) {
+        this.map[fieldName] = value;
+    }
+
+    void remove(String fieldName) {
+        this.map.remove(fieldName);
+    }
+
     /**
      * If the field is defined then return the value.
      * Otherwise, return a JsonElement with type == NULL_TYPE.
@@ -81,10 +93,6 @@ class JsonObject {
     static JsonObject parse(String text) {
         var elem = JsonParser.parse(text);
         return elem == null ? null : elem.getAsObject();
-    }
-
-    void set(String fieldName, JsonElement value) {
-        this.map[fieldName] = value;
     }
 
     void setBoolean(String fieldName, boolean value) {
