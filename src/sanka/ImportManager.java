@@ -23,7 +23,9 @@ public class ImportManager {
      *
      * Do not recursively import classes. We don't need to know the structure of classes
      * that are used by the imported class, because we're not parsing or evaluating the
-     * code of the imported class. We're just reading signatures.
+     * code of the imported class. We're just reading signatures. (Unfortunately, this is
+     * not really true. We may need to recursively import classes to evaluate the imported
+     * class's constants.)
      *
      * If the given class is defined in one of the source files that we're translating,
      * then don't look for it in the class path.
@@ -109,6 +111,7 @@ public class ImportManager {
                 if (item.interfaceDeclaration() != null) {
                     classdef.parseInterface(item.interfaceDeclaration());
                 }
+                classdef.evaluateConstants();
                 env.classList.add(classdef);
             }
         }

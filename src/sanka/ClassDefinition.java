@@ -290,6 +290,23 @@ class ClassDefinition {
         }
     }
 
+    void evaluateConstants() {
+        Environment env = Environment.getInstance();
+        ClassDefinition oldCurrentClass = env.currentClass;
+        env.currentClass = this;
+        for (FieldDefinition field : this.fieldList) {
+            if (field.isConst && field.expression != null) {
+                field.value = new ExpressionDefinition();
+                field.value.evaluate(field.expression);
+                if (field.value.value == null) {
+                    env.printError(field.expression, "initial value must be simple constant");
+                }
+                field.type = field.value.type;
+            }
+        }
+        env.currentClass = oldCurrentClass;
+    }
+
     TypeDefinition toTypeDefinition() {
         TypeDefinition type = new TypeDefinition();
         type.packageName = this.packageName;
