@@ -102,6 +102,18 @@ public class SankaBaseListener implements SankaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterExtendsClass(SankaParser.ExtendsClassContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitExtendsClass(SankaParser.ExtendsClassContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterInterfaceDeclaration(SankaParser.InterfaceDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -205,6 +217,18 @@ public class SankaBaseListener implements SankaListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitMethodDeclaration(SankaParser.MethodDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBlockOrSemi(SankaParser.BlockOrSemiContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBlockOrSemi(SankaParser.BlockOrSemiContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

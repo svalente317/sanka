@@ -3,6 +3,9 @@ package sanka;
 import sanka.ClassDefinition.FieldDefinition;
 
 class ExportUtils {
+    // Use a reserved word that can never be a field name.
+    public static final String EXTENDS_FROM = "extends";
+
     /**
      * Recursive function to add all exported methods to class methodList.
      */
@@ -68,6 +71,18 @@ class ExportUtils {
                 }
             }
         }
+        if (classdef.superclass != null && parseExports(classdef.superclass)) {
+            if (!classdef.superclass.isAbstract) {
+                env.printError(null, "cannot extend " + classdef.superclass.qualifiedName() +
+                        " because it is not abstract");
+                return false;
+            }
+            for (MethodDefinition method : classdef.superclass.methodList) {
+                if (!(method.isPrivate || method.isStatic)) {
+                    addMethodToClass(classdef, EXTENDS_FROM, method, false);
+                }
+            }
+        }
         classdef.exportStatus = 1;
         return true;
     }
@@ -78,7 +93,7 @@ class ExportUtils {
         MethodDefinition existing = classdef.getMethod(method.name, method.parameters.size());
         if (existing != null) {
             // Implicit exported methods do not override explicitly defined methods.
-            if (force == false && existing.exportFrom == null) {
+            if (!force && (existing.exportFrom == null || fieldName.equals(EXTENDS_FROM))) {
                 return;
             }
             if (existing.exportFrom != null) {
@@ -100,5 +115,27 @@ class ExportUtils {
         clone.parameters.addAll(method.parameters);
         clone.exportFrom = fieldName;
         classdef.methodList.add(clone);
+    }
+
+    static void translateSuperclasses(ClassDefinition classdef, String variableName) {
+        Environment env = Environment.getInstance();
+        String prefix = variableName + "->" + ClassDefinition.SUPER_FIELD_NAME;
+        while (classdef.superclass != null) {
+            env.print(prefix + ".object = " + variableName + ";");
+            for (MethodDefinition method : classdef.superclass.methodList) {
+                if (method.isPrivate || method.isStatic) {
+                    continue;
+                }
+                MethodDefinition override = classdef.getMethod(
+                        method.name, method.parameters.size());
+                if (override == null || override.isInherited()) {
+                    continue;
+                }
+                String cName = TranslationUtils.translateMethodName(classdef.name, override);
+                env.print(prefix + "." + method.name + " = " + cName + ";");
+            }
+            prefix = prefix + "." + ClassDefinition.SUPER_FIELD_NAME;
+            classdef = classdef.superclass;
+        }
     }
 }

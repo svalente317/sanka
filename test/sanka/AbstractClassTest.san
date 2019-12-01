@@ -1,0 +1,64 @@
+// -*- mode: Java; -*-
+package sanka.test;
+
+class Globals {
+    static String[] RESULTS;
+}
+
+abstract class AbstractClass {
+    void printOne() {
+        Globals.RESULTS.add("1");
+    }
+
+    void printTwo();
+    void printThree();
+}
+
+abstract class MiddleClass extends AbstractClass {
+    void printTwo() {
+        Globals.RESULTS.add("2");
+    }
+}
+
+class ConcreteClass extends MiddleClass {
+    void printThree() {
+        Globals.RESULTS.add("3");
+    }
+}
+
+class VeryConcreteClass extends MiddleClass {
+    void printOne() {
+        Globals.RESULTS.add("1a");
+    }
+
+    void printThree() {
+        Globals.RESULTS.add("3");
+    }
+}
+
+class Main {
+    static int main(String[] argv) {
+        Globals.RESULTS = new String[0];
+
+        var o = new ConcreteClass();
+        o.printOne();
+        o.printTwo();
+        o.printThree();
+
+        var o2 = new VeryConcreteClass();
+        o2.printOne();
+        o2.printTwo();
+        o.printThree();
+
+        var expected = new String[]{"1", "2", "3", "1a", "2", "3"};
+        for (var idx = 0; idx < expected.length; idx++) {
+            if (Globals.RESULTS[idx] != expected[idx]) {
+                System.println("idx=" + idx + " expected=" + expected[idx] +
+                               " value=" + Globals.RESULTS[idx]);
+                return -1;
+            }
+        }
+        System.println("ok");
+        return 0;
+    }
+}

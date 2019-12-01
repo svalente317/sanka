@@ -56,15 +56,20 @@ typeDeclaration
     ;
 
 classDeclaration
-    :   classModifier? 'class' Identifier typeParameters? classBody
+    :   classModifier? 'class' Identifier typeParameters? extendsClass? classBody
     ;
 
 classModifier
-    :   'serializable'
+    :   'abstract'
+    |   'serializable'
     ;
 
 typeParameters
     :   '<' Identifier (',' Identifier)* '>'
+    ;
+
+extendsClass
+    :   'extends' typeType
     ;
 
 interfaceDeclaration
@@ -111,7 +116,12 @@ constructorDeclaration
 
 methodDeclaration
     :   fieldModifier* (typeType|'void') Identifier formalParameters
-        block
+        (block | ';')
+    ;
+
+blockOrSemi
+    :   block
+    |   ';'
     ;
 
 interfaceBodyDeclaration
@@ -311,6 +321,7 @@ literal
 
 // 3.9 Keywords
 
+ABSTRACT      : 'abstract';
 BOOLEAN       : 'boolean';
 BREAK         : 'break';
 BYTE          : 'byte';
@@ -322,6 +333,7 @@ DEFAULT       : 'default';
 DOUBLE        : 'double';
 ELSE          : 'else';
 EXPORT        : 'export';
+EXTENDS       : 'extends';
 FLOAT         : 'float';
 FOR           : 'for';
 IF            : 'if';

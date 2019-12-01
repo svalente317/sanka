@@ -62,21 +62,30 @@ public class TypeUtils {
             ImportManager.getInstance().doImport(null, type.packageName, type.name);
             typeClass = env.getClassDefinition(type);
         }
-        if (exprClass == null || typeClass == null || !typeClass.isInterface) {
+        if (exprClass == null || typeClass == null) {
             return false;
         }
         // Decide if exprClass implements the interface.
         // Should we keep a cache of what classes have matched interfaces?
-        if (!isInterfaceImplemented(typeClass, exprClass)) {
-            return false;
+        if (typeClass.isInterface && isInterfaceImplemented(typeClass, exprClass)) {
+            if (!isReadOnly) {
+                ExpressionDefinition copy = expr.copyAndClear();
+                expr.expressionType = ExpressionType.NEW_INSTANCE;
+                expr.type = type;
+                expr.expression1 = copy;
+            }
+            return true;
         }
-        if (!isReadOnly) {
-            ExpressionDefinition copy = expr.copyAndClear();
-            expr.expressionType = ExpressionType.NEW_INSTANCE;
-            expr.type = type;
-            expr.expression1 = copy;
+        if (typeClass.isAbstract && isSubclassOf(typeClass, exprClass)) {
+            if (!isReadOnly) {
+                ExpressionDefinition copy = expr.copyAndClear();
+                expr.expressionType = ExpressionType.SUPERCLASS;
+                expr.type = type;
+                expr.expression1 = copy;
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -156,5 +165,18 @@ public class TypeUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * @return true if the concrete class inherits the abstract class
+     */
+    static boolean isSubclassOf(ClassDefinition abstractClass, ClassDefinition concreteClass) {
+        if (concreteClass.superclass == null) {
+            return false;
+        }
+        if (concreteClass.superclass == abstractClass) {
+            return true;
+        }
+        return isSubclassOf(abstractClass, concreteClass.superclass);
     }
 }

@@ -1,5 +1,7 @@
 # TODO
 
+* for extends abstract classes, verify all methods are implemented
+
 * support inline fields
 
 * Support classes with the same name in different packages
@@ -9,8 +11,6 @@
 * Improve support for char literals and complex literals?
 
 * float to double promotion and demotion
-
-* Allow multiple constructors with different signatures
 
 * Support expressions with qualified class name or classes in the current
   package (in ED.evaluatePrimary)
@@ -36,3 +36,5 @@
 * Add byte to string as character
 
 * json library: escape quotes in strings
+
+* can abstract classes have static fields?

@@ -19,6 +19,7 @@ import sanka.antlr4.SankaParser.InterfaceDeclarationContext;
 import sanka.antlr4.SankaParser.InterfaceMethodDeclarationContext;
 
 class ClassDefinition {
+    public static final String SUPER_FIELD_NAME = "super";
 
     static class FieldDefinition {
         String name;
@@ -34,9 +35,11 @@ class ClassDefinition {
     Map<String, String> classPackageMap;
     boolean isImport;
     boolean isInterface;
+    boolean isAbstract;
     boolean isSerializable;
     String packageName;
     String name;
+    ClassDefinition superclass;
     List<FieldDefinition> fieldList;
     List<String> exports;
     List<MethodDefinition> methodList;
@@ -58,8 +61,25 @@ class ClassDefinition {
         Environment env = Environment.getInstance();
         this.name = ctx.Identifier().getText();
         ClassModifierContext mod = ctx.classModifier();
+        if (mod != null && mod.getStart().getType() == SankaLexer.ABSTRACT) {
+            this.isAbstract = true;
+        }
         if (mod != null && mod.getStart().getType() == SankaLexer.SERIALIZABLE) {
             this.isSerializable = true;
+        }
+        if (ctx.extendsClass() != null) {
+            TypeDefinition type = new TypeDefinition();
+            type.parse(ctx.extendsClass().typeType());
+            if (!type.isPrimitiveType && type.arrayOf == null) {
+                this.superclass = env.getClassDefinition(type);
+                if (this.superclass == null) {
+                    ImportManager.getInstance().doImport(ctx, type.packageName, type.name);
+                    this.superclass = env.getClassDefinition(type);
+                }
+            }
+            if (this.superclass == null) {
+                env.printError(ctx, "superclass " + type + " not found");
+            }
         }
         if (ctx.classBody().classBodyDeclaration() == null) {
             return;
@@ -82,7 +102,11 @@ class ClassDefinition {
             if (item.constructorDeclaration() != null) {
                 String name = item.constructorDeclaration().Identifier().getText();
                 if (!this.name.equals(name)) {
-                    env.printError(ctx, "method " + this.name + "." + name + " missing return type");
+                    env.printError(ctx, "method " + name + " missing return type");
+                    continue;
+                }
+                if (this.isAbstract) {
+                    env.printError(ctx, "abstract class cannot have constructor");
                     continue;
                 }
                 MethodDefinition method = new MethodDefinition();
@@ -119,6 +143,13 @@ class ClassDefinition {
                 if (prevMethod != null) {
                     prevMethod.isOverloaded = true;
                     method.isOverloaded = true;
+                }
+                if (method.blockContext == null && !this.isAbstract) {
+                    env.printError(item, "class " + this.name + " is not abstract; " +
+                            "method " + method.name + " missing body");
+                }
+                if (method.blockContext == null && method.isPrivate) {
+                    env.printError(item, "abstract method " + method.name + " must be public");
                 }
                 this.methodList.add(method);
             }
@@ -184,6 +215,7 @@ class ClassDefinition {
     }
 
     void parseFields(FieldDeclarationContext ctx) {
+        Environment env = Environment.getInstance();
         boolean isPrivate = false;
         boolean isStatic = false;
         boolean isInline = false;
@@ -201,12 +233,14 @@ class ClassDefinition {
                 }
             }
         }
+        if (this.isAbstract && !isPrivate) {
+            env.printError(ctx, "abstract class fields must be private");
+        }
         List<TerminalNode> identifierList = ctx.Identifier();
         FieldDefinition field = null;
         for (TerminalNode identifier : identifierList) {
             String name = identifier.getText();
             if (getField(name) != null) {
-                Environment env = Environment.getInstance();
                 env.printError(ctx, "class " + this.name + " field " + name + " declared twice");
             }
             field = new FieldDefinition();
@@ -224,7 +258,6 @@ class ClassDefinition {
         assert(identifierList.size() == 1);
         field.expression = ctx.expression();
         if (field.expression != null && !field.isStatic) {
-            Environment env = Environment.getInstance();
             env.printError(ctx, "only static fields may have initial values outside " +
                     "the constructor.");
         }
@@ -315,14 +348,23 @@ class ClassDefinition {
     }
 
     void translateHeader() {
-        if (this.isInterface) {
-            translateInterfaceHeader();
-            return;
-        }
         Environment env = Environment.getInstance();
         env.typeList.clear();
         env.print("struct " + this.name + " {");
         env.level++;
+        if (this.superclass != null) {
+            env.addType(this.superclass.toTypeDefinition());
+            env.print(this.superclass.toTypeDefinition().translateDereference() + " " +
+                    SUPER_FIELD_NAME + ";");
+        }
+        if (this.isInterface || this.isAbstract) {
+            env.print("void *object;");
+            for (MethodDefinition method : this.methodList) {
+                if (!(method.isPrivate || method.isStatic)) {
+                    method.translateInterface(this);
+                }
+            }
+        }
         for (FieldDefinition field : this.fieldList) {
             if (field.isStatic) {
                 continue;
@@ -337,6 +379,7 @@ class ClassDefinition {
         }
         env.level--;
         env.print("};");
+        env.print("");
         for (FieldDefinition field : this.fieldList) {
             if (field.isStatic) {
                 StringBuilder builder = new StringBuilder();
@@ -356,51 +399,13 @@ class ClassDefinition {
         }
     }
 
-    void translateInterfaceHeader() {
-        Environment env = Environment.getInstance();
-        env.typeList.clear();
-        env.print("struct " + this.name + " {");
-        env.level++;
-        env.print("void *object;");
-        for (MethodDefinition method : this.methodList) {
-            method.translateInterface(this);
-        }
-        env.level--;
-        env.print("};");
-        env.print("");
-        StringBuilder builder = makeInterfaceConstructor();
-        builder.append(";");
-        env.print(builder.toString());
-        for (MethodDefinition method : this.methodList) {
-            method.translate(this, true);
-        }
-    }
 
     void translateForward() {
         Environment env = Environment.getInstance();
         env.print("struct " + this.name + ";");
     }
 
-    StringBuilder makeInterfaceConstructor() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("void ");
-        builder.append(TranslationUtils.translateMethodName(this.name, this.name));
-        builder.append("(");
-        builder.append(toTypeDefinition().translateSpace());
-        builder.append("this, void *object");
-        for (MethodDefinition method : this.methodList) {
-            builder.append(", void *");
-            builder.append(method.name);
-        }
-        builder.append(")");
-        return builder;
-    }
-
     void translate() {
-        if (this.isInterface) {
-            translateInterface();
-            return;
-        }
         Environment env = Environment.getInstance();
         env.typeList.clear();
         boolean printedSomething = false;
@@ -426,25 +431,6 @@ class ClassDefinition {
             }
             method.translate(this, false);
             printedSomething = true;
-        }
-    }
-
-    void translateInterface() {
-        Environment env = Environment.getInstance();
-        env.typeList.clear();
-        StringBuilder builder = makeInterfaceConstructor();
-        builder.append(" {");
-        env.print(builder.toString());
-        env.level++;
-        env.print("this->object = object;");
-        for (MethodDefinition method : this.methodList) {
-            env.print("this->" + method.name + " = " + method.name + ";");
-        }
-        env.level--;
-        env.print("}");
-        for (MethodDefinition method : this.methodList) {
-            env.print("");
-            method.translate(this, false);
         }
     }
 }

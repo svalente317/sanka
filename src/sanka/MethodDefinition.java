@@ -97,6 +97,10 @@ class MethodDefinition {
         this.frame = env.symbolTable.pop();
     }
 
+    boolean isInherited() {
+        return ExportUtils.EXTENDS_FROM.equals(this.exportFrom);
+    }
+
     void translate(ClassDefinition classdef, boolean isHeader) {
         Environment env = Environment.getInstance();
         StringBuilder builder = new StringBuilder();
@@ -130,22 +134,40 @@ class MethodDefinition {
             return;
         }
         env.print(builder.toString());
+        env.print("{");
+        env.level++;
         if (this.block != null) {
             env.symbolTable.push(this.frame);
-            this.block.translate(true);
+            if (classdef.isAbstract && !this.isPrivate) {
+                // Public methods in abstract classes do a little extra work to allow themselves
+                // to be overridden.
+                env.print("if (this->" + this.name + " != NULL) {");
+                env.level++;
+                translateInterfaceBody();
+                if (this.returnType.isVoidType()) {
+                    env.print("return;");
+                }
+                env.level--;
+                env.print("}");
+            }
+            this.block.translate(false);
             env.symbolTable.pop();
         } else {
-            env.print("{");
-            env.level++;
             if (this.exportFrom != null) {
                 builder.setLength(0);
                 if (!this.returnType.equals(TypeDefinition.VOID_TYPE)) {
                     builder.append("return ");
                 }
-                FieldDefinition fielddef = classdef.getField(this.exportFrom);
-                builder.append(TranslationUtils.translateMethodName(fielddef.type.name, this));
-                builder.append("(this->");
-                builder.append(this.exportFrom);
+                if (this.exportFrom.equals(ExportUtils.EXTENDS_FROM)) {
+                    builder.append(TranslationUtils.translateMethodName(
+                            classdef.superclass.name, this));
+                    builder.append("(&this->" + ClassDefinition.SUPER_FIELD_NAME);
+                } else {
+                    FieldDefinition fielddef = classdef.getField(this.exportFrom);
+                    builder.append(TranslationUtils.translateMethodName(fielddef.type.name, this));
+                    builder.append("(this->");
+                    builder.append(this.exportFrom);
+                }
                 for (ParameterDefinition param : this.parameters) {
                     builder.append(", ");
                     builder.append(param.name);
@@ -156,12 +178,12 @@ class MethodDefinition {
                 env.symbolTable.push(this.frame);
                 this.generator.translate();
                 env.symbolTable.pop();
-            } else if (classdef.isInterface) {
+            } else if (classdef.isInterface || classdef.isAbstract) {
                 translateInterfaceBody();
             }
-            env.level--;
-            env.print("}");
         }
+        env.level--;
+        env.print("}");
     }
 
     void translateInterface(ClassDefinition classdef) {

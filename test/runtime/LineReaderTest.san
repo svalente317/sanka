@@ -1,0 +1,65 @@
+// -*- mode: Java; -*-
+package sanka.test;
+import sanka.io.LineReader;
+
+class FunnyReader {
+
+    private String[] testData;
+    private int readCount;
+
+    FunnyReader() {
+        this.testData = new String[]{
+            "first test\r\n",
+            "sec",
+            "ond test\r\nthird\r\nfou",
+            "rth\r\nfifth\r",
+            "\nsixth\r\nseventh\r test\r\nei",
+            "g",
+            "h",
+            "th\r\nDONE"
+        };
+    }
+
+    int read(byte[] buffer) {
+        if (this.readCount >= this.testData.length) {
+            return 0;
+        }
+        var data = this.testData[this.readCount];
+        this.readCount++;
+        var len = data.length();
+        for (var i = 0; i < len; i++) {
+            buffer[i] = data[i];
+        }
+        return len;
+    }
+
+    void close() {
+    }
+}
+
+class Main {
+
+    static int main(String[] argv) {
+        var expectedLines = new String[]{
+            "first test",
+            "second test",
+            "third",
+            "fourth",
+            "fifth",
+            "sixth",
+            "seventh\r test",
+            "eighth"
+        };
+        var funnyReader = new FunnyReader();
+        var lineReader = new LineReader(funnyReader);
+        for (var expected : expectedLines) {
+            var line = lineReader.readline();
+            if (expected != line) {
+                System.println("expected:" + expected + " received:" + line);
+                return -1;
+            }
+        }
+        System.println("ok");
+        return 0;
+    }
+}

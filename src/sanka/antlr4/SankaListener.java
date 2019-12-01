@@ -80,6 +80,16 @@ public interface SankaListener extends ParseTreeListener {
 	 */
 	void exitTypeParameters(SankaParser.TypeParametersContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SankaParser#extendsClass}.
+	 * @param ctx the parse tree
+	 */
+	void enterExtendsClass(SankaParser.ExtendsClassContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#extendsClass}.
+	 * @param ctx the parse tree
+	 */
+	void exitExtendsClass(SankaParser.ExtendsClassContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SankaParser#interfaceDeclaration}.
 	 * @param ctx the parse tree
 	 */
@@ -169,6 +179,16 @@ public interface SankaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitMethodDeclaration(SankaParser.MethodDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SankaParser#blockOrSemi}.
+	 * @param ctx the parse tree
+	 */
+	void enterBlockOrSemi(SankaParser.BlockOrSemiContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#blockOrSemi}.
+	 * @param ctx the parse tree
+	 */
+	void exitBlockOrSemi(SankaParser.BlockOrSemiContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SankaParser#interfaceBodyDeclaration}.
 	 * @param ctx the parse tree

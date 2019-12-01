@@ -21,7 +21,7 @@ class ExpressionDefinition {
     static enum ExpressionType {
         LITERAL, IDENTIFIER, CLASS_IDENTIFIER, NEW_INSTANCE, NEW_ARRAY_WITH_VALUES,
         NEW_ARRAY, NEW_MAP, UNARY, FIELD_ACCESS, BINARY, ARRAY_ACCESS, FUNCTION_CALL,
-        TERNARY
+        TERNARY, SUPERCLASS
     };
 
     ExpressionType expressionType;
@@ -226,7 +226,7 @@ class ExpressionDefinition {
                 this.identifiedClass = new TypeDefinition(packageName, this.name);
                 return;
             }
-            env.printError(primary, "undefined variable: " + this.name);
+            env.printError(primary, "undefined: " + this.name);
             return;
         }
         if (text.equals("this")) {
@@ -684,6 +684,8 @@ class ExpressionDefinition {
             return translateFunctionCall(variableName);
         case TERNARY:
             return translateTernary(variableName);
+        case SUPERCLASS:
+            return translateSuperclass();
         }
         return null;
     }
@@ -704,40 +706,41 @@ class ExpressionDefinition {
         builder.append(" = GC_MALLOC(sizeof(");
         builder.append(this.type.translateDereference());
         builder.append("));");
-        StringBuilder builder2 = null;
+        env.print(builder.toString());
         ClassDefinition classdef = env.getClassDefinition(this.type);
         int numArgs = this.argList == null ? 0 : this.argList.length;
         MethodDefinition constructor = classdef.getMethod(classdef.name, numArgs);
+        ExportUtils.translateSuperclasses(classdef, variableName);
         if (constructor != null) {
-            builder2 = new StringBuilder();
-            builder2.append(TranslationUtils.translateMethodName(classdef.name, constructor));
-            builder2.append("(");
-            builder2.append(variableName);
+            builder = new StringBuilder();
+            builder.append(TranslationUtils.translateMethodName(classdef.name, constructor));
+            builder.append("(");
+            builder.append(variableName);
             if (this.argList != null) {
                for (ExpressionDefinition arg : this.argList) {
-                   builder2.append(", ");
-                   builder2.append(arg.translate(null));
+                   builder.append(", ");
+                   builder.append(arg.translate(null));
                }
             }
-            builder2.append(");");
+            builder.append(");");
+            env.print(builder.toString());
         }
         if (classdef.isInterface) {
+            builder = new StringBuilder();
+            builder.append(variableName);
+            builder.append("->object = ");
+            builder.append(this.expression1.translate(null));
+            builder.append(";");
+            env.print(builder.toString());
             String typeName = this.expression1.type.name;
-            builder2 = new StringBuilder();
-            builder2.append(TranslationUtils.translateMethodName(classdef.name, classdef.name));
-            builder2.append("(");
-            builder2.append(variableName);
-            builder2.append(", ");
-            builder2.append(this.expression1.translate(null));
             for (MethodDefinition method : classdef.methodList) {
-                builder2.append(", ");
-                builder2.append(TranslationUtils.translateMethodName(typeName, method));
+                builder = new StringBuilder();
+                builder.append(variableName);
+                builder.append("->" + method.name + " = ");
+                builder.append(TranslationUtils.translateMethodName(typeName, method));
+                builder.append(";");
+                env.print(builder.toString());
             }
-            builder2.append(");");
-        }
-        env.print(builder.toString());
-        if (builder2 != null) {
-            env.print(builder2.toString());
         }
         return variableName;
     }
@@ -1056,5 +1059,15 @@ class ExpressionDefinition {
         builder.append(");");
         env.print(builder.toString());
         return variableName;
+    }
+
+    String translateSuperclass() {
+        String text = this.expression1.translate(null);
+        // Technically, the correct expression is "&this.super.super.super..."
+        // That is: Walk up the correct number of superclass levels, and take a pointer.
+        // However, because C is close to machine language, and we control the layout of
+        // C structures in memory, we know that each ".super" moves the pointer zero bytes,
+        // so we simply cast the pointer.
+        return "((" + this.type.translate() + ")" + text + ")";
     }
 }
