@@ -57,7 +57,9 @@ Sanka has the following things in common with Java:
 
 Here are the Java constructs that Sanka does not provide:
 
-* Sanka does not provide class inheritance or subclasses or abstract classes.
+* Sanka classes are either abstract or final. Either a class is abstract
+  and it can be subclassed (but not instantiated), or it is concrete and it
+  can be instantiated (but not subclassed).
 * Classes are a compile-time abstraction. They basically don't exist at
   runtime. I can declare variables of type `Foo`, but there is no `Foo.class`
   object accessable at runtime.
@@ -155,11 +157,11 @@ keyword -- the syntax, the limitations, etc. -- see
 **export keyword**
 
 The `export` keyword is syntactic sugar to get around the fact that a
-Sanka class cannot extend another class. `export` provides the
-illusion that a class extends one (or more) of its fields. When you
-export a field, the compiler adds copies of all of the field's public
-methods to the parent class. For example, say that the class `Person`
-has a method with the signature:
+Sanka class cannot extend another non-abtract class. `export` provides
+the illusion that a class extends one (or more) of its fields. When
+you export a field, the compiler adds copies of all of the field's
+public methods to the parent class. For example, say that the class
+`Person` has a method with the signature:
 ~~~
 public String getName();
 ~~~

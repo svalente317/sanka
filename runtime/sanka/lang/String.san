@@ -48,8 +48,12 @@ class String {
         c__stmt "return (n1 >= n2) && strcmp(this+(n1-n2), s) == 0";
     }
 
+    String substring(int beginIndex) {
+        c__stmt "return STRING_SUBSTRING(this, beginIndex, 0, 1)";
+    }
+
     String substring(int beginIndex, int endIndex) {
-        c__stmt "return STRING_SUBSTRING(this, beginIndex, endIndex)";
+        c__stmt "return STRING_SUBSTRING(this, beginIndex, endIndex, 0)";
     }
 
     String toString() {

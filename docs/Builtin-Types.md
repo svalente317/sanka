@@ -141,6 +141,7 @@ The `String` class has these methods:
 * `boolean startsWith(String s)` Return true if this string starts with `s`
 * `boolean endsWith(String s)` Return true if this string ends with `s`
 * `String substring(int beginIndex, int endIndex)` Return a substring
+* `String substring(int beginIndex)` Return a suffix
 * `byte[] toByteArray()` Return a copy of the bytes in the String
 
 ## Array

@@ -95,7 +95,7 @@ class File {
             c__stmt "if (entry == NULL) break";
             c__stmt "char *name = entry->d_name";
             c__stmt "if (name[0] == '.' && (name[1] == 0 || (name[1] == '.' && name[2] == 0))) continue";
-            c__stmt "filename = STRING_SUBSTRING(name, 0, 0)";
+            c__stmt "filename = STRING_SUBSTRING(name, 0, 0, 1)";
             results.add(filename);
         }
         c__stmt "closedir(dir)";

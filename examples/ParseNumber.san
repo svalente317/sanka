@@ -12,7 +12,7 @@ class ParseNumber {
             var space = text.indexOf(' ');
             if (space > 0) {
                 this.words.add(text.substring(0, space));
-                text = text.substring(space + 1, 0);
+                text = text.substring(space + 1);
             } else {
                 this.words.add(text);
                 break;

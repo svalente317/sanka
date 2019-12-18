@@ -94,12 +94,12 @@ void DOUBLE_TO_STRING(double d, char *str) {
     sprintf(str, "%g", d);
 }
 
-char *STRING_SUBSTRING(const char *this, int beginIndex, int endIndex) {
+char *STRING_SUBSTRING(const char *this, int beginIndex, int endIndex, int toEnd) {
     if (beginIndex < 0 || endIndex < 0) {
         return NULL;
     }
     int n = strlen(this);
-    if (endIndex == 0 || endIndex > n) {
+    if (endIndex > n || toEnd) {
         endIndex = n;
     }
     if (beginIndex > endIndex) {
