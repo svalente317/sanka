@@ -81,6 +81,14 @@ class MethodDefinition {
         this.blockContext = blockContext;
     }
 
+    boolean isAbstract(ClassDefinition classdef) {
+        if (isInherited()) {
+            classdef = classdef.superclass;
+            return classdef.getMethod(this.name, this.parameters.size()).isAbstract(classdef);
+        }
+        return this.blockContext == null && this.exportFrom == null && this.generator == null;
+    }
+
     void evaluate() {
         Environment env = Environment.getInstance();
         env.currentMethod = this;

@@ -1,7 +1,5 @@
 # TODO
 
-* for extends abstract classes, verify all methods are implemented
-
 * support inline fields
 
 * Support classes with the same name in different packages

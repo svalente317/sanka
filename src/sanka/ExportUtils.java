@@ -1,5 +1,6 @@
 package sanka;
 
+
 import sanka.ClassDefinition.FieldDefinition;
 
 class ExportUtils {
@@ -42,33 +43,20 @@ class ExportUtils {
             if (!parseExports(superclass)) {
                 continue;
             }
-            if (methodName != null) {
-                MethodDefinition method = superclass.getMethod(methodName, null);
-                if (method == null) {
-                    env.printError(null, "export " + classdef.qualifiedName() + "." + fieldName +
-                            ": method " + methodName + " not found");
-                    continue;
-                }
-                if (method.isPrivate) {
-                    env.printError(null, "cannot export " + classdef.qualifiedName() +
-                            "." + fieldName + ": method is private");
-                    continue;
-                }
-                if (method.isOverloaded) {
-                    for (MethodDefinition imethod : classdef.methodList) {
-                        if (imethod.name.equals(methodName)) {
-                            addMethodToClass(classdef, fieldName, imethod, true);
-                        }
-                    }
-                } else {
-                    addMethodToClass(classdef, fieldName, method, true);
-                }
-            } else {
-                for (MethodDefinition method : superclass.methodList) {
-                    if (!method.isPrivate) {
-                        addMethodToClass(classdef, fieldName, method, false);
+            // Export all public methods with the given name.
+            int count = 0;
+            for (MethodDefinition method : superclass.methodList) {
+                if (!method.isPrivate) {
+                    if (methodName == null || methodName.equals(method.name)) {
+                        count++;
+                        addMethodToClass(classdef, fieldName, method, methodName == null);
                     }
                 }
+            }
+            if (methodName != null && count == 0) {
+                env.printError(null, "export " + classdef.qualifiedName() + "." + fieldName +
+                        ": public method " + methodName + " not found");
+                continue;
             }
         }
         if (classdef.superclass != null && parseExports(classdef.superclass)) {
@@ -78,7 +66,12 @@ class ExportUtils {
                 return false;
             }
             for (MethodDefinition method : classdef.superclass.methodList) {
-                if (!(method.isPrivate || method.isStatic)) {
+                if (method.isPrivate || method.isStatic) {
+                    continue;
+                }
+                if (method.isAbstract(classdef) && !classdef.isAbstract) {
+                    verifyMethodDefined(classdef, method);
+                } else {
                     addMethodToClass(classdef, EXTENDS_FROM, method, false);
                 }
             }
@@ -87,13 +80,20 @@ class ExportUtils {
         return true;
     }
 
-    static void addMethodToClass(ClassDefinition classdef, String fieldName,
-            MethodDefinition method, boolean force) {
+    private static void addMethodToClass(ClassDefinition classdef, String fieldName,
+            MethodDefinition method, boolean isImplicit) {
         Environment env = Environment.getInstance();
         MethodDefinition existing = classdef.getMethod(method.name, method.parameters.size());
         if (existing != null) {
+            if (fieldName.equals(EXTENDS_FROM)) {
+                if (!sameSignature(method, existing)) {
+                    env.printError(null, "class " + classdef.name + " method " + existing.name +
+                            ": signature incompatible with " + classdef.superclass.name);
+                }
+                return;
+            }
             // Implicit exported methods do not override explicitly defined methods.
-            if (!force && (existing.exportFrom == null || fieldName.equals(EXTENDS_FROM))) {
+            if (isImplicit && existing.exportFrom == null && sameSignature(method, existing)) {
                 return;
             }
             if (existing.exportFrom != null) {
@@ -115,6 +115,27 @@ class ExportUtils {
         clone.parameters.addAll(method.parameters);
         clone.exportFrom = fieldName;
         classdef.methodList.add(clone);
+    }
+
+    private static void verifyMethodDefined(ClassDefinition classdef, MethodDefinition method) {
+        MethodDefinition existing = classdef.getMethod(method.name, method.parameters.size());
+        if (existing == null || !sameSignature(method, existing)) {
+            Environment env = Environment.getInstance();
+            env.printError(null, "class " + classdef.name + " must define method " + method.name);
+        }
+    }
+
+    private static boolean sameSignature(MethodDefinition md1, MethodDefinition md2) {
+        if (!(md1.isStatic == md2.isStatic && md1.returnType.equals(md2.returnType))) {
+            return false;
+        }
+        int count = md1.parameters.size();
+        for (int idx = 0; idx < count; idx++) {
+            if (!md1.parameters.get(idx).equals(md2.parameters.get(idx))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     static void translateSuperclasses(ClassDefinition classdef, String variableName) {
