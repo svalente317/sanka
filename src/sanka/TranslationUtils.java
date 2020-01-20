@@ -169,11 +169,18 @@ class TranslationUtils {
         if (expr.type.equals(TypeDefinition.BOOLEAN_TYPE)) {
             return "(" + text + " ? \"true\" : \"false\")";
         }
+        if (expr.type.equals(TypeDefinition.NULL_TYPE)) {
+            return "NULL";
+        }
         if (expr.type.isNumericType()) {
             String variableName = env.getTmpVariable();
             if (expr.type.equals(TypeDefinition.LONG_TYPE)) {
                 env.print("char " + variableName + "[22];");
                 env.print("LONG_TO_STRING(" + text + ", " + variableName + ");");
+            } else if (expr.type.equals(TypeDefinition.BYTE_TYPE)) {
+                env.print("char " + variableName + "[2];");
+                env.print(variableName + "[0] = " + text + ";");
+                env.print(variableName + "[1] = 0;");
             } else if (expr.type.isIntegralType()) {
                 env.print("char " + variableName + "[12];");
                 env.print("INT_TO_STRING(" + text + ", " + variableName + ");");

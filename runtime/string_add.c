@@ -16,6 +16,7 @@ char *STRING_ADD(const char **arr, int size) {
 
     length = 0;
     for (idx = 0; idx < size; idx++) {
+        if (arr[idx] == NULL) arr[idx] = "null";
         lens[idx] = strlen(arr[idx]);
         length += lens[idx];
     }

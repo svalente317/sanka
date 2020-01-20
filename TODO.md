@@ -1,9 +1,5 @@
 # TODO
 
-* Add byte to string as character
-
-* Add null to string as "null"
-
 * implement cast from long to int, etc.
 
 * float to double promotion and demotion
