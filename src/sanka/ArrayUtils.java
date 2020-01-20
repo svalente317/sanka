@@ -166,7 +166,9 @@ public class ArrayUtils {
                       ", (union rb_key) " + keyName + ", &" + valueName + ");");
             return variableName;
         case "clear":
-            return null;
+            env.print("NULLCHECK(" + arrayName + ");");
+            env.print("rb_clear(" + arrayName + ");");
+            return variableName;
         }
         env.printError(null, "map method not implemented: " + methodName);
         return null;

@@ -1,14 +1,28 @@
 # TODO
 
-* support inline fields
+* Add byte to string as character
+
+* Add null to string as "null"
+
+* implement cast from long to int, etc.
+
+* float to double promotion and demotion
+
+* implement typecast for interface and abstract classes.
+
+* Error if two classes have same qualified name
 
 * Support classes with the same name in different packages
+
+* Support static field initialized to literal array
+
+* add "singleton" as class modifier?
+
+* support inline fields
 
 * Parameterized types
 
 * Improve support for char literals and complex literals?
-
-* float to double promotion and demotion
 
 * Support expressions with qualified class name or classes in the current
   package (in ED.evaluatePrimary)
@@ -17,21 +31,13 @@
 
 * Support 2d arrays - initialization and code generation
 
-* Support static field initialized to literal array
-
 * what if map changes during iteration?
-
-* Error if two classes have same qualified name
 
 * Implement "x == y" where x or y is an interface
 
-* Implement Map "clear"
-
 * Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
 
-* Serializable interfaces
-
-* Add byte to string as character
+* Serializable interfaces. Can interface extend another interface?
 
 * json library: escape quotes in strings
 

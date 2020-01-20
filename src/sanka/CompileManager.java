@@ -13,6 +13,22 @@ class CompileManager {
 
     void compile(String mainClass, String exeName) throws Exception {
         Environment env = Environment.getInstance();
+        String packageName = null;
+        String className = mainClass;
+        int idx = mainClass.lastIndexOf('.');
+        if (idx >= 0) {
+            packageName = mainClass.substring(0,  idx);
+            className = className.substring(idx+1);
+        }
+        ClassDefinition mcd = env.getClassDefinition(packageName, className);
+        if (mcd == null) {
+            env.printError(null, mainClass + ": class not found");
+            return;
+        }
+        if (mcd.isAbstract || mcd.isInterface) {
+            env.printError(null, mainClass + ": class cannot be instantiated");
+            return;
+        }
         List<String> linkcommand = new ArrayList<>();
         for (ClassDefinition classdef : env.classList) {
             if (classdef.isImport) {
@@ -44,7 +60,7 @@ class CompileManager {
         }
     }
 
-    void compileFile(String filename, List<String> ofileList) throws Exception {
+    private void compileFile(String filename, List<String> ofileList) throws Exception {
         Environment env = Environment.getInstance();
         List<String> command = new ArrayList<>();
         command.add(GCC);
@@ -66,14 +82,14 @@ class CompileManager {
         ofileList.add(objfilename);
     }
 
-    int executeCommand(List<String> command) throws Exception {
+    private int executeCommand(List<String> command) throws Exception {
         String[] args = command.toArray(new String[0]);
         printCommand(args);
         Process process = Runtime.getRuntime().exec(args);
         return process.waitFor();
     }
 
-    void printCommand(String[] args) {
+    private void printCommand(String[] args) {
         StringBuilder builder = new StringBuilder();
         for (String arg : args) {
             if (builder.length() > 0) {
@@ -84,7 +100,7 @@ class CompileManager {
         System.out.println(builder.toString());
     }
 
-    String generateMainFile(String mainClass) throws Exception {
+    private String generateMainFile(String mainClass) throws Exception {
         Environment env = Environment.getInstance();
         String packageName = null;
         String className = mainClass;

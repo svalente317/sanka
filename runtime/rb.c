@@ -456,3 +456,19 @@ rb_t_next (struct rb_traverser *trav, union rb_key *kp, union rb_value *vp)
   *vp = x->rb_value;
   return 1;
 }
+
+/**
+ * This function was not part of libavl. It was added for sanka.
+ * This intentionally leaks memory, which should be safe because sanka does
+ * garbage collection. Do not use this function without GC.
+ */
+void rb_clear(struct rb_table *tree)
+{
+  if (tree->rb_root != NULL)
+    {
+      GC_FREE(tree->rb_root);
+    }
+  tree->rb_root = NULL;
+  tree->rb_count = 0;
+  tree->rb_generation++;
+}

@@ -73,6 +73,7 @@ int rb_find(const struct rb_table *, union rb_key, union rb_value *);
 int rb_put(struct rb_table *, union rb_key, union rb_value, union rb_value *);
 int rb_delete(struct rb_table *, union rb_key, union rb_value *);
 #define rb_count(table) ((size_t) (table)->rb_count)
+void rb_clear(struct rb_table *);
 
 struct rb_traverser
   {
