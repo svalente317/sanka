@@ -134,9 +134,8 @@ public class TypeUtils {
                 failureList.add(method.name);
             }
         }
-        if (failureList.isEmpty()) {
-            return true;
-        }
+        return failureList.isEmpty();
+        /*
         StringBuilder builder = new StringBuilder();
         builder.append("class ");
         builder.append(classDef.name);
@@ -147,9 +146,7 @@ public class TypeUtils {
             builder.append(" ");
             builder.append(name);
         }
-        Environment env = Environment.getInstance();
-        env.printError(null, builder.toString());
-        return false;
+        */
     }
 
     static boolean sameParameterList(List<ParameterDefinition> mp,
@@ -178,5 +175,14 @@ public class TypeUtils {
             return true;
         }
         return isSubclassOf(abstractClass, concreteClass.superclass);
+    }
+
+    static boolean isInterface(TypeDefinition type) {
+        if (type == null) {
+            return false;
+        }
+        Environment env = Environment.getInstance();
+        ClassDefinition classdef = env.getClassDefinition(type);
+        return classdef != null && classdef.isInterface;
     }
 }

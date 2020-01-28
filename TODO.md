@@ -1,10 +1,18 @@
 # TODO
 
+* support consts in interface
+
+* implement typecast for interface and abstract classes.
+
+* interface extends interface
+
+* can String, array, and map implement interfaces?
+
+* do not allow abstract class to be instantiated
+
 * implement cast from long to int, etc.
 
 * float to double promotion and demotion
-
-* implement typecast for interface and abstract classes.
 
 * Error if two classes have same qualified name
 
@@ -29,11 +37,7 @@
 
 * what if map changes during iteration?
 
-* Implement "x == y" where x or y is an interface
-
 * Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
-
-* Serializable interfaces. Can interface extend another interface?
 
 * json library: escape quotes in strings
 

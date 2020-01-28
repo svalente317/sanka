@@ -1,12 +1,8 @@
 package sanka;
 
-
 import sanka.ClassDefinition.FieldDefinition;
 
 class ExportUtils {
-    // Use a reserved word that can never be a field name.
-    public static final String EXTENDS_FROM = "extends";
-
     /**
      * Recursive function to add all exported methods to class methodList.
      */
@@ -69,11 +65,7 @@ class ExportUtils {
                 if (method.isPrivate || method.isStatic) {
                     continue;
                 }
-                if (method.isAbstract(classdef) && !classdef.isAbstract) {
-                    verifyMethodDefined(classdef, method);
-                } else {
-                    addMethodToClass(classdef, EXTENDS_FROM, method, false);
-                }
+                addMethodToClass(classdef, null, method, false);
             }
         }
         classdef.exportStatus = 1;
@@ -83,13 +75,15 @@ class ExportUtils {
     private static void addMethodToClass(ClassDefinition classdef, String fieldName,
             MethodDefinition method, boolean isImplicit) {
         Environment env = Environment.getInstance();
-        MethodDefinition existing = classdef.getMethod(method.name, method.parameters.size());
+        int numArgs = method.parameters.size();
+        MethodDefinition existing = classdef.getMethod(method.name, numArgs);
         if (existing != null) {
-            if (fieldName.equals(EXTENDS_FROM)) {
+            if (fieldName == null) {
                 if (!sameSignature(method, existing)) {
                     env.printError(null, "class " + classdef.name + " method " + existing.name +
                             ": signature incompatible with " + classdef.superclass.name);
                 }
+                existing.overrideCount = method.overrideCount + 1;
                 return;
             }
             // Implicit exported methods do not override explicitly defined methods.
@@ -114,13 +108,12 @@ class ExportUtils {
         clone.name = method.name;
         clone.parameters.addAll(method.parameters);
         clone.exportFrom = fieldName;
+        if (fieldName == null) {
+            clone.overrideCount = method.overrideCount + 1;
+        }
         classdef.methodList.add(clone);
-    }
-
-    private static void verifyMethodDefined(ClassDefinition classdef, MethodDefinition method) {
-        MethodDefinition existing = classdef.getMethod(method.name, method.parameters.size());
-        if (existing == null || !sameSignature(method, existing)) {
-            Environment env = Environment.getInstance();
+        if (!classdef.isAbstract && fieldName == null &&
+             classdef.getMethodWithBody(method.name, numArgs) == null) {
             env.printError(null, "class " + classdef.name + " must define method " + method.name);
         }
     }
@@ -131,7 +124,7 @@ class ExportUtils {
         }
         int count = md1.parameters.size();
         for (int idx = 0; idx < count; idx++) {
-            if (!md1.parameters.get(idx).equals(md2.parameters.get(idx))) {
+            if (!md1.parameters.get(idx).type.equals(md2.parameters.get(idx).type)) {
                 return false;
             }
         }
@@ -139,24 +132,27 @@ class ExportUtils {
     }
 
     static void translateSuperclasses(ClassDefinition classdef, String variableName) {
-        Environment env = Environment.getInstance();
-        String prefix = variableName + "->" + ClassDefinition.SUPER_FIELD_NAME;
-        while (classdef.superclass != null) {
-            env.print(prefix + ".object = " + variableName + ";");
-            for (MethodDefinition method : classdef.superclass.methodList) {
-                if (method.isPrivate || method.isStatic) {
-                    continue;
-                }
-                MethodDefinition override = classdef.getMethod(
-                        method.name, method.parameters.size());
-                if (override == null || override.isInherited()) {
-                    continue;
-                }
-                String cName = TranslationUtils.translateMethodName(classdef.name, override);
-                env.print(prefix + "." + method.name + " = " + cName + ";");
-            }
-            prefix = prefix + "." + ClassDefinition.SUPER_FIELD_NAME;
-            classdef = classdef.superclass;
+        if (classdef.superclass == null) {
+            return;
         }
+        Environment env = Environment.getInstance();
+        String prefix = variableName + "->";
+        env.print(prefix + supers(classdef.depth()) + "object = " + variableName + ";");
+        for (MethodDefinition method : classdef.methodList) {
+            if (method.isPrivate || method.isStatic || method.overrideCount == 0) {
+                continue;
+            }
+            String lhs = prefix + supers(method.overrideCount) + method.name;
+            String cName = TranslationUtils.translateMethodName(classdef.name, method);
+            env.print(lhs + " = (void *) " + cName + ";");
+        }
+    }
+
+    static String supers(int count) {
+        String result = "";
+        for (int idx = 0; idx < count; idx++) {
+            result = result + ClassDefinition.SUPER_FIELD_NAME + ".";
+        }
+        return result;
     }
 }

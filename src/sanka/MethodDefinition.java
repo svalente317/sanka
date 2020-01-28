@@ -36,6 +36,7 @@ class MethodDefinition {
     SymbolTable.Frame frame;
     String exportFrom;
     MethodGenerator generator;
+    int overrideCount;
 
     MethodDefinition() {
         this.parameters = new ArrayList<>();
@@ -81,12 +82,8 @@ class MethodDefinition {
         this.blockContext = blockContext;
     }
 
-    boolean isAbstract(ClassDefinition classdef) {
-        if (isInherited()) {
-            classdef = classdef.superclass;
-            return classdef.getMethod(this.name, this.parameters.size()).isAbstract(classdef);
-        }
-        return this.blockContext == null && this.exportFrom == null && this.generator == null;
+    boolean hasBody() {
+        return this.blockContext != null || this.exportFrom != null || this.generator != null;
     }
 
     void evaluate() {
@@ -105,36 +102,36 @@ class MethodDefinition {
         this.frame = env.symbolTable.pop();
     }
 
-    boolean isInherited() {
-        return ExportUtils.EXTENDS_FROM.equals(this.exportFrom);
+    void translate(ClassDefinition classdef, boolean isHeader) {
+        translate(classdef, isHeader, false);
+        if (classdef.isAbstract && this.hasBody()) {
+            if (!isHeader) {
+                Environment.getInstance().print("");
+            }
+            translate(classdef, isHeader, true);
+        }
     }
 
-    void translate(ClassDefinition classdef, boolean isHeader) {
+    private void translate(ClassDefinition classdef, boolean isHeader, boolean isBase) {
         Environment env = Environment.getInstance();
+        String name = TranslationUtils.translateMethodName(classdef.name, this);
+        if (isBase) {
+            name = TranslationUtils.getBaseTranslatedName(name);
+        }
         StringBuilder builder = new StringBuilder();
         if (this.isPrivate) {
             builder.append("/* private */ ");
         }
         env.addType(this.returnType);
         builder.append(this.returnType.translateSpace());
-        builder.append(TranslationUtils.translateMethodName(classdef.name, this));
+        builder.append(name);
         builder.append("(");
         boolean needComma = false;
         if (!this.isStatic) {
             builder.append(classdef.toTypeDefinition().translateSpace() + "this");
             needComma = true;
         }
-        if (this.parameters != null) {
-            for (ParameterDefinition param : this.parameters) {
-                if (needComma) {
-                    builder.append(", ");
-                }
-                env.addType(param.type);
-                builder.append(param.type.translateSpace());
-                builder.append(param.name);
-                needComma = true;
-            }
-        }
+        addParameters(builder, true, needComma);
         builder.append(")");
         if (isHeader) {
             builder.append(";");
@@ -144,54 +141,52 @@ class MethodDefinition {
         env.print(builder.toString());
         env.print("{");
         env.level++;
-        if (this.block != null) {
-            env.symbolTable.push(this.frame);
-            if (classdef.isAbstract && !this.isPrivate) {
-                // Public methods in abstract classes do a little extra work to allow themselves
-                // to be overridden.
-                env.print("if (this->" + this.name + " != NULL) {");
-                env.level++;
-                translateInterfaceBody();
-                if (this.returnType.isVoidType()) {
-                    env.print("return;");
-                }
-                env.level--;
-                env.print("}");
+        if (this.exportFrom != null) {
+            builder.setLength(0);
+            if (!this.returnType.equals(TypeDefinition.VOID_TYPE)) {
+                builder.append("return ");
             }
+            FieldDefinition fielddef = classdef.getField(this.exportFrom);
+            builder.append(TranslationUtils.translateMethodName(fielddef.type.name, this));
+            builder.append("(this->");
+            builder.append(this.exportFrom);
+            addParameters(builder, false, true);
+            builder.append(");");
+            env.print(builder.toString());
+        }
+        else if (classdef.isInterface || (classdef.isAbstract && !isBase)) {
+            translateInterfaceBody(classdef);
+        }
+        else if (this.block != null) {
+            env.symbolTable.push(this.frame);
             this.block.translate(false);
             env.symbolTable.pop();
-        } else {
-            if (this.exportFrom != null) {
-                builder.setLength(0);
-                if (!this.returnType.equals(TypeDefinition.VOID_TYPE)) {
-                    builder.append("return ");
-                }
-                if (this.exportFrom.equals(ExportUtils.EXTENDS_FROM)) {
-                    builder.append(TranslationUtils.translateMethodName(
-                            classdef.superclass.name, this));
-                    builder.append("(&this->" + ClassDefinition.SUPER_FIELD_NAME);
-                } else {
-                    FieldDefinition fielddef = classdef.getField(this.exportFrom);
-                    builder.append(TranslationUtils.translateMethodName(fielddef.type.name, this));
-                    builder.append("(this->");
-                    builder.append(this.exportFrom);
-                }
-                for (ParameterDefinition param : this.parameters) {
-                    builder.append(", ");
-                    builder.append(param.name);
-                }
-                builder.append(");");
-                env.print(builder.toString());
-            } else if (this.generator != null) {
-                env.symbolTable.push(this.frame);
-                this.generator.translate();
-                env.symbolTable.pop();
-            } else if (classdef.isInterface || classdef.isAbstract) {
-                translateInterfaceBody();
-            }
+        } else if (this.generator != null) {
+            env.symbolTable.push(this.frame);
+            this.generator.translate();
+            env.symbolTable.pop();
+        } else if (this.overrideCount > 0) {
+            translateCallSuperclass(classdef);
         }
         env.level--;
         env.print("}");
+    }
+
+    private void addParameters(StringBuilder builder, boolean withTypes, boolean needComma) {
+        Environment env = Environment.getInstance();
+        if (this.parameters != null) {
+            for (ParameterDefinition param : this.parameters) {
+                if (needComma) {
+                    builder.append(", ");
+                }
+                if (withTypes) {
+                    env.addType(param.type);
+                    builder.append(param.type.translateSpace());
+                }
+                builder.append(param.name);
+                needComma = true;
+            }
+        }
     }
 
     void translateInterface(ClassDefinition classdef) {
@@ -207,44 +202,60 @@ class MethodDefinition {
             builder.append("void *object");
             needComma = true;
         }
-        if (this.parameters != null) {
-            for (ParameterDefinition param : this.parameters) {
-                if (needComma) {
-                    builder.append(", ");
-                }
-                env.addType(param.type);
-                builder.append(param.type.translateSpace());
-                builder.append(param.name);
-                needComma = true;
-            }
-        }
+        addParameters(builder, true, needComma);
         builder.append(");");
         env.print(builder.toString());
     }
 
-    void translateInterfaceBody() {
+    void translateInterfaceBody(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
         StringBuilder builder = new StringBuilder();
         if (!this.returnType.isVoidType()) {
             builder.append("return ");
         }
-        builder.append("this->");
+        builder.append("this->" + ExportUtils.supers(this.overrideCount));
         builder.append(this.name);
         builder.append("(");
         boolean needComma = false;
         if (!this.isStatic) {
-            builder.append("this->object");
+            String supers = ExportUtils.supers(classdef.depth());
+            builder.append("this->" + supers + "object");
             needComma = true;
         }
-        if (this.parameters != null) {
-            for (ParameterDefinition param : this.parameters) {
-                if (needComma) {
-                    builder.append(", ");
-                }
-                builder.append(param.name);
-                needComma = true;
+        addParameters(builder, false, needComma);
+        builder.append(");");
+        env.print(builder.toString());
+    }
+
+    void translateCallSuperclass(ClassDefinition classdef) {
+        Environment env = Environment.getInstance();
+        ClassDefinition candidate = classdef.superclass;
+        MethodDefinition method = null;
+        int superCount = 1;
+        while (candidate != null) {
+            method = candidate.getMethod(this.name, this.parameters.size());
+            if (method == null || method.hasBody()) {
+                break;
             }
+            candidate = candidate.superclass;
+            superCount++;
         }
+        if (method == null) {
+            env.printError(null, "class " + classdef.name + " concrete method " +
+                    this.name + " not found");
+            return;
+        }
+        StringBuilder builder = new StringBuilder();
+        if (!method.returnType.isVoidType()) {
+            builder.append("return ");
+        }
+        String name = TranslationUtils.translateMethodName(candidate.name, method);
+        builder.append(TranslationUtils.getBaseTranslatedName(name));
+        builder.append("(&this->" + ClassDefinition.SUPER_FIELD_NAME);
+        for (int idx = 1; idx < superCount; idx++) {
+            builder.append("." + ClassDefinition.SUPER_FIELD_NAME);
+        }
+        addParameters(builder, false, true);
         builder.append(");");
         env.print(builder.toString());
     }

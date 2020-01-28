@@ -33,6 +33,10 @@ class TranslationUtils {
         return method.isOverloaded ? name + "__" + method.parameters.size() : name;
     }
 
+    static String getBaseTranslatedName(String name) {
+        return name + "__BASE";
+    }
+
     static String replaceDot(String s, char ch) {
         int prev = 0;
         while (true) {

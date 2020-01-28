@@ -184,6 +184,18 @@ class ClassDefinition {
         return null;
     }
 
+    MethodDefinition getMethodWithBody(String name, Integer numArgs) {
+        ClassDefinition current = this;
+        while (current != null) {
+            MethodDefinition method = current.getMethod(name, numArgs);
+            if (method == null || method.hasBody()) {
+                return method;
+            }
+            current = current.superclass;
+        }
+        return null;
+    }
+
     /**
      * Get a non-contructor method.
      */
@@ -297,6 +309,16 @@ class ClassDefinition {
         }
     }
 
+    int depth() {
+        int result = 0;
+        ClassDefinition current = this.superclass;
+        while (current != null) {
+            result++;
+            current = current.superclass;
+        }
+        return result;
+    }
+
     void evaluate() {
         Environment env = Environment.getInstance();
         env.currentClass = this;
@@ -357,8 +379,19 @@ class ClassDefinition {
             env.print(this.superclass.toTypeDefinition().translateDereference() + " " +
                     SUPER_FIELD_NAME + ";");
         }
-        if (this.isInterface || this.isAbstract) {
+        if (this.isAbstract) {
+            if (this.superclass == null) {
+                env.print("void *object;");
+            }
+            for (MethodDefinition method : this.methodList) {
+                if (!(method.isPrivate || method.isStatic || method.overrideCount > 0)) {
+                    method.translateInterface(this);
+                }
+            }
+        }
+        else if (this.isInterface) {
             env.print("void *object;");
+            env.print("void *base;");
             for (MethodDefinition method : this.methodList) {
                 if (!(method.isPrivate || method.isStatic)) {
                     method.translateInterface(this);

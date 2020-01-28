@@ -528,8 +528,11 @@ class ExpressionDefinition {
             else if (this.operator.equals("==") || this.operator.equals("!=")) {
                 if (!(TypeUtils.isCompatibleRO(this.expression1.type, this.expression2) ||
                       TypeUtils.isCompatibleRO(this.expression2.type, this.expression1))) {
-                    env.printError(rhs, "incompatible types: " + this.expression1.type +
-                            " cannot be compared to " + this.expression2.type);
+                    if (!(TypeUtils.isInterface(this.expression1.type) &&
+                          TypeUtils.isInterface(this.expression2.type))) {
+                        env.printError(rhs, "incompatible types: " + this.expression1.type +
+                                " cannot be compared to " + this.expression2.type);
+                    }
                 }
                 this.type = TypeDefinition.BOOLEAN_TYPE;
             }
@@ -726,12 +729,11 @@ class ExpressionDefinition {
             env.print(builder.toString());
         }
         if (classdef.isInterface) {
-            builder = new StringBuilder();
-            builder.append(variableName);
-            builder.append("->object = ");
-            builder.append(this.expression1.translate(null));
-            builder.append(";");
-            env.print(builder.toString());
+            ClassDefinition baseClass = env.getClassDefinition(this.expression1.type);
+            String baseExpr = this.expression1.translate(null);
+            env.print(variableName + "->object = " + baseExpr + ";");
+            String text = baseClass.isInterface ? baseExpr + "->base" : variableName + "->object";
+            env.print(variableName + "->base = " + text + ";");
             String typeName = this.expression1.type.name;
             for (MethodDefinition method : classdef.methodList) {
                 builder = new StringBuilder();
@@ -879,6 +881,16 @@ class ExpressionDefinition {
         }
         String text1 = this.expression1.translate(null);
         String text2 = this.expression2.translate(null);
+        if (this.operator.equals("==") || this.operator.equals("!=")) {
+            if (TypeUtils.isInterface(this.expression1.type)) {
+                text1 = text1 + "->base";
+            }
+            if (TypeUtils.isInterface(this.expression2.type)) {
+                text2 = text2 + "->base";
+            }
+            // If either expression type is an abstract class, then add "->object"
+            // or "->super.object". Or at least a cast to the common type.
+        }
         if (this.expression1.type.isStringType()) {
             String translation = translateStringComparison(text1, text2, this.operator);
             if (translation != null) {
