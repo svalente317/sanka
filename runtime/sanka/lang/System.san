@@ -64,11 +64,15 @@ class System {
         c__stmt "return strtol(text, NULL, 0)";
     }
 
-    static int l2i(long value) {
-        c__stmt "return (int) value";
+    static int parseInt(String text) {
+        c__stmt "return (int) strtol(text, NULL, 0)";
     }
 
     static void sort(String[] arr) {
         c__stmt "qsort(arr->data, arr->length, sizeof(char*), STRING_QSORT_CMP)";
+    }
+
+    static int getuid() {
+        c__stmt "return getuid()";
     }
 }

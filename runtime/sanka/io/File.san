@@ -7,6 +7,8 @@ class FileStats {
     boolean isLink;
     long lastModified;
     long length;
+    int uid;
+    int gid;
 }
 
 /**
@@ -75,6 +77,8 @@ class File {
         c__stmt "stats->isLink = S_ISLNK(statbuf.st_mode)";
         c__stmt "stats->lastModified = statbuf.st_mtim.tv_sec*1000 + (statbuf.st_mtim.tv_nsec/1000000)";
         c__stmt "stats->length = statbuf.st_size";
+        c__stmt "stats->uid = statbuf.st_uid";
+        c__stmt "stats->gid = statbuf.st_gid";
         return 0;
     }
 

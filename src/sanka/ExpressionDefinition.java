@@ -738,7 +738,7 @@ class ExpressionDefinition {
             for (MethodDefinition method : classdef.methodList) {
                 builder = new StringBuilder();
                 builder.append(variableName);
-                builder.append("->" + method.name + " = ");
+                builder.append("->" + method.name + " = (void *) ");
                 builder.append(TranslationUtils.translateMethodName(typeName, method));
                 builder.append(";");
                 env.print(builder.toString());

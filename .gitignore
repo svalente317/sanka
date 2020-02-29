@@ -3,12 +3,10 @@
 /runtime/bin/
 /examples/sanka/
 /examples/*.o
-/examples/wordmap
-/examples/interface
-/examples/heap
-/examples/channel
+/examples/channeltest
+/examples/cheesefinder
 /examples/jsontest
-/examples/finder
 /examples/parsenumber
+/examples/processviewer
 /examples/total
-/examples/serializabletest
+/examples/wordmap
