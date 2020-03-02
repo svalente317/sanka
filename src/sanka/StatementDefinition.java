@@ -1,6 +1,8 @@
 package sanka;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -23,14 +25,19 @@ import sanka.antlr4.SankaParser.VariableDeclarationContext;
 
 public class StatementDefinition {
 
-    int statementType;
-    ExpressionDefinition lhsExpression;
-    String name;
-    ExpressionDefinition expression;
-    BlockDefinition block;
-    BlockDefinition elseBlock;
-    StatementDefinition[] forStatements;
-    String valueName;
+    public static enum StatementType {
+        DECLARATION, ASSIGNMENT, INC, DEC, IF, WHILE, FOR, ENHANCED_FOR, SWITCH, CASE, DEFAULT,
+        RETURN, BREAK, CONTINUE, EXPRESSION, SEMI, C__STMT, BLOCK
+    }
+
+    public StatementType statementType;
+    public ExpressionDefinition lhsExpression;
+    public String name;
+    public ExpressionDefinition expression;
+    public BlockDefinition block;
+    public BlockDefinition elseBlock;
+    public StatementDefinition[] forStatements;
+    public String valueName;
 
     /**
      * Pass 2 (of 3): Evaluate the statement. Calculate the type of all expressions
@@ -38,7 +45,7 @@ public class StatementDefinition {
      */
     void evaluate(StatementContext ctx) {
         Environment env = Environment.getInstance();
-        this.statementType = ctx.getStart().getType();
+        int lexerType = ctx.getStart().getType();
         if (ctx.variableDeclaration() != null) {
             evaluateVariableDeclaration(ctx.variableDeclaration());
             return;
@@ -49,13 +56,14 @@ public class StatementDefinition {
         }
         if (ctx.switchLabel() != null) {
             if (ctx.switchLabel().expression() != null) {
-                this.statementType = SankaLexer.CASE;
+                this.statementType = StatementType.CASE;
                 this.expression = new ExpressionDefinition();
                 this.expression.evaluate(ctx.switchLabel().expression());
                 if (this.expression.type != null && this.expression.value == null) {
                     env.printError(ctx, "constant expression required");
                 }
             } else if (ctx.switchLabel().typeType() != null) {
+                // TODO this.statementType = StatementType.TYPECASE ?
                 this.expression = new ExpressionDefinition();
                 this.expression.type = new TypeDefinition();
                 this.expression.type.parse(ctx.switchLabel().typeType());
@@ -63,7 +71,7 @@ public class StatementDefinition {
                 verifyVariableNotDefined(ctx.switchLabel(), this.name);
                 env.symbolTable.put(this.name, this.expression.type);
             } else {
-                this.statementType = SankaLexer.DEFAULT;
+                this.statementType = StatementType.DEFAULT;
             }
             return;
         }
@@ -82,8 +90,9 @@ public class StatementDefinition {
             evaluateIf(ctx.ifStatement());
             return;
         }
-        switch (this.statementType) {
+        switch (lexerType) {
         case SankaLexer.WHILE:
+            this.statementType = StatementType.WHILE;
             evaluateBooleanExpression(ctx.parExpression().expression());
             this.block = new BlockDefinition();
             this.block.evaluate(ctx.block());
@@ -92,23 +101,10 @@ public class StatementDefinition {
             evaluateFor(ctx.forControl(), ctx.block());
             return;
         case SankaLexer.SWITCH:
-            this.expression = new ExpressionDefinition();
-            this.expression.evaluate(ctx.parExpression().expression());
-            TypeDefinition type = this.expression.type;
-            boolean isInterface = false;
-            if (type != null && !(type.isIntegralType() || type.isStringType())) {
-                ClassDefinition classdef = env.getClassDefinition(type);
-                isInterface = classdef != null && classdef.isInterface;
-                if (!isInterface) {
-                    env.printError(ctx, "incompatible types: switch statement must use " +
-                            "integral type or String or interface");
-                }
-            }
-            this.block = new BlockDefinition();
-            this.block.evaluate(ctx.block());
-            SwitchUtils.evaluateSwitchStatement(ctx, this, isInterface);
+            evaluateSwitch(ctx);
             return;
         case SankaLexer.RETURN:
+            this.statementType = StatementType.RETURN;
             if (ctx.expression() == null) {
                 TypeDefinition desired = env.currentMethod.returnType;
                 if (!desired.isVoidType()) {
@@ -128,16 +124,22 @@ public class StatementDefinition {
             }
             return;
         case SankaLexer.BREAK:
+            this.statementType = StatementType.BREAK;
+            return;
         case SankaLexer.CONTINUE:
+            this.statementType = StatementType.CONTINUE;
+            return;
         case SankaLexer.SEMI:
+            this.statementType = StatementType.SEMI;
             return;
         case SankaLexer.C__STMT:
+            this.statementType = StatementType.C__STMT;
             String literal = ctx.StringLiteral().getText();
             this.name = LiteralUtils.evaluateStringLiteral(literal);
             return;
         }
         if (ctx.block() != null) {
-            this.statementType = SankaLexer.LBRACE;
+            this.statementType = StatementType.BLOCK;
             this.block = new BlockDefinition();
             this.block.evaluate(ctx.block());
             return;
@@ -150,7 +152,7 @@ public class StatementDefinition {
      */
     void evaluateVariableDeclaration(VariableDeclarationContext vc) {
         Environment env = Environment.getInstance();
-        this.statementType = SankaLexer.VAR;
+        this.statementType = StatementType.DECLARATION;
         this.name = vc.Identifier().getText();
         verifyVariableNotDefined(vc, this.name);
         if (vc.expression() == null) {
@@ -181,11 +183,11 @@ public class StatementDefinition {
         Environment env = Environment.getInstance();
         String operator = ((TerminalNode) assignment.getChild(1)).getSymbol().getText();
         if (operator.equals("=")) {
-            this.statementType = SankaLexer.EQUAL;
+            this.statementType = StatementType.ASSIGNMENT;
         } else if (operator.equals("++")) {
-            this.statementType = SankaLexer.INC;
+            this.statementType = StatementType.INC;
         } else if (operator.equals("--")) {
-            this.statementType = SankaLexer.DEC;
+            this.statementType = StatementType.DEC;
         } else {
             env.printError(assignment, "unrecognized variable assignment statement");
         }
@@ -237,7 +239,7 @@ public class StatementDefinition {
                 this.lhsExpression.isStatic = true;
                 lhsType = fielddef.type;
             }
-            if (this.statementType == SankaLexer.EQUAL && lhsType.isNullType()) {
+            if (this.statementType == StatementType.ASSIGNMENT && lhsType.isNullType()) {
                 lhsType = this.expression.type;
                 env.symbolTable.promote(this.name, lhsType);
             }
@@ -245,7 +247,7 @@ public class StatementDefinition {
         if (lhsType == null) {
             return;
         }
-        if (this.statementType == SankaLexer.EQUAL) {
+        if (this.statementType == StatementType.ASSIGNMENT) {
             if (!TypeUtils.isCompatible(lhsType, this.expression)) {
                 env.printError(assignment, "incompatible types: " + this.expression.type +
                         " cannot be converted to " + lhsType);
@@ -261,11 +263,10 @@ public class StatementDefinition {
     }
 
     /**
-     * Evaluate an expression as a standalone statement. Use BOOLEAN as the statement type
-     * simply because it's a constant that's available for usage.
+     * Evaluate an expression as a standalone statement.
      */
     void evaluateExpressionStatement(ExpressionContext expr) {
-        this.statementType = SankaLexer.BOOLEAN;
+        this.statementType = StatementType.EXPRESSION;
         this.expression = new ExpressionDefinition();
         this.expression.evaluate(expr);
     }
@@ -287,7 +288,7 @@ public class StatementDefinition {
      * Evaluate an "if" statement.
      */
     void evaluateIf(IfStatementContext ictx) {
-        this.statementType = SankaLexer.IF;
+        this.statementType = StatementType.IF;
         evaluateBooleanExpression(ictx.parExpression().expression());
         this.block = new BlockDefinition();
         this.block.evaluate(ictx.block());
@@ -315,7 +316,7 @@ public class StatementDefinition {
     }
 
     void evaluateEnhancedFor(EnhancedForControlContext forControl) {
-        this.statementType = SankaLexer.COLON;
+        this.statementType = StatementType.ENHANCED_FOR;
         Environment env = Environment.getInstance();
         List<TerminalNode> vars = forControl.Identifier();
         this.name = vars.get(0).getText();
@@ -351,6 +352,7 @@ public class StatementDefinition {
     }
 
     void evaluateClassicFor(ForControlContext forControl) {
+        this.statementType = StatementType.FOR;
         this.forStatements = new StatementDefinition[2];
         ForInitContext forInit = forControl.forInit();
         if (forInit != null) {
@@ -379,288 +381,70 @@ public class StatementDefinition {
     }
 
     /**
-     * Pass 3 (of 3). Generate C code for the evaluated statements and expressions.
+     * Evaluate a "switch" block with labels and statements.
      */
-    void translate() {
+    void evaluateSwitch(StatementContext ctx) {
         Environment env = Environment.getInstance();
-        StringBuilder builder;
-        String text;
-        switch (this.statementType) {
-        case SankaLexer.VAR:
-            TypeDefinition type = env.symbolTable.get(this.name);
-            if (type == null || type.isNullType()) {
-                // This variable never has a non-null value. Drop it.
-                return;
+        this.statementType = StatementType.SWITCH;
+        this.expression = new ExpressionDefinition();
+        this.expression.evaluate(ctx.parExpression().expression());
+        TypeDefinition type = this.expression.type;
+        boolean isInterface = false;
+        if (type != null && !(type.isIntegralType() || type.isStringType())) {
+            ClassDefinition classdef = env.getClassDefinition(type);
+            isInterface = classdef != null && classdef.isInterface;
+            if (!isInterface) {
+                env.printError(ctx, "incompatible types: switch statement must use " +
+                        "integral type or String or interface");
             }
-            env.addType(type);
-            builder = new StringBuilder();
-            builder.append(type.translateSpace());
-            builder.append(this.name);
-            if (this.expression == null) {
-                builder.append(" = 0;");
-                env.print(builder.toString());
-                return;
-            }
-            builder.append(";");
-            env.print(builder.toString());
-            text = this.expression.translate(this.name);
-            if (!text.equals(this.name)) {
-                builder.setLength(0);
-                builder.append(this.name);
-                builder.append(" = ");
-                builder.append(text);
-                builder.append(";");
-                env.print(builder.toString());
-            }
+        }
+        this.block = new BlockDefinition();
+        this.block.evaluate(ctx.block());
+        if (this.expression.type == null) {
             return;
-        case SankaLexer.LBRACE:
-            this.block.translate(true);
+        }
+        if (this.block.block.length == 0) {
             return;
-        case SankaLexer.EQUAL:
-        case SankaLexer.INC:
-        case SankaLexer.DEC:
-            builder = new StringBuilder();
-            text = null;
-            if (this.lhsExpression != null) {
-                if (this.lhsExpression.isMapAccess()) {
-                    translateMapAssignment();
-                    return;
-                }
-                // Set builder to either "LHS[idx]" or "LHS->field".
-                builder.append(this.lhsExpression.translate(null));
-                if (this.expression != null) {
-                    text = this.expression.translate(null);
-                }
-            } else {
-                // Try to directly write "var = value".
-                if (this.expression != null) {
-                    text = this.expression.translate(this.name);
-                    if (text.equals(this.name)) {
-                        return;
+        }
+        StatementDefinition first = this.block.block[0];
+        if (first.statementType != StatementType.CASE &&
+            first.statementType != StatementType.DEFAULT) {
+            env.printError(ctx, "switch block must begin with a case statement");
+            return;
+        }
+        Set<String> labels = new TreeSet<>();
+        boolean haveDefault = false;
+        for (StatementDefinition item : this.block.block) {
+            // Approve the "case" statements that are directly in the block. This is not
+            // recursive. You cannot have a "case" statement inside an "if" statement.
+            if (item.statementType == StatementType.CASE && item.expression.type != null) {
+                item.valueName = "approved";
+                if (isInterface) {
+                    if (item.name == null) {
+                        env.printError(ctx, "case statement must include variable declaration");
                     }
+                    continue;
                 }
-                builder.append(this.name);
-            }
-            switch (this.statementType) {
-            case SankaLexer.EQUAL:
-                builder.append(" = ");
-                builder.append(text);
-                break;
-            case SankaLexer.INC:
-                builder.append("++");
-                break;
-            case SankaLexer.DEC:
-                builder.append("--");
-                break;
-            }
-            builder.append(";");
-            env.print(builder.toString());
-            return;
-        case SankaLexer.IF:
-            text = this.expression.translate(null);
-            if (this.expression.expressionType != ExpressionType.BINARY || text.charAt(0) != '(') {
-                text = "(" + text + ")";
-            }
-            env.print("if " + text);
-            this.block.translate(true);
-            if (this.elseBlock != null) {
-                env.print("else");
-                this.elseBlock.translate(true);
-            }
-            return;
-        case SankaLexer.WHILE:
-            env.print("while (1) {");
-            env.level++;
-            builder = new StringBuilder();
-            builder.append("if (!");
-            builder.append(this.expression.translate(null));
-            builder.append(") break;");
-            env.print(builder.toString());
-            this.block.translate(false);
-            env.level--;
-            env.print("}");
-            return;
-        case SankaLexer.FOR:
-            if (this.forStatements[0] != null) {
-                this.forStatements[0].translate();
-            }
-            // Should generate different code for loops that don't use "continue".
-            text = null;
-            if (this.forStatements[1] != null) {
-                text = env.getTmpVariable();
-                env.print("int " + text + " = 0;");
-            }
-            env.print("while (1) {");
-            env.level++;
-            if (text != null) {
-                env.print("if (" + text + " != 0) {");
-                env.level++;
-                this.forStatements[1].translate();
-                env.level--;
-                env.print("}");
-                env.print(text + " = 1;");
-            }
-            builder = new StringBuilder();
-            builder.append("if (!");
-            builder.append(this.expression.translate(null));
-            builder.append(") break;");
-            env.print(builder.toString());
-            this.block.translate(false);
-            env.level--;
-            env.print("}");
-            return;
-        case SankaLexer.COLON:
-            TypeDefinition exprType = this.expression.type;
-            if (exprType.keyType == null) {
-                // Expression is String or array.
-                String exprVar = env.getTmpVariable();
-                env.print(exprType.translateSpace() + exprVar + ";");
-                text = this.expression.translate(exprVar);
-                if (!text.equals(exprVar)) {
-                    env.print(exprVar + " = " + text + ";");
+                if (item.name != null) {
+                    env.printError(ctx, "case statement must include constant " +
+                            this.expression.type);
+                    continue;
                 }
-                env.print("NULLCHECK(" + exprVar + ");");
-                String lenCode;
-                if (exprType.isStringType()) {
-                    lenCode = env.getTmpVariable();
-                    env.print(TypeDefinition.INT_TYPE.translateSpace() + lenCode + " = " +
-                            TranslationUtils.translateMethodName(exprType.name, "length") +
-                            "(" + exprVar + ");");
-                } else {
-                    lenCode = exprVar + "->length";
+                if (item.expression.value != null && !labels.add(item.expression.value)) {
+                    env.printError(ctx, "duplicate case label: " + item.expression.value);
                 }
-                String indexVar = env.getTmpVariable();
-                env.print("for (int " + indexVar + " = 0; " +
-                        indexVar + " < " + lenCode + "; " + indexVar + "++) {");
-                env.level++;
-                if (exprType.isStringType()) {
-                    env.print(TypeDefinition.BYTE_TYPE.translateSpace() + this.name + " = " +
-                            exprVar + "[" + indexVar + "];");
-                } else {
-                    env.print(exprType.arrayOf.translateSpace() + this.name + " = " +
-                            "ARRCAST(" + exprVar + ", " + exprType.arrayOf.translate() +
-                            ")[" + indexVar + "];");
-                }
-                this.block.translate(false);
-                env.level--;
-                env.print("}");
-                return;
-            }
-            String traverserVar = env.getTmpVariable();
-            String keyVar = env.getTmpVariable();
-            String valueVar = env.getTmpVariable();
-            env.print("struct rb_traverser " + traverserVar + ";");
-            env.print("union rb_key " + keyVar + ";");
-            env.print("union rb_value " + valueVar + ";");
-            String exprText = this.expression.translate(null);
-            env.print("NULLCHECK(" + exprText + ");");
-            env.print("rb_t_init(&" + traverserVar + ", " + exprText + ");");
-            env.print("while (rb_t_next(&" + traverserVar + ", &" + keyVar + ", &" +
-                    valueVar + ")) {");
-            env.level++;
-            env.print(this.expression.type.keyType.translateSpace() + this.name + ";");
-            String field = TranslationUtils.typeToMapKeyFieldName(this.expression.type.keyType);
-            env.print(this.name +" = " + keyVar + "." + field + ";");
-            if (this.valueName != null) {
-                env.print(this.expression.type.arrayOf.translateSpace() + this.valueName + ";");
-                field = TranslationUtils.typeToMapFieldName(this.expression.type.arrayOf);
-                env.print(this.valueName + " = " + valueVar + "." + field + ";");
-            }
-            this.block.translate(false);
-            env.level--;
-            env.print("}");
-            return;
-        case SankaLexer.SWITCH:
-            SwitchUtils.translateSwitchStatement(this);
-            return;
-        case SankaLexer.CASE:
-            if (this.valueName == null) {
-                env.printError(null, "case statement must be inside a switch block");
-            } else {
-                // TODO typecase
-                env.print("case " + this.expression.translate(null) + ":;");
-            }
-            return;
-        case SankaLexer.DEFAULT:
-            if (this.valueName == null) {
-                env.printError(null, "default statement must be inside a switch block");
-            } else {
-                env.print("default:;");
-            }
-            return;
-        case SankaLexer.RETURN:
-            builder = new StringBuilder();
-            builder.append("return");
-            if (this.expression != null) {
-                if (this.expression.type.isVoidType()) {
-                    this.expression.translate(null);
-                } else {
-                    builder.append(" ");
-                    builder.append(this.expression.translate(null));
+                if (!TypeUtils.isCompatible(this.expression.type, item.expression)) {
+                    env.printError(ctx, "incompatible types: " + item.expression.type +
+                            " cannot be converted to " + this.expression.type);
                 }
             }
-            builder.append(";");
-            env.print(builder.toString());
-            return;
-        case SankaLexer.BREAK:
-            env.print("break;");
-            return;
-        case SankaLexer.CONTINUE:
-            env.print("continue;");
-            return;
-        case SankaLexer.BOOLEAN:
-            this.expression.translate(null);
-            // Since the returned expression has no side-effects,
-            // there's no reason to write it to the output stream.
-            return;
-        case SankaLexer.SEMI:
-            env.print(";");
-            return;
-        case SankaLexer.C__STMT:
-            env.print(this.name + ";");
-            return;
-        }
-    }
-
-    void translateMapAssignment() {
-        Environment env = Environment.getInstance();
-        ExpressionDefinition lhs = this.lhsExpression;
-        String text1 = lhs.expression1.translate(null);
-        String text2 = lhs.expression2.translate(null);
-        env.print("NULLCHECK(" + text1 + ");");
-        if (lhs.expression1.type.keyType.isStringType()) {
-            if (lhs.expression2.expressionType == ExpressionType.LITERAL) {
-                text2 = "(" + TypeDefinition.STRING_TYPE.translate() + ")" + text2;
-            } else {
-                env.print("NULLCHECK(" + text2 + ");");
+            else if (item.statementType == StatementType.DEFAULT) {
+                if (haveDefault) {
+                    env.printError(ctx, "duplicate default label");
+                }
+                haveDefault = true;
+                item.valueName = "approved";
             }
         }
-        String valueName = env.getTmpVariable();
-        env.print("union rb_value " + valueName + ";");
-        String field = TranslationUtils.typeToMapFieldName(this.expression.type);
-        env.print(valueName + "." + field + " = " + this.expression.translate(null) + ";");
-        env.print("rb_put(" + text1 + ", (union rb_key) " + text2 + ", " + valueName + ", 0);");
-    }
-
-    static String translateMapAssignment(String mapName, ExpressionDefinition keyExpr,
-            ExpressionDefinition valueExpr, String valueName) {
-        Environment env = Environment.getInstance();
-        String keyText = keyExpr.translate(null);
-        String valueText = valueExpr.translate(null);
-        if (keyExpr.type.isStringType()) {
-            if (keyExpr.expressionType == ExpressionType.LITERAL) {
-                keyText = "(" + TypeDefinition.STRING_TYPE.translate() + ")" + keyText;
-            } else {
-                env.print("NULLCHECK(" + keyText + ");");
-            }
-        }
-        if (valueName == null) {
-            valueName = env.getTmpVariable();
-            env.print("union rb_value " + valueName + ";");
-        }
-        String field = TranslationUtils.typeToMapFieldName(valueExpr.type);
-        env.print(valueName + "." + field + " = " + valueText + ";");
-        env.print("rb_put(" + mapName + ", (union rb_key) " + keyText + ", " + valueName + ", 0);");
-        return valueName;
     }
 }

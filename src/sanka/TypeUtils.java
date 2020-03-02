@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sanka.ExpressionDefinition.ExpressionType;
-import sanka.MethodDefinition.ParameterDefinition;
 
 public class TypeUtils {
     /**
@@ -129,8 +128,7 @@ public class TypeUtils {
                     method.parameters.size());
             if (implementer == null ||
                 implementer.isPrivate ||
-                implementer.isStatic != method.isStatic ||
-                !sameParameterList(method.parameters, implementer.parameters)) {
+                !method.sameSignature(implementer)) {
                 failureList.add(method.name);
             }
         }
@@ -149,21 +147,6 @@ public class TypeUtils {
         */
     }
 
-    static boolean sameParameterList(List<ParameterDefinition> mp,
-                                     List<ParameterDefinition> ip) {
-        if (mp.size() != ip.size()) {
-            return false;
-        }
-        for (int idx = 0; idx < mp.size(); idx++) {
-            ParameterDefinition p1 = mp.get(idx);
-            ParameterDefinition p2 = ip.get(idx);
-            if (!p1.type.equals(p2.type)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * @return true if the concrete class inherits the abstract class
      */
@@ -177,7 +160,7 @@ public class TypeUtils {
         return isSubclassOf(abstractClass, concreteClass.superclass);
     }
 
-    static boolean isInterface(TypeDefinition type) {
+    public static boolean isInterface(TypeDefinition type) {
         if (type == null) {
             return false;
         }

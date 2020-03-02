@@ -7,25 +7,25 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import sanka.antlr4.SankaParser.TypeTypeContext;
 
-class TypeDefinition implements Comparable<TypeDefinition> {
+public class TypeDefinition implements Comparable<TypeDefinition> {
 
-    static final TypeDefinition NULL_TYPE = new TypeDefinition("null");
-    static final TypeDefinition VOID_TYPE = new TypeDefinition("void");
-    static final TypeDefinition BOOLEAN_TYPE = new TypeDefinition("boolean");
-    static final TypeDefinition BYTE_TYPE = new TypeDefinition("byte");
-    static final TypeDefinition SHORT_TYPE = new TypeDefinition("short");
-    static final TypeDefinition INT_TYPE = new TypeDefinition("int");
-    static final TypeDefinition LONG_TYPE = new TypeDefinition("long");
-    static final TypeDefinition FLOAT_TYPE = new TypeDefinition("float");
-    static final TypeDefinition DOUBLE_TYPE = new TypeDefinition("double");
-    static final TypeDefinition METHOD_TYPE = new TypeDefinition("method");
-    static final TypeDefinition STRING_TYPE = new TypeDefinition("String");
+    public static final TypeDefinition NULL_TYPE = new TypeDefinition("null");
+    public static final TypeDefinition VOID_TYPE = new TypeDefinition("void");
+    public static final TypeDefinition BOOLEAN_TYPE = new TypeDefinition("boolean");
+    public static final TypeDefinition BYTE_TYPE = new TypeDefinition("byte");
+    public static final TypeDefinition SHORT_TYPE = new TypeDefinition("short");
+    public static final TypeDefinition INT_TYPE = new TypeDefinition("int");
+    public static final TypeDefinition LONG_TYPE = new TypeDefinition("long");
+    public static final TypeDefinition FLOAT_TYPE = new TypeDefinition("float");
+    public static final TypeDefinition DOUBLE_TYPE = new TypeDefinition("double");
+    public static final TypeDefinition STRING_TYPE = new TypeDefinition("String");
+    public static final TypeDefinition METHOD_TYPE = new TypeDefinition("method");
 
-    boolean isPrimitiveType;
-    String packageName;
-    String name;
-    TypeDefinition arrayOf;
-    TypeDefinition keyType;
+    public boolean isPrimitiveType;
+    public String packageName;
+    public String name;
+    public TypeDefinition arrayOf;
+    public TypeDefinition keyType;
 
     TypeDefinition() {
     }
@@ -110,73 +110,33 @@ class TypeDefinition implements Comparable<TypeDefinition> {
         }
     }
 
-    boolean isNullType() {
+    public boolean isNullType() {
         return this.equals(NULL_TYPE);
     }
 
-    boolean isVoidType() {
+    public boolean isVoidType() {
         return this.equals(VOID_TYPE);
     }
 
-    boolean isBooleanType() {
+    public boolean isBooleanType() {
         return this.equals(BOOLEAN_TYPE);
     }
 
-    boolean isIntegralType() {
+    public boolean isIntegralType() {
         return this.isPrimitiveType &&
                 (this.name.equals("int") || this.name.equals("long") ||
                  this.name.equals("short") || this.name.equals("byte"));
     }
 
-    boolean isNumericType() {
+    public boolean isNumericType() {
         return this.isPrimitiveType &&
                 (this.name.equals("int") || this.name.equals("long") ||
                  this.name.equals("float") || this.name.equals("double") ||
                  this.name.equals("short") || this.name.equals("byte"));
     }
 
-    boolean isStringType() {
+    public boolean isStringType() {
         return this.equals(STRING_TYPE);
-    }
-
-    String translate() {
-        if (this.keyType != null) {
-            return "struct rb_table *";
-        }
-        if (this.arrayOf != null) {
-            return "struct array *";
-        }
-        if (this.isPrimitiveType) {
-            if (this.name.equals("boolean")) {
-                return "int";
-            }
-            if (this.name.equals("byte")) {
-                return "char";
-            }
-            return this.name;
-        }
-        if (this.isStringType()) {
-            return "const char *";
-        }
-        return "struct " + this.name + " *";
-    }
-
-    String translateSpace() {
-        String text = translate();
-        return text.endsWith("*") ? text : text + " ";
-    }
-
-    String translateDereference() {
-        if (this.keyType != null) {
-            return "struct rb_table";
-        }
-        if (this.arrayOf != null) {
-            return this.arrayOf.translate();
-        }
-        if (this.isPrimitiveType || this.isStringType()) {
-            return null;
-        }
-        return "struct " + this.name;
     }
 
     static private <T> int compareObjects(Comparable<T> o1, T o2) {

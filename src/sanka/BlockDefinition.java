@@ -2,13 +2,14 @@ package sanka;
 
 import java.util.List;
 
+import sanka.MethodDefinition.BlockGenerator;
 import sanka.antlr4.SankaParser.BlockContext;
 import sanka.antlr4.SankaParser.IfStatementContext;
 import sanka.antlr4.SankaParser.StatementContext;
 
 public class BlockDefinition {
-    StatementDefinition[] block;
-    SymbolTable.Frame frame;
+    public StatementDefinition[] block;
+    public SymbolTable.Frame frame;
 
     void evaluate(BlockContext ctx) {
         Environment env = Environment.getInstance();
@@ -22,6 +23,13 @@ public class BlockDefinition {
         this.frame = env.symbolTable.pop();
     }
 
+    void evaluate(BlockGenerator generator) {
+        Environment env = Environment.getInstance();
+        env.symbolTable.push(null);
+        this.block = generator.generate();
+        this.frame = env.symbolTable.pop();
+    }
+
     void evaluate(IfStatementContext ictx) {
         Environment env = Environment.getInstance();
         env.symbolTable.push(null);
@@ -29,22 +37,5 @@ public class BlockDefinition {
         this.block[0] = new StatementDefinition();
         this.block[0].evaluateIf(ictx);
         this.frame = env.symbolTable.pop();
-    }
-
-    void translate(boolean printBraces) {
-        Environment env = Environment.getInstance();
-        env.symbolTable.push(this.frame);
-        if (printBraces) {
-            env.print("{");
-            env.level++;
-        }
-        for (StatementDefinition statementdef : this.block) {
-            statementdef.translate();
-        }
-        if (printBraces) {
-            env.level--;
-            env.print("}");
-        }
-        env.symbolTable.pop();
     }
 }

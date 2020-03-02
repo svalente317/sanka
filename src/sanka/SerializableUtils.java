@@ -1,10 +1,13 @@
 package sanka;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import sanka.ClassDefinition.FieldDefinition;
 import sanka.ExpressionDefinition.ExpressionType;
-import sanka.MethodDefinition.MethodGenerator;
+import sanka.MethodDefinition.BlockGenerator;
 import sanka.MethodDefinition.ParameterDefinition;
-import sanka.antlr4.SankaLexer;
+import sanka.StatementDefinition.StatementType;
 
 class SerializableUtils {
 
@@ -21,7 +24,7 @@ class SerializableUtils {
         ImportManager.getInstance().doImport(null,
                 JSON_OBJECT_TYPE.packageName, JSON_OBJECT_TYPE.name);
         MethodDefinition method, current;
-        boolean isEvaluated = false;
+        final boolean[] isEvaluated = new boolean[1];
         method = new MethodDefinition();
         method.isPrivate = false;
         method.isStatic = false;
@@ -29,21 +32,19 @@ class SerializableUtils {
         method.name = "toJson";
         current = classdef.getMethod(method.name, 0);
         if (current != null) {
-            if (!sameSignature(method, current)) {
+            if (!method.sameSignature(current)) {
                 env.printError(null, "serializable class " + classdef.name +
                         ": wrong signature for method " + method.name);
             }
         } else {
-            isEvaluated = true;
-            method.generator = new MethodGenerator() {
+            method.generator = new BlockGenerator() {
                 @Override
-                public void evaluate() {
-                    SerializableUtils.evaluateClass(classdef);
-                }
-
-                @Override
-                public void translate() {
-                    SerializableUtils.translateToJson(classdef);
+                public StatementDefinition[] generate() {
+                    if (!isEvaluated[0]) {
+                        SerializableUtils.evaluateClass(classdef);
+                        isEvaluated[0] = true;
+                    }
+                    return SerializableUtils.translateToJson(classdef);
                 }
             };
             classdef.methodList.add(method);
@@ -59,45 +60,23 @@ class SerializableUtils {
         method.parameters.add(param);
         current = classdef.getMethod(method.name, 1);
         if (current != null) {
-            if (!sameSignature(method, current)) {
+            if (!method.sameSignature(current)) {
                 env.printError(null, "serializable class " + classdef.name +
                         ": wrong signature for method " + method.name);
             }
         } else {
-            final boolean finalIsEvaluated = isEvaluated;
-            method.generator = new MethodGenerator() {
+            method.generator = new BlockGenerator() {
                 @Override
-                public void evaluate() {
-                    // If this class passed evaluation for toJson(),
-                    // then don't evaluate it again.
-                    if (!finalIsEvaluated) {
+                public StatementDefinition[] generate() {
+                    if (!isEvaluated[0]) {
                         SerializableUtils.evaluateClass(classdef);
+                        isEvaluated[0] = true;
                     }
-                }
-
-                @Override
-                public void translate() {
-                    SerializableUtils.translateFromJson(classdef);
+                    return SerializableUtils.translateFromJson(classdef);
                 }
             };
             classdef.methodList.add(method);
         }
-    }
-
-    static boolean sameSignature(MethodDefinition m1, MethodDefinition m2) {
-        boolean ok = m1.isPrivate == m2.isPrivate &&
-                m1.isStatic == m2.isStatic &&
-                m1.returnType.equals(m2.returnType) &&
-                m1.parameters.size() == m2.parameters.size();
-        if (!ok) {
-            return false;
-        }
-        for (int idx = 0; idx < m1.parameters.size(); idx++) {
-            if (!m1.parameters.get(idx).type.equals(m2.parameters.get(idx).type)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -142,24 +121,25 @@ class SerializableUtils {
     }
 
     /**
-     * Generate C code for writing public fields to JSON.
+     * Generate the list of statements for writing public fields to JSON.
      * The line "expr.value = field.name" is basically reflection.
      * TODO: Support setArray()
      */
-    static void translateToJson(ClassDefinition classdef) {
+    static StatementDefinition[] translateToJson(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
         ClassDefinition joClass = env.getClassDefinition(JSON_OBJECT_TYPE);
+        List<StatementDefinition> statements = new ArrayList<>();
 
         // 1. translate `var obj = new JsonObject()`
         StatementDefinition stmt;
         stmt = new StatementDefinition();
-        stmt.statementType = SankaLexer.VAR;
+        stmt.statementType = StatementType.DECLARATION;
         stmt.name = "obj";
         stmt.expression = new ExpressionDefinition();
         stmt.expression.expressionType = ExpressionType.NEW_INSTANCE;
         stmt.expression.type = JSON_OBJECT_TYPE;
         env.symbolTable.put(stmt.name, stmt.expression.type);
-        stmt.translate();
+        statements.add(stmt);
         for (FieldDefinition field : classdef.fieldList) {
             if (field.isPrivate || field.isStatic) {
                 continue;
@@ -211,18 +191,19 @@ class SerializableUtils {
             }
             func.argList[1] = expr;
             stmt = new StatementDefinition();
-            stmt.statementType = SankaLexer.BOOLEAN;
+            stmt.statementType = StatementType.EXPRESSION;
             stmt.expression = func;
-            stmt.translate();
+            statements.add(stmt);
         }
         // 3. translate `return obj`
         stmt = new StatementDefinition();
-        stmt.statementType = SankaLexer.RETURN;
+        stmt.statementType = StatementType.RETURN;
         stmt.expression = new ExpressionDefinition();
         stmt.expression.expressionType = ExpressionType.IDENTIFIER;
         stmt.expression.type = JSON_OBJECT_TYPE;
         stmt.expression.name = "obj";
-        stmt.translate();
+        statements.add(stmt);
+        return statements.toArray(new StatementDefinition[statements.size()]);
     }
 
     static String get_toJson_method(TypeDefinition type) {
@@ -246,9 +227,14 @@ class SerializableUtils {
         return "";
     }
 
-    static void translateFromJson(ClassDefinition classdef) {
+    /**
+     * Generate the list of statements for setting public fields from JSON.
+     */
+    static StatementDefinition[] translateFromJson(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
         ClassDefinition joClass = env.getClassDefinition(JSON_OBJECT_TYPE);
+        List<StatementDefinition> statements = new ArrayList<>();
+
         for (FieldDefinition field : classdef.fieldList) {
             if (field.isPrivate || field.isStatic) {
                 continue;
@@ -257,7 +243,7 @@ class SerializableUtils {
             // TODO if (!(field.type.isStringType() || field.type.isPrimitiveType)) {
             // recursively get object }
             StatementDefinition stmt = new StatementDefinition();
-            stmt.statementType = SankaLexer.EQUAL;
+            stmt.statementType = StatementType.ASSIGNMENT;
             ExpressionDefinition expr = new ExpressionDefinition();
             expr.expressionType = ExpressionType.FIELD_ACCESS;
             expr.expression1 = new ExpressionDefinition();
@@ -290,8 +276,9 @@ class SerializableUtils {
             expr.type = TypeDefinition.STRING_TYPE;
             func.argList[0] = expr;
             stmt.expression = func;
-            stmt.translate();
+            statements.add(stmt);
         }
+        return statements.toArray(new StatementDefinition[statements.size()]);
     }
 
     static String get_fromJson_method(TypeDefinition type) {

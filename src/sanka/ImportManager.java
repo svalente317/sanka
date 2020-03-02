@@ -62,7 +62,7 @@ public class ImportManager {
      */
     private void doNewImport(ParserRuleContext importctx, String packageName, String className) {
         Environment env = Environment.getInstance();
-        String filename = TranslationUtils.replaceDot(packageName, File.separatorChar) +
+        String filename = StringUtils.replaceDot(packageName, File.separatorChar) +
                 File.separatorChar + className + ".san";
         String pathname = null;
         if (env.importPath == null) {

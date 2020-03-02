@@ -1,4 +1,4 @@
-package sanka;
+package sanka.c;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -6,12 +6,15 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-class CompileManager {
+import sanka.ClassDefinition;
+import sanka.Environment;
+
+public class CompileManager {
 
     static final String GCC = "gcc";
     static final String DBG = "-O6";
 
-    void compile(String mainClass, String exeName) throws Exception {
+    public void compile(String mainClass, String exeName) throws Exception {
         Environment env = Environment.getInstance();
         String packageName = null;
         String className = mainClass;
@@ -34,7 +37,7 @@ class CompileManager {
             if (classdef.isImport) {
                 continue;
             }
-            File cfile = TranslationUtils.getClassFilename(classdef, false);
+            File cfile = ClassTranslator.getClassFilename(classdef, false);
             compileFile(cfile.getPath(), linkcommand);
         }
         String filename = generateMainFile(mainClass);
@@ -111,8 +114,8 @@ class CompileManager {
         }
         File tmpfile = File.createTempFile("main", ".c");
         env.writer = new BufferedWriter(new FileWriter(tmpfile));
-        env.print(TranslationUtils.INCLUDE_SANKA_HEADER);
-        env.print("#include <" + TranslationUtils.getHeaderFileName(packageName, className) + ">");
+        env.print(ClassTranslator.INCLUDE_SANKA_HEADER);
+        env.print("#include <" + ClassTranslator.getHeaderFileName(packageName, className) + ">");
         env.print("");
         env.print("int main(int argc, char *const *argv) {");
         env.level++;
@@ -120,7 +123,7 @@ class CompileManager {
         env.print("struct array arr;");
         env.print("arr.data = argv;");
         env.print("arr.length = argc;");
-        env.print(TranslationUtils.translateMethodName(className, "main") + "(&arr);");
+        env.print(TranslationBase.translateMethodName(className, "main") + "(&arr);");
         env.print("return 0;");
         env.level--;
         env.print("}");
@@ -129,9 +132,9 @@ class CompileManager {
         return tmpfile.getAbsolutePath();
     }
 
-    static CompileManager instance = null;
+    private static CompileManager instance = null;
 
-    static CompileManager getInstance() {
+    public static CompileManager getInstance() {
         if (instance == null) {
             instance = new CompileManager();
         }

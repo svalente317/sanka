@@ -15,7 +15,7 @@ public class SymbolTable {
         this.stack = new Stack<>();
     }
 
-    Frame push(Frame frame) {
+    public Frame push(Frame frame) {
         if (frame == null) {
             frame = new Frame();
         }
@@ -23,7 +23,7 @@ public class SymbolTable {
         return frame;
     }
 
-    Frame pop() {
+    public Frame pop() {
         return this.stack.pop();
     }
 
@@ -31,7 +31,7 @@ public class SymbolTable {
         this.stack.peek().put(name, type);
     }
 
-    TypeDefinition get(String name) {
+    public TypeDefinition get(String name) {
         for (int idx = this.stack.size()-1; idx >= 0; idx--) {
             Frame frame = this.stack.get(idx);
             TypeDefinition value = frame.get(name);

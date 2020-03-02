@@ -138,30 +138,4 @@ class LiteralUtils {
         expr.expression1 = null;
         expr.expression2 = null;
     }
-
-    static String translateLiteral(ExpressionDefinition expr) {
-        if (expr.type == TypeDefinition.BYTE_TYPE) {
-            return expr.value;
-        }
-        if (expr.type == TypeDefinition.SHORT_TYPE ||
-            expr.type == TypeDefinition.INT_TYPE) {
-            return expr.value;
-        }
-        if (expr.type == TypeDefinition.LONG_TYPE) {
-            return "(long)" + expr.value;
-        }
-        if (expr.type == TypeDefinition.DOUBLE_TYPE) {
-            return expr.value;
-        }
-        if (expr.type == TypeDefinition.BOOLEAN_TYPE) {
-            return expr.value.equals("true") ? "1" : (expr.value.equals("false") ? "0" : "error");
-        }
-        if (expr.type == TypeDefinition.STRING_TYPE) {
-            return "\"" + expr.value + "\"";
-        }
-        if (expr.type == TypeDefinition.NULL_TYPE) {
-            return "NULL";
-        }
-        return "error";
-    }
 }

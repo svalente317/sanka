@@ -1,6 +1,6 @@
 package sanka;
 
-import java.io.BufferedWriter;
+import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,29 +11,29 @@ import java.util.TreeSet;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
-class Environment {
+public class Environment {
     public static final String SANKA_LANG = "sanka.lang";
 
     // Pass 1.
-    List<String> importPath;
-    List<String> libPath;
-    List<String> libraries;
-    List<ClassDefinition> classList;
+    public List<String> importPath;
+    public List<String> libPath;
+    public List<String> libraries;
+    public List<ClassDefinition> classList;
     String currentPackage;
     Map<String, String> classPackageMap;
-    int errorCount = 0;
+    public int errorCount = 0;
 
     // Pass 2.
-    ClassDefinition currentClass;
-    MethodDefinition currentMethod;
-    SymbolTable symbolTable;
-    SortedSet<TypeDefinition> typeList;
+    public ClassDefinition currentClass;
+    public MethodDefinition currentMethod;
+    public SymbolTable symbolTable;
+    public SortedSet<TypeDefinition> typeList;
 
     // Pass 3.
-    String topDirectory;
-    BufferedWriter writer = null;
-    int level = 0;
-    int tmpVariableCount = 0;
+    public String topDirectory;
+    public Writer writer = null;
+    public int level = 0;
+    public int tmpVariableCount = 0;
 
     Environment() {
         this.classList = new LinkedList<>();
@@ -87,7 +87,7 @@ class Environment {
                 this.currentPackage.equals(classdef.packageName));
     }
 
-    void printError(ParserRuleContext ctx, String error) {
+    public void printError(ParserRuleContext ctx, String error) {
         String prefix = "error";
         if (ctx != null) {
             Token token = ctx.getStart();
@@ -97,7 +97,7 @@ class Environment {
         this.errorCount++;
     }
 
-    ClassDefinition getClassDefinition(String packageName, String name) {
+    public ClassDefinition getClassDefinition(String packageName, String name) {
         if (name == null) {
             return null;
         }
@@ -113,7 +113,7 @@ class Environment {
 
     // Pass 2
 
-    ClassDefinition getClassDefinition(TypeDefinition typeDefinition) {
+    public ClassDefinition getClassDefinition(TypeDefinition typeDefinition) {
         if (typeDefinition.isPrimitiveType || typeDefinition.arrayOf != null) {
             return null;
         }
@@ -122,7 +122,7 @@ class Environment {
 
     // Pass 3
 
-    void print(String text) {
+    public void print(String text) {
         String prefix = "";
         for (int i = 0; i < this.level; i++) {
             prefix = "    " + prefix;
@@ -133,21 +133,21 @@ class Environment {
         } else {
             try {
                 this.writer.write(text);
-                this.writer.newLine();
+                this.writer.write(System.getProperty("line.separator"));
             } catch (Exception exception) {
                 printError(null, "write failure: " + exception);
             }
         }
     }
 
-    void addType(TypeDefinition type) {
+    public void addType(TypeDefinition type) {
         type = type.baseType();
         if (!type.isPrimitiveType) {
             this.typeList.add(type);
         }
     }
 
-    String getTmpVariable() {
+    public String getTmpVariable() {
         String name = null;
         while (name == null) {
             this.tmpVariableCount++;
@@ -161,7 +161,7 @@ class Environment {
 
     static Environment instance = null;
 
-    static Environment getInstance() {
+    public static Environment getInstance() {
         if (instance == null) {
             instance = new Environment();
         }

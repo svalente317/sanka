@@ -25,7 +25,7 @@ bin/sanka.jar: FORCE
 bin/sanka.sh: FORCE
 	echo '#!/bin/sh' > $@
 	echo exec java -cp ${PREFIX}/share/sanka.jar:$(ANTLR_RUNTIME) \
-	sanka/Translator -I ${PREFIX}/include -L ${PREFIX}/lib '"$$@"' >> $@
+	sanka/SankaCompiler -I ${PREFIX}/include -L ${PREFIX}/lib '"$$@"' >> $@
 	chmod 755 $@
 
 clean: FORCE

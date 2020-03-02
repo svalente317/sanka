@@ -13,8 +13,10 @@ import sanka.antlr4.SankaParser;
 import sanka.antlr4.SankaParser.CompilationUnitContext;
 import sanka.antlr4.SankaParser.ImportDeclarationContext;
 import sanka.antlr4.SankaParser.TypeDeclarationContext;
+import sanka.c.ClassTranslator;
+import sanka.c.CompileManager;
 
-public class Translator {
+public class SankaCompiler {
 
     // On an uncaught exception, the system exits with status 1;
     // don't use that status for a more specific error.
@@ -27,7 +29,7 @@ public class Translator {
 
     public static void main(String[] argv) throws Exception {
         Environment env = Environment.getInstance();
-        Translator translator = new Translator();
+        SankaCompiler compiler = new SankaCompiler();
         List<CompilationUnitContext> contextList = new ArrayList<>();
         String mainClass = null;
         String exeName = null;
@@ -59,15 +61,14 @@ public class Translator {
                 continue;
             }
             if (arg.equals("--skip-imports")) {
-                translator.skipImports = true;
+                compiler.skipImports = true;
                 continue;
             }
             if (arg.startsWith("-l")) {
                 env.addLibrary(arg);
                 continue;
             }
-            if ((mainClass != null && exeName == null) ||
-                (mainClass == null && exeName != null)) {
+            if ((mainClass != null && exeName == null) || (mainClass == null && exeName != null)) {
                 System.err.println("Specify --main and --exe together");
                 System.exit(INVALID_ARGUMENT);
             }
@@ -75,15 +76,15 @@ public class Translator {
             SankaParser parser = new SankaParser(new CommonTokenStream(lexer));
             contextList.add(parser.compilationUnit());
         }
-        translator.parse(contextList);
+        compiler.parse(contextList);
         if (env.errorCount > 0) {
             System.exit(CANNOT_PARSE);
         }
-        translator.evaluate();
+        compiler.evaluate();
         if (env.errorCount > 0) {
             System.exit(CANNOT_EVALUATE);
         }
-        translator.translate();
+        compiler.translate();
         if (env.errorCount > 0) {
             System.exit(CANNOT_TRANSLATE);
         }
@@ -93,7 +94,8 @@ public class Translator {
     }
 
     /**
-     * Pass 1: Parse each class. For each class, note the defined methods and signatures.
+     * Pass 1: Parse each class. For each class, note the defined methods and
+     * signatures.
      */
     void parse(List<CompilationUnitContext> contextList) {
         if (!this.skipImports) {
@@ -108,7 +110,7 @@ public class Translator {
         }
         Environment env = Environment.getInstance();
         for (ClassDefinition classdef : env.classList) {
-            ExportUtils.parseExports(classdef);
+            classdef.parseExports();
         }
     }
 
@@ -194,8 +196,7 @@ public class Translator {
         Environment env = Environment.getInstance();
         for (ClassDefinition classdef : env.classList) {
             if (!classdef.isImport) {
-                TranslationUtils.translateClass(classdef, true);
-                TranslationUtils.translateClass(classdef, false);
+                ClassTranslator.translate(classdef);
             }
         }
     }
