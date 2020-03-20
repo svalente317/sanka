@@ -1,7 +1,5 @@
 # TODO
 
-* support consts in interface
-
 * implement typecast for interface and abstract classes.
 
 * interface extends interface
@@ -9,8 +7,6 @@
 * can String, array, and map implement interfaces?
 
 * do not allow abstract class to be instantiated
-
-* implement cast from long to int, etc.
 
 * float to double promotion and demotion
 

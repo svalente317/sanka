@@ -12,14 +12,33 @@ class Process {
 }
 
 class ProcessViewer {
-
+    /**
+     * This is basically a terse, stupid "ps" command for Linux.
+     */
     static void main(String[] args) {
+        var allUsers = false;
+        var ignoreFile = null;
+        var ignoreList = null;
+        for (var idx = 1; idx < args.length; idx++) {
+            switch (args[idx]) {
+            case "-a":
+                allUsers = true;
+                break;
+            case "-i":
+                idx++;
+                ignoreFile = args[idx];
+                break;
+            }
+        }
         var viewer = new ProcessViewer();
         var processes = viewer.readProcesses();
         if (processes == null) {
             return;
         }
-        viewer.print(processes, true);
+        if (ignoreFile != null) {
+            ignoreList = viewer.readIgnoreFile(ignoreFile);
+        }
+        viewer.print(processes, ignoreList, allUsers);
     }
 
     /**
@@ -178,24 +197,57 @@ class ProcessViewer {
     }
 
     /**
+     * Read a file where each line is a process name in the first column, and
+     * optionally a comment in the second column.
+     */
+    private String[] readIgnoreFile(String filename) {
+        var fileReader = new FileReader();
+        var status = fileReader.open(filename);
+        if (status != 0) {
+            return null;
+        }
+        var reader = new LineReader(fileReader);
+        var ignoreList = new String[0];
+        while (true) {
+            var line = reader.readline();
+            if (line == null) {
+                break;
+            }
+            line = split(line, ' ');
+            line = split(line, '\t');
+            if (line != "") {
+                ignoreList.add(line);
+            }
+        }
+        reader.close();
+        return ignoreList;
+    }
+
+    /**
      * Print my running processes to stdout.
      */
-    void print(Process[] processes, boolean onlyMe) {
+    void print(Process[] processes, String[] ignoreList, boolean allUsers) {
         var uid = System.getuid();
-        var printed = new boolean[class String];
+        var ignore = new boolean[class String];
+        if (ignoreList != null) {
+            for (var name : ignoreList) {
+                ignore[name] = true;
+            }
+        }
         for (var process : processes) {
-            if (onlyMe && process.uid != uid) {
+            if (!allUsers && process.uid != uid) {
                 continue;
             }
-            if (printed[process.name]) {
+            if (ignore[process.name]) {
                 continue;
             }
-            printed[process.name] = true;
-            if (onlyMe) {
-                System.println("" + process.pid + "\t" + process.name);
-            } else {
+            if (allUsers) {
                 System.println("" + process.pid + "\t" + process.uid + "\t" + process.name);
+            } else {
+                System.println("" + process.pid + "\t" + process.name);
             }
+            // Don't print it again.
+            ignore[process.name] = true;
         }
     }
 }

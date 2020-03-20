@@ -275,11 +275,15 @@ public class ExpressionDefinition {
             return;
         }
         this.expressionType = ExpressionType.NEW_INSTANCE;
-        if (classdef == null) {
-            env.printError(creator, "cannot create new instance of primitive type " + this.type);
+        ExpressionListContext exprlist = creator.classCreatorRest().expressionList();
+        if (this.type.isPrimitiveType) {
+            if (!this.type.isNumericType()) {
+                env.printError(creator, "cannot create new instance of " + this.type);
+                return;
+            }
+            evaluateSingleNumericArgCreator(exprlist);
             return;
         }
-        ExpressionListContext exprlist = creator.classCreatorRest().expressionList();
         int numArgs = exprlist == null ? 0 : exprlist.expression().size();
         MethodDefinition method = classdef.getMethod(classdef.name, numArgs);
         if (method == null) {
@@ -612,6 +616,22 @@ public class ExpressionDefinition {
         for (int idx = 0; idx < paramCount; idx++) {
             ParameterDefinition param = method.parameters.get(idx);
             checkRequiredType(exprList.expression(idx), param.type, this.argList[idx]);
+        }
+    }
+
+    void evaluateSingleNumericArgCreator(ExpressionListContext exprList) {
+        Environment env = Environment.getInstance();
+        int numArgs = exprList == null ? 0 : exprList.expression().size();
+        if (numArgs != 1) {
+            env.printError(exprList, "creator takes 1 argument");
+            return;
+        }
+        this.argList = new ExpressionDefinition[1];
+        this.argList[0] = new ExpressionDefinition();
+        this.argList[0].evaluate(exprList.expression(0));
+        TypeDefinition type = this.argList[0].type;
+        if (type == null || !type.isNumericType()) {
+            env.printError(exprList, "incompatible types: creator argument must be numeric");
         }
     }
 
