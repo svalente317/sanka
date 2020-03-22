@@ -1,5 +1,7 @@
 # TODO
 
+* Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
+
 * implement typecast for interface and abstract classes.
 
 * interface extends interface
@@ -8,15 +10,13 @@
 
 * do not allow abstract class to be instantiated
 
-* float to double promotion and demotion
+* float to double promotion?
 
 * Error if two classes have same qualified name
 
 * Support classes with the same name in different packages
 
 * Support static field initialized to literal array
-
-* add "singleton" as class modifier?
 
 * support inline fields
 
@@ -33,8 +33,6 @@
 
 * what if map changes during iteration?
 
-* Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
-
-* json library: escape quotes in strings
+* json library: control characters when parsing and unparsing strings
 
 * can abstract classes have static fields?

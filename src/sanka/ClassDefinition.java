@@ -37,6 +37,7 @@ public class ClassDefinition {
     public boolean isInterface;
     public boolean isAbstract;
     public boolean isSerializable;
+    public boolean isSingleton;
     public String packageName;
     public String name;
     public ClassDefinition superclass;
@@ -60,12 +61,24 @@ public class ClassDefinition {
     void parse(ClassDeclarationContext ctx) {
         Environment env = Environment.getInstance();
         this.name = ctx.Identifier().getText();
-        ClassModifierContext mod = ctx.classModifier();
-        if (mod != null && mod.getStart().getType() == SankaLexer.ABSTRACT) {
-            this.isAbstract = true;
-        }
-        if (mod != null && mod.getStart().getType() == SankaLexer.SERIALIZABLE) {
-            this.isSerializable = true;
+        if (ctx.classModifier() != null) {
+             for (ClassModifierContext item : ctx.classModifier()) {
+                 String modifier = item.Identifier().getText();
+                 switch (modifier) {
+                 case "abstract":
+                     this.isAbstract = true;
+                     break;
+                 case "serializable":
+                     this.isSerializable = true;
+                     break;
+                 case "singleton":
+                     this.isSingleton = true;
+                     break;
+                 default:
+                     env.printError(item, "class modifier " + modifier + " undefined");
+                     break;
+                 }
+             }
         }
         if (ctx.extendsClass() != null) {
             TypeDefinition type = new TypeDefinition();
@@ -170,6 +183,9 @@ public class ClassDefinition {
         }
         if (this.isSerializable) {
             SerializableUtils.addMethodsToClass(this);
+        }
+        if (this.isSingleton) {
+            SingletonUtils.addMethodsToClass(this);
         }
     }
 

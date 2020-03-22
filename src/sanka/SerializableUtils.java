@@ -44,7 +44,7 @@ class SerializableUtils {
                         SerializableUtils.evaluateClass(classdef);
                         isEvaluated[0] = true;
                     }
-                    return SerializableUtils.translateToJson(classdef);
+                    return SerializableUtils.generateToJson(classdef);
                 }
             };
             classdef.methodList.add(method);
@@ -72,7 +72,7 @@ class SerializableUtils {
                         SerializableUtils.evaluateClass(classdef);
                         isEvaluated[0] = true;
                     }
-                    return SerializableUtils.translateFromJson(classdef);
+                    return SerializableUtils.generateFromJson(classdef);
                 }
             };
             classdef.methodList.add(method);
@@ -125,12 +125,12 @@ class SerializableUtils {
      * The line "expr.value = field.name" is basically reflection.
      * TODO: Support setArray()
      */
-    static StatementDefinition[] translateToJson(ClassDefinition classdef) {
+    static StatementDefinition[] generateToJson(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
         ClassDefinition joClass = env.getClassDefinition(JSON_OBJECT_TYPE);
         List<StatementDefinition> statements = new ArrayList<>();
 
-        // 1. translate `var obj = new JsonObject()`
+        // 1. generate `var obj = new JsonObject()`
         StatementDefinition stmt;
         stmt = new StatementDefinition();
         stmt.statementType = StatementType.DECLARATION;
@@ -144,7 +144,7 @@ class SerializableUtils {
             if (field.isPrivate || field.isStatic) {
                 continue;
             }
-            // 2. translate `obj.setInt([field.name], this.field)`
+            // 2. generate `obj.setInt([field.name], this.field)`
             //    or        `obj.setObject([field.name], this.field.toJson())`
             ExpressionDefinition expr = new ExpressionDefinition();
             expr.expressionType = ExpressionType.FIELD_ACCESS;
@@ -195,7 +195,7 @@ class SerializableUtils {
             stmt.expression = func;
             statements.add(stmt);
         }
-        // 3. translate `return obj`
+        // 3. generate `return obj`
         stmt = new StatementDefinition();
         stmt.statementType = StatementType.RETURN;
         stmt.expression = new ExpressionDefinition();
@@ -230,7 +230,7 @@ class SerializableUtils {
     /**
      * Generate the list of statements for setting public fields from JSON.
      */
-    static StatementDefinition[] translateFromJson(ClassDefinition classdef) {
+    static StatementDefinition[] generateFromJson(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
         ClassDefinition joClass = env.getClassDefinition(JSON_OBJECT_TYPE);
         List<StatementDefinition> statements = new ArrayList<>();
@@ -239,7 +239,7 @@ class SerializableUtils {
             if (field.isPrivate || field.isStatic) {
                 continue;
             }
-            // translate `this.field = obj.getAsInt([field.name])`
+            // generate `this.field = obj.getAsInt([field.name])`
             // TODO if (!(field.type.isStringType() || field.type.isPrimitiveType)) {
             // recursively get object }
             StatementDefinition stmt = new StatementDefinition();

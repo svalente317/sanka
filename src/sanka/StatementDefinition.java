@@ -27,7 +27,7 @@ public class StatementDefinition {
 
     public static enum StatementType {
         DECLARATION, ASSIGNMENT, INC, DEC, IF, WHILE, FOR, ENHANCED_FOR, SWITCH, CASE, DEFAULT,
-        RETURN, BREAK, CONTINUE, EXPRESSION, SEMI, C__STMT, BLOCK
+        RETURN, BREAK, CONTINUE, EXPRESSION, SEMI, C__STMT, BLOCK, LOCK_CLASS, UNLOCK_CLASS
     }
 
     public StatementType statementType;

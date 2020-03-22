@@ -56,12 +56,11 @@ typeDeclaration
     ;
 
 classDeclaration
-    :   classModifier? 'class' Identifier typeParameters? extendsClass? classBody
+    :   classModifier* 'class' Identifier typeParameters? extendsClass? classBody
     ;
 
 classModifier
-    :   'abstract'
-    |   'serializable'
+    :   Identifier
     ;
 
 typeParameters
@@ -73,7 +72,7 @@ extendsClass
     ;
 
 interfaceDeclaration
-    :   classModifier? 'interface' Identifier typeParameters? interfaceBody
+    :   classModifier* 'interface' Identifier typeParameters? interfaceBody
     ;
 
 classBody
@@ -321,7 +320,6 @@ literal
 
 // 3.9 Keywords
 
-ABSTRACT      : 'abstract';
 BOOLEAN       : 'boolean';
 BREAK         : 'break';
 BYTE          : 'byte';
@@ -346,7 +344,6 @@ NEW           : 'new';
 PACKAGE       : 'package';
 PRIVATE       : 'private';
 RETURN        : 'return';
-SERIALIZABLE  : 'serializable';
 SHORT         : 'short';
 STATIC        : 'static';
 SWITCH        : 'switch';

@@ -24,6 +24,7 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/json/JsonObject.c \
 	bin/sanka/json/JsonParser.c \
 	bin/sanka/json/Serializable.c \
+	bin/sanka/json/StringEncoder.c \
 	bin/sanka/net/Socket.c
 
 OBJS=	bin/panic.o \

@@ -18,7 +18,8 @@ class StatementTranslator extends TranslationBase {
         Environment env = Environment.getInstance();
         StringBuilder builder;
         String text, exprText;
-        switch (statement.statementType) {
+        StatementType statementType = statement.statementType;
+        switch (statementType) {
         case DECLARATION:
             TypeDefinition type = env.symbolTable.get(statement.name);
             if (type == null || type.isNullType()) {
@@ -71,7 +72,7 @@ class StatementTranslator extends TranslationBase {
                 }
                 builder.append(statement.name);
             }
-            switch (statement.statementType) {
+            switch (statementType) {
             case ASSIGNMENT:
                 builder.append(" = ");
                 builder.append(text);
@@ -279,6 +280,12 @@ class StatementTranslator extends TranslationBase {
             return;
         case BLOCK:
             translateBlock(statement.block, true);
+            return;
+        case LOCK_CLASS:
+        case UNLOCK_CLASS:
+            String word = statementType == StatementType.LOCK_CLASS ? "lock" : "unlock";
+            String name = translateStaticField(statement.expression.type.name, "MUTEX");
+            env.print("pthread_mutex_" + word + "(&" + name + ");");
             return;
         }
     }

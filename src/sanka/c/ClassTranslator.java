@@ -197,6 +197,11 @@ public class ClassTranslator extends TranslationBase {
                 printedSomething = true;
             }
         }
+        if (classdef.isSingleton) {
+            String name = translateStaticField(classdef.name, "MUTEX");
+            env.print("static pthread_mutex_t " + name + " = PTHREAD_MUTEX_INITIALIZER;");
+            printedSomething = true;
+        }
         for (MethodDefinition method : classdef.methodList) {
             if (printedSomething) {
                 env.print("");

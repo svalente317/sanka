@@ -110,8 +110,8 @@ class JsonElement {
         case DOUBLE_TYPE:
             return "" + getAsDouble();
         case STRING_TYPE:
-            // TODO escape things
-            return "\"" + getAsString() + "\"";
+            var text = getAsString();
+            return StringEncoder.get().encodeAndQuote(text);
         case ARRAY_TYPE:
             var arr = getAsArray();
             if (arr.length == 0) {

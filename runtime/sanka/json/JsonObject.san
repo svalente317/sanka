@@ -83,8 +83,7 @@ class JsonObject {
         var s = "";
         var comma = "";
         for (var key, value : this.map) {
-            // TODO escape things in key
-            s = s + comma + "\"" + key + "\":" + value.toString();
+            s = s + comma + StringEncoder.get().encodeAndQuote(key) + ":" + value.toString();
             comma = ",";
         }
         return "{" + s + "}";
