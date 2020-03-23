@@ -291,6 +291,10 @@ public class ExpressionDefinition {
                 env.printError(creator, "class " + this.type + " constructor does not take " +
                         numArgs + " parameters");
             }
+            if (numArgs == 0 && classdef.hasConstructor()) {
+                env.printError(creator, "class " + this.type +
+                        " does not have no argument constructor");
+            }
             return;
         }
         evaluateFunctionArguments(creator, method, exprlist);

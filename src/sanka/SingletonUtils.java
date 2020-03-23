@@ -47,6 +47,13 @@ class SingletonUtils {
     }
 
     static StatementDefinition[] generateMethod(ClassDefinition classdef) {
+        if (classdef.hasConstructor()) {
+            if (classdef.getMethod(classdef.name, 0) == null) {
+                Environment env = Environment.getInstance();
+                env.printError(null, "singleton class " + classdef.name +
+                        " requires no argument constructor");
+            }
+        }
         TypeDefinition type = classdef.toTypeDefinition();
         StatementDefinition[] statements = new StatementDefinition[2];
         StatementDefinition stmt = new StatementDefinition();

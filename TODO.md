@@ -1,7 +1,5 @@
 # TODO
 
-* Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
-
 * implement typecast for interface and abstract classes.
 
 * interface extends interface
@@ -35,4 +33,4 @@
 
 * json library: control characters when parsing and unparsing strings
 
-* can abstract classes have static fields?
+* Support MAP[IDX]++ in StatementDefinition.translateMapAssignment

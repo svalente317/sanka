@@ -189,6 +189,15 @@ public class ClassDefinition {
         }
     }
 
+    boolean hasConstructor() {
+        for (MethodDefinition method : this.methodList) {
+            if (method.name.equals(this.name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public MethodDefinition getMethod(String name, Integer numArgs) {
         for (MethodDefinition method : this.methodList) {
             if (method.name.equals(name)) {
