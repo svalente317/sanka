@@ -1,0 +1,13 @@
+// -*- mode: Java; -*-
+package sanka.io;
+
+singleton class StandardInputReader {
+    c__include "unistd.h";
+
+    int read(byte[] buffer) {
+        c__stmt "return read(STDIN_FILENO, buffer->data, buffer->length)";
+    }
+
+    int close() {
+    }
+}

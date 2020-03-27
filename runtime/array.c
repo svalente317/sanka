@@ -50,11 +50,13 @@ void SET_ARRAY_LENGTH(struct array *this, int length, int size) {
         this->length = length;
         return;
     }
-    this->data = GC_REALLOC(this->data, length * size);
+    if (this->alloced < length) {
+        this->data = GC_REALLOC(this->data, length * size);
+        this->alloced = length;
+    }
     memset(((char *) this->data) + (this->length * size), 0,
            (length - this->length) * size);
     this->length = length;
-    this->alloced = length;
 }
 
 void ADD_ALL_ARRAY(struct array *this, struct array *that, int size) {

@@ -17,16 +17,6 @@ class System {
         c__stmt "puts(text)";
     }
 
-    static String readline() {
-        c__stmt "char buf[256]";
-        c__stmt "if (fgets(buf, sizeof(buf), stdin) == NULL) return NULL";
-        c__stmt "buf[sizeof(buf)-1] = 0";
-        c__stmt "int len = strlen(buf)";
-        c__stmt "while (len > 0 && (buf[len-1] == '\n' || buf[len-1] == '\r')) len--";
-        c__stmt "buf[len] = 0";
-        c__stmt "return strdup(buf)";
-    }
-
     static String strerror(int errno) {
         c__stmt "return strerror(errno)";
     }

@@ -20,6 +20,7 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/io/FileStats.c \
 	bin/sanka/io/LineReader.c \
 	bin/sanka/io/Reader.c \
+	bin/sanka/io/StandardInputReader.c \
 	bin/sanka/json/JsonElement.c \
 	bin/sanka/json/JsonObject.c \
 	bin/sanka/json/JsonParser.c \

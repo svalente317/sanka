@@ -1,19 +1,23 @@
 // -*- mode: Java; -*-
 package sanka.examples;
+import sanka.io.LineReader;
+import sanka.io.StandardInputReader;
 
 // https://stackoverflow.com/questions/450799/shell-command-to-sum-integers-one-per-line
 // for benchmarks
 
 class Total {
     static void main(String[] argv) {
+        var reader = new LineReader(StandardInputReader.get());
         var sum = 0L;
         while (true) {
-            var line = System.readline();
+            var line = reader.readline();
             if (line == null) {
                 break;
             }
             sum = sum + System.parseLong(line);
         }
         System.println("" + sum);
+        reader.close();
     }
 }
