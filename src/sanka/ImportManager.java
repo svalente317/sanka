@@ -42,26 +42,34 @@ public class ImportManager {
         for (int idx = 1; idx < (idCount-1); idx++) {
             packageName = packageName + "." + ids.get(idx).getText();
         }
-        doImport(importctx, packageName, ids.get(idCount-1).getText());
-    }
-
-    void doImport(ParserRuleContext importctx, String packageName, String className) {
-        Environment env = Environment.getInstance();
-        if (env.getClassDefinition(packageName, className) == null) {
-            doNewImport(importctx, packageName, className);
-        }
-        if (env.getClassDefinition(packageName, className) != null) {
-            if (env.classPackageMap != null) {
-                env.classPackageMap.put(className, packageName);
-            }
-        }
+        String className = ids.get(idCount-1).getText();
+        importFile(importctx, packageName, className, false);
+        env.classPackageMap.put(className, packageName);
     }
 
     /**
-     * Read a class into env.classList so that doImport() can add it to env.classPackageMap.
+     * Read a superclass definition while parsing a class.
      */
-    private void doNewImport(ParserRuleContext importctx, String packageName, String className) {
+    void importClass(ParserRuleContext ctx, String packageName, String className) {
+        importFile(null, packageName, className, false);
+    }
+
+    /**
+     * Read a class definition so that we can compare interfaces, etc. to it.
+     */
+    void importClass(String packageName, String className) {
+        importFile(null, packageName, className, true);
+    }
+
+    /**
+     * Read a class into env.classList during the parse or evaluate phase.
+     */
+    private void importFile(ParserRuleContext importctx, String packageName, String className,
+            boolean evaluate) {
         Environment env = Environment.getInstance();
+        if (env.getClassDefinition(packageName, className) != null) {
+            return;
+        }
         String filename = StringUtils.replaceDot(packageName, File.separatorChar) +
                 File.separatorChar + className + ".san";
         String pathname = null;
@@ -111,7 +119,9 @@ public class ImportManager {
                 if (item.interfaceDeclaration() != null) {
                     classdef.parseInterface(item.interfaceDeclaration());
                 }
-                classdef.evaluateConstants();
+                if (evaluate) {
+                    classdef.evaluateConstants();
+                }
                 env.classList.add(classdef);
             }
         }

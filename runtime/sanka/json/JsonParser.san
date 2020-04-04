@@ -214,7 +214,7 @@ class JsonParser {
 
     int parseNumber(int idx, JsonElement elem) {
         var isMinus = false;
-        var ival = 0;
+        var ival = 0L;
         var fval = 0.0;
         var isFrac = false;
         if (this.text[idx] == '-') {

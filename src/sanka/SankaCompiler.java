@@ -2,7 +2,6 @@ package sanka;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -99,8 +98,8 @@ public class SankaCompiler {
      */
     void parse(List<CompilationUnitContext> contextList) {
         if (!this.skipImports) {
-            ImportManager.getInstance().doImport(null, Environment.SANKA_LANG, "String");
-            ImportManager.getInstance().doImport(null, Environment.SANKA_LANG, "System");
+            ImportManager.getInstance().importClass(Environment.SANKA_LANG, "String");
+            ImportManager.getInstance().importClass(Environment.SANKA_LANG, "System");
         }
         for (CompilationUnitContext ctx : contextList) {
             parseClassNames(ctx);
@@ -176,16 +175,14 @@ public class SankaCompiler {
         Environment env = Environment.getInstance();
         // Take a snapshot of the classes to evaluate.
         // Do this now because env.classList can change while evaluating classes.
-        List<ClassDefinition> toEvaluate = new LinkedList<>();
-        for (ClassDefinition classdef : env.classList) {
-            if (!classdef.isImport) {
-                toEvaluate.add(classdef);
-            }
+        ClassDefinition[] toEvaluate = env.classList.toArray(new ClassDefinition[0]);
+        for (ClassDefinition classdef : toEvaluate) {
+            classdef.evaluateConstants();
         }
         for (ClassDefinition classdef : toEvaluate) {
-            env.classPackageMap = classdef.classPackageMap;
-            classdef.evaluate();
-            env.classPackageMap = null;
+            if (!classdef.isImport) {
+                classdef.evaluate();
+            }
         }
     }
 

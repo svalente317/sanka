@@ -21,8 +21,7 @@ class SerializableUtils {
      */
     static void addMethodsToClass(final ClassDefinition classdef) {
         Environment env = Environment.getInstance();
-        ImportManager.getInstance().doImport(null,
-                JSON_OBJECT_TYPE.packageName, JSON_OBJECT_TYPE.name);
+        ImportManager.getInstance().importClass(JSON_OBJECT_TYPE.packageName, JSON_OBJECT_TYPE.name);
         MethodDefinition method, current;
         final boolean[] isEvaluated = new boolean[1];
         method = new MethodDefinition();
@@ -85,7 +84,7 @@ class SerializableUtils {
      */
     static void evaluateClass(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
-        ImportManager.getInstance().doImport(null,
+        ImportManager.getInstance().importClass(
                 SERIALIZABLE_TYPE.packageName, SERIALIZABLE_TYPE.name);
         ClassDefinition serializableClass = env.getClassDefinition(SERIALIZABLE_TYPE);
         if (serializableClass == null) {

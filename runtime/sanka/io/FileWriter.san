@@ -1,0 +1,24 @@
+// -*- mode: Java; -*-
+package sanka.io;
+
+class FileWriter {
+    c__include "stdio.h";
+    c__include "errno.h";
+    c__field "FILE *fp";
+
+    int open(String filename) {
+        c__stmt "char rd[2] = {'w', 0}";
+        c__stmt "this->fp = fopen(filename, rd)";
+        c__stmt "return this->fp != NULL ? 0 : errno";
+    }
+
+    int write(byte[] buffer) {
+        c__stmt "return fwrite(buffer->data, 1, buffer->length, this->fp)";
+    }
+
+    int close() {
+        c__stmt "int status = fclose(this->fp)";
+        c__stmt "this->fp = NULL";
+        c__stmt "return status == 0 ? 0 : errno";
+    }
+}

@@ -59,7 +59,7 @@ class JsonObject {
         return getElement(fieldName).getAsBoolean();
     }
 
-    int getAsInt(String fieldName) {
+    long getAsInt(String fieldName) {
         return getElement(fieldName).getAsInt();
     }
 
@@ -98,7 +98,7 @@ class JsonObject {
         this.map[fieldName] = new JsonElement().makeBoolean(value);
     }
 
-    void setInt(String fieldName, int value) {
+    void setInt(String fieldName, long value) {
         this.map[fieldName] = new JsonElement().makeInt(value);
     }
 

@@ -47,6 +47,7 @@ public class ClassDefinition {
     public List<String> c_includes;
     public List<String> c_fields;
     int exportStatus;
+    int constantsStatus;
 
     ClassDefinition() {
         this.fieldList = new LinkedList<>();
@@ -86,7 +87,7 @@ public class ClassDefinition {
             if (!type.isPrimitiveType && type.arrayOf == null) {
                 this.superclass = env.getClassDefinition(type);
                 if (this.superclass == null) {
-                    ImportManager.getInstance().doImport(ctx, type.packageName, type.name);
+                    ImportManager.getInstance().importClass(ctx, type.packageName, type.name);
                     this.superclass = env.getClassDefinition(type);
                 }
             }
@@ -458,18 +459,45 @@ public class ClassDefinition {
         return result;
     }
 
-    void evaluate() {
+    void evaluateConstants() {
         Environment env = Environment.getInstance();
+        if (this.constantsStatus > 0) {
+            return;
+        }
+        if (this.constantsStatus < 0) {
+            env.printError(null, qualifiedName() + ": detected loop between constant values");
+            return;
+        }
+        this.constantsStatus = -1;
+        ClassDefinition oldCurrentClass = env.currentClass;
+        Map<String, String> oldClassPackageMap = env.classPackageMap;
         env.currentClass = this;
+        env.classPackageMap = this.classPackageMap;
         for (FieldDefinition field : this.fieldList) {
-            if (field.expression != null) {
+            if (field.isConst && field.expression != null) {
                 field.value = new ExpressionDefinition();
                 field.value.evaluate(field.expression);
                 if (field.value.value == null) {
                     env.printError(field.expression, "initial value must be simple constant");
                 }
-                if (field.isConst) {
-                    field.type = field.value.type;
+                field.type = field.value.type;
+            }
+        }
+        env.currentClass = oldCurrentClass;
+        env.classPackageMap = oldClassPackageMap;
+        this.constantsStatus = 1;
+    }
+
+    void evaluate() {
+        Environment env = Environment.getInstance();
+        env.currentClass = this;
+        env.classPackageMap = this.classPackageMap;
+        for (FieldDefinition field : this.fieldList) {
+            if (!field.isConst && field.expression != null) {
+                field.value = new ExpressionDefinition();
+                field.value.evaluate(field.expression);
+                if (field.value.value == null) {
+                    env.printError(field.expression, "initial value must be simple constant");
                 } else if (!TypeUtils.isCompatible(field.type, field.value)) {
                      env.printError(field.expression, "incompatible types: " +
                              field.value.type + " cannot be converted to " + field.type);
@@ -482,23 +510,6 @@ public class ClassDefinition {
         for (MethodDefinition method : this.methodList) {
             method.evaluate();
         }
-    }
-
-    void evaluateConstants() {
-        Environment env = Environment.getInstance();
-        ClassDefinition oldCurrentClass = env.currentClass;
-        env.currentClass = this;
-        for (FieldDefinition field : this.fieldList) {
-            if (field.isConst && field.expression != null) {
-                field.value = new ExpressionDefinition();
-                field.value.evaluate(field.expression);
-                if (field.value.value == null) {
-                    env.printError(field.expression, "initial value must be simple constant");
-                }
-                field.type = field.value.type;
-            }
-        }
-        env.currentClass = oldCurrentClass;
     }
 
     public TypeDefinition toTypeDefinition() {

@@ -1,0 +1,13 @@
+// -*- mode: Java; -*-
+package sanka.io;
+
+interface Writer {
+    /**
+     * Write given data to the I/O device.
+     *
+     * @return the number of bytes written, or -1.
+     */
+    int write(byte[] buffer);
+
+    int close();
+}

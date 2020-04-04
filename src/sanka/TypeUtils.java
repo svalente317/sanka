@@ -58,7 +58,7 @@ public class TypeUtils {
         ClassDefinition exprClass = env.getClassDefinition(expr.type);
         ClassDefinition typeClass = env.getClassDefinition(type);
         if (typeClass == null) {
-            ImportManager.getInstance().doImport(null, type.packageName, type.name);
+            ImportManager.getInstance().importClass(type.packageName, type.name);
             typeClass = env.getClassDefinition(type);
         }
         if (exprClass == null || typeClass == null) {

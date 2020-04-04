@@ -463,6 +463,9 @@ public class ExpressionDefinition {
              this.isStatic = this.method.isStatic;
              isPrivate = this.method.isPrivate;
         } else {
+            if (classdef != env.currentClass) {
+                classdef.evaluateConstants();
+            }
             this.type = fielddef.type;
             this.isStatic = fielddef.isStatic;
             isPrivate = fielddef.isPrivate;
