@@ -59,8 +59,20 @@ class JsonObject {
         return getElement(fieldName).getAsBoolean();
     }
 
-    long getAsInt(String fieldName) {
+    short getAsShort(String fieldName) {
+        return getElement(fieldName).getAsShort();
+    }
+
+    int getAsInt(String fieldName) {
         return getElement(fieldName).getAsInt();
+    }
+
+    long getAsLong(String fieldName) {
+        return getElement(fieldName).getAsLong();
+    }
+
+    float getAsFloat(String fieldName) {
+        return getElement(fieldName).getAsFloat();
     }
 
     double getAsDouble(String fieldName) {
@@ -98,8 +110,16 @@ class JsonObject {
         this.map[fieldName] = new JsonElement().makeBoolean(value);
     }
 
-    void setInt(String fieldName, long value) {
+    void setInt(String fieldName, int value) {
         this.map[fieldName] = new JsonElement().makeInt(value);
+    }
+
+    void setLong(String fieldName, long value) {
+        this.map[fieldName] = new JsonElement().makeLong(value);
+    }
+
+    void setFloat(String fieldName, float value) {
+        this.map[fieldName] = new JsonElement().makeDouble(value);
     }
 
     void setDouble(String fieldName, double value) {

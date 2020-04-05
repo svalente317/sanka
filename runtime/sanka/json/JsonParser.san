@@ -277,7 +277,7 @@ class JsonParser {
             if (isMinus) {
                 ival = -ival;
             }
-            elem.makeInt(ival);
+            elem.makeLong(ival);
         }
         return idx;
     }

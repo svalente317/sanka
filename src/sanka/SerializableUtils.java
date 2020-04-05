@@ -212,13 +212,22 @@ class SerializableUtils {
         if (!type.isPrimitiveType) {
             return "setObject";
         }
-        if (type.isBooleanType()) {
+        if (type.equals(TypeDefinition.BOOLEAN_TYPE)) {
             return "setBoolean";
         }
-        if (type.isIntegralType()) {
+        if (type.equals(TypeDefinition.SHORT_TYPE)) {
+            return "setShort";
+        }
+        if (type.equals(TypeDefinition.INT_TYPE)) {
             return "setInt";
         }
-        if (type.isNumericType()) {
+        if (type.equals(TypeDefinition.LONG_TYPE)) {
+            return "setLong";
+        }
+        if (type.equals(TypeDefinition.FLOAT_TYPE)) {
+            return "setFloat";
+        }
+        if (type.equals(TypeDefinition.DOUBLE_TYPE)) {
             return "setDouble";
         }
         Environment env = Environment.getInstance();
@@ -287,13 +296,22 @@ class SerializableUtils {
         if (!type.isPrimitiveType) {
             return "getAsObject";
         }
-        if (type.isBooleanType()) {
+        if (type.equals(TypeDefinition.BOOLEAN_TYPE)) {
             return "getAsBoolean";
         }
-        if (type.isIntegralType()) {
+        if (type.equals(TypeDefinition.SHORT_TYPE)) {
+            return "getAsShort";
+        }
+        if (type.equals(TypeDefinition.INT_TYPE)) {
             return "getAsInt";
         }
-        if (type.isNumericType()) {
+        if (type.equals(TypeDefinition.LONG_TYPE)) {
+            return "getAsLong";
+        }
+        if (type.equals(TypeDefinition.FLOAT_TYPE)) {
+            return "getAsFloat";
+        }
+        if (type.equals(TypeDefinition.DOUBLE_TYPE)) {
             return "getAsDouble";
         }
         Environment env = Environment.getInstance();

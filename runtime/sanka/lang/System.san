@@ -17,8 +17,8 @@ class System {
         c__stmt "puts(text)";
     }
 
-    static String strerror(int errno) {
-        c__stmt "return strerror(errno)";
+    static String strerror(int error) {
+        c__stmt "return strerror(error)";
     }
 
     static long currentTimeMillis() {

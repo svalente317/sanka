@@ -23,9 +23,27 @@ class JsonElement {
         return this;
     }
 
-    JsonElement makeInt(long value) {
+    JsonElement makeShort(short value) {
         this.type = INT_TYPE;
         c__stmt "this->data.i = value";
+        return this;
+    }
+
+    JsonElement makeInt(int value) {
+        this.type = INT_TYPE;
+        c__stmt "this->data.i = value";
+        return this;
+    }
+
+    JsonElement makeLong(long value) {
+        this.type = INT_TYPE;
+        c__stmt "this->data.i = value";
+        return this;
+    }
+
+    JsonElement makeFloat(float value) {
+        this.type = DOUBLE_TYPE;
+        c__stmt "this->data.d = value";
         return this;
     }
 
@@ -61,14 +79,35 @@ class JsonElement {
         if (this.type != BOOLEAN_TYPE) {
             return false;
         }
-        c__stmt "return this->data.i";
+        c__stmt "return (int) this->data.i";
     }
 
-    long getAsInt() {
+    short getAsShort() {
+        if (this.type != INT_TYPE) {
+            return 0;
+        }
+        c__stmt "return (short) this->data.i";
+    }
+
+    int getAsInt() {
+        if (this.type != INT_TYPE) {
+            return 0;
+        }
+        c__stmt "return (int) this->data.i";
+    }
+
+    long getAsLong() {
         if (this.type != INT_TYPE) {
             return 0;
         }
         c__stmt "return this->data.i";
+    }
+
+    float getAsFloat() {
+        if (this.type != DOUBLE_TYPE) {
+            return 0;
+        }
+        c__stmt "return (float) this->data.d";
     }
 
     double getAsDouble() {
