@@ -50,6 +50,8 @@ class ExpressionTranslator extends TranslationBase {
             return translateTernary(expr, variableName);
         case SUPERCLASS:
             return translateSuperclass(expr);
+        case SUPER_DOT_METHOD:
+            return translateSuperDotMethod(expr);
         }
         return null;
     }
@@ -296,10 +298,10 @@ class ExpressionTranslator extends TranslationBase {
         String text2 = translate(expr.expression2);
         if (expr.operator.equals("==") || expr.operator.equals("!=")) {
             if (TypeUtils.isInterface(expr.expression1.type)) {
-                text1 = text1 + "->base";
+                text1 = translateInterfaceForComparison(text1);
             }
             if (TypeUtils.isInterface(expr.expression2.type)) {
-                text2 = text2 + "->base";
+                text2 = translateInterfaceForComparison(text2);
             }
             // If either expression type is an abstract class, then add "->object"
             // or "->super.object". Or at least a cast to the common type.
@@ -322,6 +324,14 @@ class ExpressionTranslator extends TranslationBase {
         builder.append(text2);
         builder.append(")");
         return builder.toString();
+    }
+
+    static String translateInterfaceForComparison(String text) {
+        Environment env = Environment.getInstance();
+        String variableName = env.getTmpVariable();
+        env.print("void *" + variableName + " = " +
+                text + " != NULL ? " + text + "->base : NULL;");
+        return variableName;
     }
 
     static String translateStringComparison(ExpressionDefinition expr, String text1, String text2,
@@ -638,5 +648,14 @@ class ExpressionTranslator extends TranslationBase {
         // C structures in memory, we know that each ".super" moves the pointer zero bytes,
         // so we simply cast the pointer.
         return "((" + translateType(expr.type) + ")" + text + ")";
+    }
+
+    static String translateSuperDotMethod(ExpressionDefinition expr) {
+        String className = expr.expression1.type.name;
+        // Technically, the correct expression is "&this->super.super.super..."
+        // But this works. See translateSuperclass().
+        expr.translatedThis = "this"; // TODO add cast
+        String name = translateMethodName(className, expr.method);
+        return getBaseTranslatedName(name);
     }
 }

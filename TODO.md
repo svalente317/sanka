@@ -1,5 +1,11 @@
 # TODO
 
+* generate code for static methods in abstract classes
+
+* Fix adding numbers while adding strings
+
+* output correct error when type in method signature is undefined
+
 * implement typecast for interface and abstract classes.
 
 * interface extends interface
@@ -34,3 +40,5 @@
 * json library: control characters when parsing and unparsing strings
 
 * Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
+
+* Support super() in constructor

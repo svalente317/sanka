@@ -20,7 +20,7 @@ public class ExpressionDefinition {
     public static enum ExpressionType {
         LITERAL, IDENTIFIER, CLASS_IDENTIFIER, NEW_INSTANCE, NEW_ARRAY_WITH_VALUES,
         NEW_ARRAY, NEW_MAP, UNARY, FIELD_ACCESS, BINARY, ARRAY_ACCESS, FUNCTION_CALL,
-        TERNARY, SUPERCLASS
+        TERNARY, SUPERCLASS, SUPER_DOT_METHOD
     };
 
     public ExpressionType expressionType;
@@ -87,7 +87,9 @@ public class ExpressionDefinition {
             return;
         case 3:
             String middle = ((TerminalNode) ctx.getChild(1)).getSymbol().getText();
-            if (middle.equals(".")) {
+            if (ctx.expression(0) == null) {
+                evaluateSuperDotMethod(ctx);
+            } else if (middle.equals(".")) {
                 evaluateFieldAccess(ctx.expression(0), ctx.Identifier());
             } else if (middle.equals("(")) {
                 evaluateFunctionCall(ctx.expression(0), null);
@@ -673,5 +675,46 @@ public class ExpressionDefinition {
     public boolean isMapAccess() {
         return this.expressionType == ExpressionType.ARRAY_ACCESS &&
                 this.expression1.type.keyType != null;
+    }
+
+    void evaluateSuperDotMethod(ExpressionContext ctx) {
+        Environment env = Environment.getInstance();
+        ClassDefinition classdef = env.currentClass.superclass;
+        if (classdef == null) {
+            String name = env.currentClass.qualifiedName();
+            env.printError(ctx, "class " + name + " has no superclass");
+            return;
+        }
+        this.expressionType = ExpressionType.SUPER_DOT_METHOD;
+        this.type = TypeDefinition.METHOD_TYPE;
+        this.name = ctx.Identifier().getText();
+        this.method = classdef.getMethod(this.name, null);
+        if (this.method == null) {
+            env.printError(ctx, "class " + classdef.qualifiedName() +
+                    " does not have field " + this.name);
+            return;
+        }
+        if (this.method.isPrivate) {
+            env.printError(ctx, "class " + classdef.qualifiedName() + " method " +
+                    this.name + " is private");
+            return;
+        }
+        while (!this.method.hasBody()) {
+            this.method = null;
+            if (classdef.superclass != null) {
+                classdef = classdef.superclass;
+                this.method = classdef.getMethod(this.name, null);
+            }
+            if (this.method == null || this.method.isPrivate) {
+                env.printError(ctx, "method super." + this.name + " not defined");
+                return;
+            }
+        }
+        this.expression1 = new ExpressionDefinition();
+        this.expression1.type = classdef.toTypeDefinition();
+        this.isStatic = this.method.isStatic;
+        if (env.currentMethod.isStatic && !this.isStatic) {
+            env.printError(ctx, "'super' method cannot be referenced from a static method");
+        }
     }
 }

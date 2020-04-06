@@ -275,6 +275,7 @@ expression
     |   expression '&&' expression
     |   expression '||' expression
     |   expression '?' expression ':' expression
+    |   'super' '.' Identifier
     ;
 
 primary
@@ -348,6 +349,7 @@ SHORT         : 'short';
 STATIC        : 'static';
 SWITCH        : 'switch';
 THIS          : 'this';
+SUPER         : 'super';
 VAR           : 'var';
 VOID          : 'void';
 WHILE         : 'while';
