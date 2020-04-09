@@ -4,7 +4,11 @@ package sanka;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+
 import sanka.antlr4.SankaLexer;
+import sanka.antlr4.SankaParser;
 import sanka.antlr4.SankaParser.BlockContext;
 import sanka.antlr4.SankaParser.FieldModifierContext;
 import sanka.antlr4.SankaParser.FormalParameterContext;
@@ -21,7 +25,7 @@ public class MethodDefinition {
     }
 
     static interface BlockGenerator {
-        public StatementDefinition[] generate();
+        public String generate();
     }
 
     BlockContext blockContext;
@@ -108,12 +112,15 @@ public class MethodDefinition {
         for (ParameterDefinition param : this.parameters) {
             env.symbolTable.put(param.name, param.type);
         }
+        if (this.generator != null) {
+            String methodBody = this.generator.generate();
+            SankaLexer lexer = new SankaLexer(CharStreams.fromString(methodBody));
+            SankaParser parser = new SankaParser(new CommonTokenStream(lexer));
+            this.blockContext = parser.block();
+        }
         if (this.blockContext != null) {
             this.block = new BlockDefinition();
             this.block.evaluate(this.blockContext);
-        } else if (this.generator != null) {
-            this.block = new BlockDefinition();
-            this.block.evaluate(this.generator);
         }
         this.frame = env.symbolTable.pop();
     }

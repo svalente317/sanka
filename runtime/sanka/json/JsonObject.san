@@ -110,6 +110,10 @@ class JsonObject {
         this.map[fieldName] = new JsonElement().makeBoolean(value);
     }
 
+    void setShort(String fieldName, short value) {
+        this.map[fieldName] = new JsonElement().makeShort(value);
+    }
+
     void setInt(String fieldName, int value) {
         this.map[fieldName] = new JsonElement().makeInt(value);
     }

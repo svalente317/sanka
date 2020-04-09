@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -94,7 +94,7 @@ public class ImportManager {
         }
         SankaLexer lexer = null;
         try {
-            lexer = new SankaLexer(new ANTLRFileStream(pathname));
+            lexer = new SankaLexer(CharStreams.fromFileName(pathname));
         } catch (IOException ioe) {
             if (importctx != null) {
                 env.printError(importctx, pathname + ": " + ioe);

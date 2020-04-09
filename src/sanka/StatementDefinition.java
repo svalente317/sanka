@@ -27,7 +27,7 @@ public class StatementDefinition {
 
     public static enum StatementType {
         DECLARATION, ASSIGNMENT, INC, DEC, IF, WHILE, FOR, ENHANCED_FOR, SWITCH, CASE, DEFAULT,
-        RETURN, BREAK, CONTINUE, EXPRESSION, SEMI, C__STMT, BLOCK, LOCK_CLASS, UNLOCK_CLASS
+        RETURN, BREAK, CONTINUE, EXPRESSION, SEMI, C__STMT, BLOCK
     }
 
     public StatementType statementType;
@@ -136,6 +136,8 @@ public class StatementDefinition {
             this.statementType = StatementType.C__STMT;
             String literal = ctx.StringLiteral().getText();
             this.name = LiteralUtils.evaluateStringLiteral(literal);
+            this.expression = new ExpressionDefinition();
+            this.expression.type = env.currentClass.toTypeDefinition();
             return;
         }
         if (ctx.block() != null) {

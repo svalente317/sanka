@@ -145,7 +145,7 @@ class JsonElement {
         case BOOLEAN_TYPE:
             return getAsBoolean() ? "true" : "false";
         case INT_TYPE:
-            return "" + getAsInt();
+            return "" + getAsLong();
         case DOUBLE_TYPE:
             return "" + getAsDouble();
         case STRING_TYPE:
@@ -153,6 +153,7 @@ class JsonElement {
             return StringEncoder.get().encodeAndQuote(text);
         case ARRAY_TYPE:
             var arr = getAsArray();
+            var isNull = (arr == null);
             if (arr.length == 0) {
                 return "[]";
             }

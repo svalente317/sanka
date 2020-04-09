@@ -12,7 +12,7 @@ import sanka.Environment;
 public class CompileManager {
 
     static final String GCC = "gcc";
-    static final String DBG = "-O6";
+    static final String DBG = "-g";
 
     public void compile(String mainClass, String exeName) throws Exception {
         Environment env = Environment.getInstance();

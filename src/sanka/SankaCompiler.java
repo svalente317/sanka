@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import sanka.antlr4.SankaLexer;
@@ -71,7 +71,7 @@ public class SankaCompiler {
                 System.err.println("Specify --main and --exe together");
                 System.exit(INVALID_ARGUMENT);
             }
-            SankaLexer lexer = new SankaLexer(new ANTLRFileStream(arg));
+            SankaLexer lexer = new SankaLexer(CharStreams.fromFileName(arg));
             SankaParser parser = new SankaParser(new CommonTokenStream(lexer));
             contextList.add(parser.compilationUnit());
         }

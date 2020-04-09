@@ -19,7 +19,7 @@ class ParseNumber {
             }
         }
         this.index = 0;
-        var numberMaps = NumberMaps.getInstance();
+        var numberMaps = NumberMaps.get();
         var total = 0L;
         var buffer = 0L;
         while (this.index < this.words.length) {
@@ -41,7 +41,7 @@ class ParseNumber {
     }
     
     int parseUpToNinetyNine() {
-        var numberMaps = NumberMaps.getInstance();
+        var numberMaps = NumberMaps.get();
         var value = parseWord(numberMaps.digitMap);
         if (value > 0) {
             return value;

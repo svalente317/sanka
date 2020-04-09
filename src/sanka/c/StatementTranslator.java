@@ -6,6 +6,7 @@ import java.util.List;
 import sanka.Environment;
 import sanka.ExpressionDefinition;
 import sanka.ExpressionDefinition.ExpressionType;
+import sanka.SingletonUtils;
 import sanka.StatementDefinition;
 import sanka.StatementDefinition.StatementType;
 import sanka.TypeDefinition;
@@ -276,16 +277,10 @@ class StatementTranslator extends TranslationBase {
             env.print(";");
             return;
         case C__STMT:
-            env.print(statement.name + ";");
+            translateCStatement(statement.expression.type, statement.name);
             return;
         case BLOCK:
             translateBlock(statement.block, true);
-            return;
-        case LOCK_CLASS:
-        case UNLOCK_CLASS:
-            String word = statementType == StatementType.LOCK_CLASS ? "lock" : "unlock";
-            String name = translateStaticField(statement.expression.type.name, "MUTEX");
-            env.print("pthread_mutex_" + word + "(&" + name + ");");
             return;
         }
     }
@@ -331,5 +326,17 @@ class StatementTranslator extends TranslationBase {
         env.print(valueName + "." + field + " = " + valueText + ";");
         env.print("rb_put(" + mapName + ", (union rb_key) " + keyText + ", " + valueName + ", 0);");
         return valueName;
+    }
+
+    static void translateCStatement(TypeDefinition type, String stmt) {
+        Environment env = Environment.getInstance();
+        if (stmt.equals(SingletonUtils.LOCK_CLASS)) {
+            stmt = "pthread_mutex_lock(&" + translateStaticField(type.name, "MUTEX") + ")";
+        }
+        else if (stmt.equals(SingletonUtils.UNLOCK_CLASS)) {
+            stmt = "pthread_mutex_unlock(&" + translateStaticField(type.name, "MUTEX") + ")";
+        }
+        env.print(stmt + ";");
+
     }
 }

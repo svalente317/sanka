@@ -6,6 +6,8 @@
 
 * output correct error when type in method signature is undefined
 
+* serializable class must have no-arg constructor.
+
 * implement typecast for interface and abstract classes.
 
 * interface extends interface

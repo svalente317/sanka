@@ -1,7 +1,7 @@
 // -*- mode: Java; -*-
 package sanka.examples;
 
-class NumberMaps {
+singleton class NumberMaps {
 
     int[String] digitMap;
     int[String] teenMap;
@@ -55,17 +55,5 @@ class NumberMaps {
             "million" : 1000000,
             "billion" : 1000000000
         };
-    }
-
-    static private NumberMaps INSTANCE = null;
-    
-    /**
-     * Implement the singleton pattern
-     */
-    static NumberMaps getInstance() {
-        if (NumberMaps.INSTANCE == null) {
-            NumberMaps.INSTANCE = new NumberMaps();
-        }
-        return NumberMaps.INSTANCE;
     }
 }

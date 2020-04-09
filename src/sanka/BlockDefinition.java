@@ -2,7 +2,6 @@ package sanka;
 
 import java.util.List;
 
-import sanka.MethodDefinition.BlockGenerator;
 import sanka.antlr4.SankaParser.BlockContext;
 import sanka.antlr4.SankaParser.IfStatementContext;
 import sanka.antlr4.SankaParser.StatementContext;
@@ -20,13 +19,6 @@ public class BlockDefinition {
             this.block[idx] = new StatementDefinition();
             this.block[idx].evaluate(statements.get(idx));
         }
-        this.frame = env.symbolTable.pop();
-    }
-
-    void evaluate(BlockGenerator generator) {
-        Environment env = Environment.getInstance();
-        env.symbolTable.push(null);
-        this.block = generator.generate();
         this.frame = env.symbolTable.pop();
     }
 
