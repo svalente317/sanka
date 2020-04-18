@@ -2,7 +2,7 @@ PREFIX=	/opt/sanka
 CC=	gcc
 DBG=	-g
 
-PROGS=	channeltest cheesefinder jsontest parsenumber processviewer total wordmap
+PROGS=	channeltest cheesefinder parsenumber processviewer total wordmap
 
 all:	$(PROGS)
 
@@ -11,9 +11,6 @@ channeltest:	ChannelTest.san
 
 cheesefinder:		CheeseFinder.san Mouse.san
 	sanka $^ --exe $@ --main sanka.examples.CheeseFinder
-
-jsontest:	JsonTest.san
-	sanka $^ --exe $@ --main sanka.examples.JsonTest
 
 parsenumber:	ParseNumber.san NumberMaps.san
 	sanka $^ --exe $@ --main sanka.examples.ParseNumber

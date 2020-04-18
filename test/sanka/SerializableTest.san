@@ -1,0 +1,88 @@
+// -*- mode: Java; -*-
+package sanka.test;
+import sanka.json.JsonObject;
+
+serializable class Dummy {
+    String key;
+
+    Dummy() {
+        this.key = "value";
+    }
+}
+
+serializable class SerializableTest {
+
+    short  s;
+    int    i;
+    long   lg;
+    String str;
+    String nullString;
+    Dummy  d;
+    Dummy  nullDummy;
+
+    short[]  shortArr;
+    int[]    nullArr;
+    long[]   longArr;
+    String[] stringArr;
+    Dummy[]  dummyArr;
+
+    void setup() {
+        this.s = -1000;
+        this.i = 8888;
+        this.lg = -2345678901;
+        this.str = "column 1" + new byte(9) + "column 2";
+        this.d = new Dummy();
+
+        this.shortArr = new short[]{ 256, -1 };
+        this.longArr = new long[]{ 54321098765, 17 };
+        this.stringArr = new String[]{ "x", "y", "z" };
+        this.dummyArr = new Dummy[]{ new Dummy(), null, new Dummy() };
+    }
+
+    static void main(String[] argv) {
+        var st = new SerializableTest();
+        st.setup();
+        var jo = st.toJson();
+
+        var t = new SerializableTest();
+        t.fromJson(jo);
+        var b1 = (t.s == -1000);
+        var b2 = (t.i == 8888);
+        var b3 = (t.lg == -2345678901);
+        var b4 = (t.str == "column 1" + new byte(9) + "column 2");
+        var b5 = (t.nullString == null);
+        System.println("" + b1 + " " + b2 + " " + b3 + " " + b4 + " " + b5);
+        b1 = (t.shortArr.length == 2);
+        b2 = (t.nullArr == null);
+        b3 = (t.longArr.length == 2);
+        b4 = (t.stringArr.length == 3);
+        b5 = (t.longArr[0] == 54321098765);
+        System.println("" + b1 + " " + b2 + " " + b3 + " " + b4 + " " + b5);
+        b1 = (t.d.key == "value");
+        b2 = (t.nullDummy == null);
+        b3 = (t.dummyArr.length == 3);
+        b4 = (t.dummyArr[1] == null);
+        b5 = (t.dummyArr[2].key == "value");
+        System.println("" + b1 + " " + b2 + " " + b3 + " " + b4 + " " + b5);
+        // System.println(t.toJson().toString());
+
+        var text = "{\"s\":\"string\", \"xxx\":17, \"STR\":0, " +
+            "\"i\":5, \"lg\":null, \"shortArr\":[\"a\", 1.1, null], " +
+            "\"stringArr\":[null, 1]}";
+        jo = JsonObject.parse(text);
+        t = new SerializableTest();
+        t.fromJson(jo);
+        System.println("" + (t.i == 5));
+
+        text = "{\"dummyArr\":[{\"key\":\"v1\"},null,{\"key\":\"v2\"}]}";
+        jo = JsonObject.parse(text);
+        t.nullArr = new int[1];
+        t.fromJson(jo);
+        b1 = (t.nullArr == null);
+        b2 = (t.dummyArr.length == 3);
+        b3 = (t.dummyArr[0].key == "v1";
+        b4 = (t.dummyArr[1] == null);
+        b5 = (t.dummyArr[2].key == "v2");
+        System.println("" + b1 + " " + b2 + " " + b3 + " " + b4 + " " + b5);
+    }
+}

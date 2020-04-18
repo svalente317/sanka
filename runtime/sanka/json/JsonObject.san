@@ -1,12 +1,20 @@
 // -*- mode: Java; -*-
 package sanka.json;
 
+class JsonMember {
+    String key;
+    JsonElement value;
+
+    JsonMember(String key, JsonElement value) {
+        this.key = key;
+        this.value = value;
+    }
+}
+
 /**
- * JsonObject is a thin wrapper around a String -> JsonElement map.
- * The wrapper does not add any state. All of the state is in the map.
- * So if two JsonObjects both wrap the same map, then the objects are
- * effectively equivalent to each other. Any changes made to the map
- * will be observable through either object.
+ * JsonObject is a list of String -> JsonElement pairs.
+ * It does not use a map, so it maintains the order that the keys are added
+ * to the object.
  *
  * Here's how all the "getAs" methods work:
  *
@@ -18,29 +26,41 @@ package sanka.json;
  */
 class JsonObject {
     private static JsonElement NULL_ELEMENT;
-    private JsonElement[String] map;
+    private JsonMember[] members;
 
     JsonObject() {
         if (JsonObject.NULL_ELEMENT == null) {
             JsonObject.NULL_ELEMENT = new JsonElement();
         }
-        this.map = new JsonElement[class String];
-    }
-
-    JsonElement[String] getMap() {
-        return this.map;
+        this.members = new JsonMember[0];
     }
 
     JsonElement get(String fieldName) {
-        return this.map[fieldName];
+        for (var member : this.members) {
+            if (member.key == fieldName) {
+                return member.value;
+            }
+        }
+        return null;
     }
 
     void set(String fieldName, JsonElement value) {
-        this.map[fieldName] = value;
+        for (var member : this.members) {
+            if (member.key == fieldName) {
+                member.value = value;
+                return;
+            }
+        }
+        this.members.add(new JsonMember(fieldName, value));
     }
 
     void remove(String fieldName) {
-        this.map.remove(fieldName);
+        for (var idx = 0; idx < this.members.length; idx++) {
+            if (this.members[idx].key == fieldName) {
+                this.members.delete(idx, 1);
+                return;
+            }
+        }
     }
 
     /**
@@ -51,7 +71,7 @@ class JsonObject {
      * call JsonElement methods on the return value.
      */
     private JsonElement getElement(String fieldName) {
-        var value = this.map[fieldName];
+        var value = get(fieldName);
         return value == null ? JsonObject.NULL_ELEMENT: value;
     }
 
@@ -94,8 +114,9 @@ class JsonObject {
     String toString() {
         var s = "";
         var comma = "";
-        for (var key, value : this.map) {
-            s = s + comma + StringEncoder.get().encodeAndQuote(key) + ":" + value.toString();
+        for (var member : this.members) {
+            s = s + comma + StringEncoder.get().encodeAndQuote(member.key) +
+                ":" + member.value.toString();
             comma = ",";
         }
         return "{" + s + "}";
@@ -107,38 +128,47 @@ class JsonObject {
     }
 
     void setBoolean(String fieldName, boolean value) {
-        this.map[fieldName] = new JsonElement().makeBoolean(value);
+        set(fieldName, new JsonElement().makeBoolean(value));
     }
 
     void setShort(String fieldName, short value) {
-        this.map[fieldName] = new JsonElement().makeShort(value);
+        set(fieldName, new JsonElement().makeShort(value));
     }
 
     void setInt(String fieldName, int value) {
-        this.map[fieldName] = new JsonElement().makeInt(value);
+        set(fieldName, new JsonElement().makeInt(value));
     }
 
     void setLong(String fieldName, long value) {
-        this.map[fieldName] = new JsonElement().makeLong(value);
+        set(fieldName, new JsonElement().makeLong(value));
     }
 
     void setFloat(String fieldName, float value) {
-        this.map[fieldName] = new JsonElement().makeDouble(value);
+        set(fieldName, new JsonElement().makeDouble(value));
     }
 
     void setDouble(String fieldName, double value) {
-        this.map[fieldName] = new JsonElement().makeDouble(value);
+        set(fieldName, new JsonElement().makeDouble(value));
     }
 
     void setString(String fieldName, String value) {
-        this.map[fieldName] = new JsonElement().makeString(value);
+        set(fieldName, new JsonElement().makeString(value));
     }
 
     void setArray(String fieldName, JsonElement[] value) {
-        this.map[fieldName] = new JsonElement().makeArray(value);
+        set(fieldName, new JsonElement().makeArray(value));
     }
 
     void setObject(String fieldName, JsonObject value) {
-        this.map[fieldName] = new JsonElement().makeObject(value);
+        set(fieldName, new JsonElement().makeObject(value));
+    }
+
+    /**
+     * Return the members so the caller can iterate over them.
+     * This is the actual data. If you modify it, then you modify
+     * the JsonObject.
+     */
+    JsonMember[] getMembers() {
+        return this.members;
     }
 }
