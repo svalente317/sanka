@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import sanka.antlr4.SankaLexer;
 import sanka.antlr4.SankaParser;
 import sanka.antlr4.SankaParser.CompilationUnitContext;
+import sanka.antlr4.SankaParser.ImportDeclarationContext;
 import sanka.antlr4.SankaParser.QualifiedNameContext;
 import sanka.antlr4.SankaParser.TypeDeclarationContext;
 
@@ -31,7 +32,11 @@ public class ImportManager {
      * then don't look for it in the class path.
      */
     void doImport(QualifiedNameContext importctx) {
-        Environment env = Environment.getInstance();
+        processImportContext(importctx, true);
+    }
+
+    private void processImportContext(QualifiedNameContext importctx, boolean doImport) {
+    Environment env = Environment.getInstance();
         List<TerminalNode> ids = importctx.Identifier();
         int idCount = ids.size();
         if (idCount < 2) {
@@ -43,7 +48,9 @@ public class ImportManager {
             packageName = packageName + "." + ids.get(idx).getText();
         }
         String className = ids.get(idCount-1).getText();
-        importFile(importctx, packageName, className, false);
+        if (doImport) {
+            importFile(importctx, packageName, className, false);
+        }
         env.classPackageMap.put(className, packageName);
     }
 
@@ -108,6 +115,11 @@ public class ImportManager {
         Map<String, String> origClassPackageMap = env.classPackageMap;
         env.currentPackage = packageName;
         env.classPackageMap = env.baseClassPackageMap(false);
+        if (ctx.importDeclaration() != null) {
+            for (ImportDeclarationContext item : ctx.importDeclaration()) {
+                processImportContext(item.qualifiedName(), false);
+            }
+        }
         for (TypeDeclarationContext item : ctx.typeDeclaration()) {
             if (item.classDeclaration() != null || item.interfaceDeclaration() != null) {
                 ClassDefinition classdef = new ClassDefinition();

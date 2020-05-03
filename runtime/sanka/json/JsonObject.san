@@ -16,7 +16,7 @@ class JsonMember {
  * It does not use a map, so it maintains the order that the keys are added
  * to the object.
  *
- * Here's how all the "getAs" methods work:
+ * Here's how all the "get" methods work:
  *
  * If the field is defined, AND the field has the specified type, then
  * return the field value.
@@ -75,39 +75,39 @@ class JsonObject {
         return value == null ? JsonObject.NULL_ELEMENT: value;
     }
 
-    boolean getAsBoolean(String fieldName) {
+    boolean getBoolean(String fieldName) {
         return getElement(fieldName).getAsBoolean();
     }
 
-    short getAsShort(String fieldName) {
+    short getShort(String fieldName) {
         return getElement(fieldName).getAsShort();
     }
 
-    int getAsInt(String fieldName) {
+    int getInt(String fieldName) {
         return getElement(fieldName).getAsInt();
     }
 
-    long getAsLong(String fieldName) {
+    long getLong(String fieldName) {
         return getElement(fieldName).getAsLong();
     }
 
-    float getAsFloat(String fieldName) {
+    float getFloat(String fieldName) {
         return getElement(fieldName).getAsFloat();
     }
 
-    double getAsDouble(String fieldName) {
+    double getDouble(String fieldName) {
         return getElement(fieldName).getAsDouble();
     }
 
-    String getAsString(String fieldName) {
+    String getString(String fieldName) {
         return getElement(fieldName).getAsString();
     }
 
-    JsonElement[] getAsArray(String fieldName) {
+    JsonElement[] getArray(String fieldName) {
         return getElement(fieldName).getAsArray();
     }
 
-    JsonObject getAsObject(String fieldName) {
+    JsonObject getObject(String fieldName) {
         return getElement(fieldName).getAsObject();
     }
 
@@ -170,5 +170,9 @@ class JsonObject {
      */
     JsonMember[] getMembers() {
         return this.members;
+    }
+
+    JsonObject getAsObject() {
+        return this;
     }
 }

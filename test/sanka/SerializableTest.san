@@ -1,6 +1,8 @@
 // -*- mode: Java; -*-
 package sanka.test;
+import sanka.json.JsonElement;
 import sanka.json.JsonObject;
+import sanka.util.Integer;
 
 serializable class Dummy {
     String key;
@@ -8,6 +10,10 @@ serializable class Dummy {
     Dummy() {
         this.key = "value";
     }
+}
+
+serializable class ScalarTest {
+    Integer key;
 }
 
 serializable class SerializableTest {
@@ -80,9 +86,19 @@ serializable class SerializableTest {
         t.fromJson(jo);
         b1 = (t.nullArr == null);
         b2 = (t.dummyArr.length == 3);
-        b3 = (t.dummyArr[0].key == "v1";
+        b3 = (t.dummyArr[0].key == "v1");
         b4 = (t.dummyArr[1] == null);
         b5 = (t.dummyArr[2].key == "v2");
         System.println("" + b1 + " " + b2 + " " + b3 + " " + b4 + " " + b5);
+
+        var s = new ScalarTest();
+        text = "{\"key\": 17}";
+        jo = JsonObject.parse(text);
+        s.fromJson(jo);
+        b1 = (s.key.intValue() == 17);
+        jo = JsonObject.parse("{}");
+        s.fromJson(jo);
+        b2 = (s.key == null);
+        System.println("" + b1 + " " + b2);
     }
 }
