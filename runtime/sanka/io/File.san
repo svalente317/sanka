@@ -105,4 +105,56 @@ class File {
         c__stmt "closedir(dir)";
         return results;
     }
+
+    /**
+     * Return an abstract representation of a parent directory that could
+     * contain this file or directory.
+     *
+     * This can be fooled by symbolic links and hard links including ".."
+     */
+    File getParent() {
+        var strip = this.pathname;
+        var done = false;
+        while (!done) {
+            var len = strip.length();
+            var origLen = len;
+            while (len > 0 && strip[len-1] == '/') {
+                len--;
+            }
+            if (len == 0) {
+                return null;
+            }
+            if (len < origLen) {
+                strip = strip.substring(0, len);
+            }
+            var idx = strip.lastIndexOf('/');
+            if (idx < 0) {
+                return null;
+            }
+            done = !((idx+2 == len) && (strip[idx+1] == '.'));
+            strip = strip.substring(0, idx);
+        }
+        return new File(strip);
+    }
+
+    /**
+     * Create the directory named by this abstract pathname, including any
+     * missing parent directories. Note that if this operation fails, it may
+     * have created some of the parent directories.
+     *
+     * @return true if and only if the directory was created
+     */
+    boolean mkdirs() {
+        var stats = new FileStats();
+        if (getStats(stats, true) == 0) {
+            return false;
+        }
+        var parent = getParent();
+        if (parent != null) {
+            parent.mkdirs();
+        }
+        var status = 0;
+        c__stmt "status = mkdir(this->pathname, 0777)";
+        return (status == 0);
+    }
 }
