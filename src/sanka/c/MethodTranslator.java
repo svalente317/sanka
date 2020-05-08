@@ -116,7 +116,7 @@ class MethodTranslator extends TranslationBase {
         builder.append(")(");
         boolean needComma = false;
         if (!method.isStatic) {
-            builder.append("void *object");
+            builder.append("void *this");
             needComma = true;
         }
         addParameters(method, builder, true, needComma);
