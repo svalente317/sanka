@@ -1,5 +1,5 @@
 // -*- mode: Java; -*-
-// package sanka.json;
+package sanka.json;
 
 singleton class StringEncoder {
     private byte[] map;
