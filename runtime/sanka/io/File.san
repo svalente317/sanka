@@ -20,6 +20,7 @@ class File {
     c__include "unistd.h";
     c__include "errno.h";
     c__include "dirent.h";
+    c__include "stdio.h";
 
     const PATH_SEPARATOR = "/";
 
@@ -155,6 +156,24 @@ class File {
         }
         var status = 0;
         c__stmt "status = mkdir(this->pathname, 0777)";
+        return (status == 0);
+    }
+
+    /**
+     * Delete the file or directory denoted by this abstract pathname.
+     * If this pathname denotes a directory, then the directory must be empty
+     * in order to be deleted.
+     *
+     * @return true if the file or directory is successfully deleted
+     */
+    boolean delete() {
+        var status = 0;
+        var isDirectory = false;
+        c__stmt "status = remove(this->pathname)";
+        c__stmt "isDirectory = (status != 0) && (errno == EISDIR)";
+        if (isDirectory) {
+            c__stmt "status = rmdir(this->pathname)";
+        }
         return (status == 0);
     }
 }
