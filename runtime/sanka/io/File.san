@@ -176,4 +176,19 @@ class File {
         }
         return (status == 0);
     }
+
+    /**
+     * Rename the file denoted by this abstract pathname.
+     *
+     * Platform-dependent: The operation might not be able to move a file
+     * from one filesystem to another, it might not be atomic, and it
+     * might not succeed if the target file already exists.
+     *
+     * @return true if and only if the renaming succeeded
+     */
+    boolean renameTo(File dest) {
+        var status = 0;
+        c__stmt "status = rename(this->pathname, dest->pathname)";
+        return (status == 0);
+    }
 }

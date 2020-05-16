@@ -65,4 +65,31 @@ class System {
     static int getuid() {
         c__stmt "return getuid()";
     }
+
+    static void seedRandom() {
+        // This is obviously not cryptographically secure but it will
+        // get you randomness for a card game or something.
+        var seed = currentTimeMillis();
+        c__stmt "srandom(seed)";
+    }
+
+    static String randomUuid() {
+        var result = new byte[35];
+        var id = 0L;
+        var length = 0;
+        for (var x = 0; x < 5; x++) {
+            c__stmt "id = random()";
+            for (var y = 0; y < 7; y++) {
+                var value = id & 15;
+                var digit = (value < 10) ? '0' + value : 'a' + (value-10);
+                result[length] = digit;
+                length++;
+                id = id >> 4;
+            }
+        }
+        var text = new String(result);
+        return text.substring(0, 8) + "-" + text.substring(8, 12) + "-" +
+            text.substring(12, 16) + "-" + text.substring(16, 20) + "-" +
+            text.substring(20, 32);
+    }
 }
