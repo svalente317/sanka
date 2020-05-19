@@ -40,7 +40,17 @@ class File {
      * pathname. The child must be relative, not absolute.
      */
     File(File parent, String child) {
-        this.pathname = parent.getPath() + PATH_SEPARATOR + child;
+        this.pathname = parent.getPath();
+        if (this.pathname.endsWith(PATH_SEPARATOR)) {
+            if (child.startsWith(PATH_SEPARATOR)) {
+                child = child.substring(1);
+            }
+        } else {
+            if (!child.startsWith(PATH_SEPARATOR)) {
+                child = PATH_SEPARATOR + child;
+            }
+        }
+        this.pathname = this.pathname + child;
     }
 
     /**

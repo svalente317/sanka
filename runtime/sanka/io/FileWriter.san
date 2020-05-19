@@ -4,6 +4,7 @@ package sanka.io;
 class FileWriter {
     c__include "stdio.h";
     c__include "errno.h";
+    c__include "unistd.h";
     c__field "FILE *fp";
 
     int open(String filename) {
@@ -20,5 +21,10 @@ class FileWriter {
         c__stmt "int status = fclose(this->fp)";
         c__stmt "this->fp = NULL";
         c__stmt "return status == 0 ? 0 : errno";
+    }
+
+    int sync() {
+        c__stmt "fflush(this->fp)";
+        c__stmt "return fdatasync(fileno(this->fp)) == 0 ? 0 : errno";
     }
 }

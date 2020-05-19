@@ -264,10 +264,14 @@ public class ExpressionDefinition {
         this.type = new TypeDefinition();
         this.type.parse(creator.typeType());
         ClassDefinition classdef = null;
-        if (!this.type.isPrimitiveType) {
-            classdef = env.getClassDefinition(this.type);
+        TypeDefinition baseType = this.type;
+        while (baseType.arrayOf != null) {
+            baseType = baseType.arrayOf;
+        }
+        if (!baseType.isPrimitiveType) {
+            classdef = env.getClassDefinition(baseType);
             if (classdef == null) {
-                env.printError(creator, "class " + this.type + " undefined");
+                env.printError(creator, "class " + baseType + " undefined");
                 this.type = null;
                 return;
             }
@@ -275,6 +279,11 @@ public class ExpressionDefinition {
         if (creator.arrayCreatorRest() != null) {
             evaluateArrayCreator(creator.arrayCreatorRest());
             return;
+        }
+        if (this.type.arrayOf != null) {
+             env.printError(creator, "cannot call constructor method for array");
+             this.type = null;
+             return;
         }
         this.expressionType = ExpressionType.NEW_INSTANCE;
         ExpressionListContext exprlist = creator.classCreatorRest().expressionList();
@@ -303,9 +312,11 @@ public class ExpressionDefinition {
     }
 
     /**
-     * Evaluate the array part of an expression like "new Class[x]" or "new Class[]{...}".
+     * Evaluate the array part of an expression.
      */
     void evaluateArrayCreator(ArrayCreatorRestContext ctx) {
+        // Case 1 of 3. "new type[size]".
+        // Currently, this.type is the type of the array element.
         if (ctx.expression() != null) {
             this.expressionType = ExpressionType.NEW_ARRAY;
             TypeDefinition arrayType = new TypeDefinition();
@@ -316,6 +327,8 @@ public class ExpressionDefinition {
             checkIntegralType(ctx.expression(), this.expression1.type);
             return;
         }
+        // Case 2 of 3. "new type[class String]".
+        // Currently, this.type is the type of the map values.
         if (ctx.typeType() != null) {
             this.expressionType = ExpressionType.NEW_MAP;
             TypeDefinition mapType = new TypeDefinition();
@@ -341,6 +354,7 @@ public class ExpressionDefinition {
             }
             return;
         }
+        // Case 3 of 3. "new type[]{ value, ... }".
         this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
         TypeDefinition arrayType = new TypeDefinition();
         arrayType.arrayOf = this.type;
