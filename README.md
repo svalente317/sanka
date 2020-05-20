@@ -20,24 +20,30 @@ what it rejects then by what it provides. The tenets are:
 
 ## Advocacy
 
-I like this language. It's that simple.
+I like this language.
+
+I wrote this language because: After using C++ and Java, I wanted a
+language that was as easy to use as Java, and as close to the hardware
+as C++. I wanted the best of both worlds. And I thought that designing
+and implementing my own language would be fun. And I was right about
+that.
 
 Sanka is in the same class of languages as Go, Rust, C++, and [insert
 your favorite compiled language here]. All of those languages are
-perfectly fine. I'm not going to tell you that mine is better, or that
-you should use mine instead of anything else. I simply like this
-language. The syntax and the details and the philosophy all work for
-me. If you like it too, that's great. If not, that's fine too.
+fine. I doubt that I could convince you that Sanka is the best of the
+bunch. But personally, I like this language a lot. The syntax and the
+details and the philosophy all work for me. If you like it too, that's
+great. If not, that's fine too.
 
 ## Syntax
 
-Sanka uses Java's syntax. For example, here is a program that compiles
-and runs in both Java and Sanka:
+Sanka's syntax is based strongly on Java's syntax. For example, here
+is a Sanka program which looks like a Java program:
 
 ~~~
 class Hello {
     static void main(String[] argv) {
-        System.out.println("Hello, world!");
+        System.println("Hello, world!");
     }
 }
 ~~~
@@ -54,6 +60,7 @@ Sanka has the following things in common with Java:
 * Many keywords work as they do in Java, such as `if`, `for`, `while`,
   `break`, `continue`, `case`.
 * Objects and arrays are mutable.
+* Support for interfaces and abstract classes.
 
 Here are the Java constructs that Sanka does not provide:
 
