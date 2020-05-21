@@ -1,0 +1,54 @@
+// -*- mode: Java; -*-
+package sanka.net;
+
+/**
+ * InetAddress represents an IPv4 address.
+ */
+class InetAddress {
+    c__include "sys/socket.h";
+    c__include "netinet/in.h";
+    c__include "arpa/inet.h";
+    c__include "netdb.h";
+
+    byte[] numbers;
+    int family;
+
+    /**
+     * Parse numeric representation like 127.0.0.1.
+     */
+    static InetAddress parse(String text) {
+        c__stmt "struct in_addr addr";
+        c__stmt "int status = inet_aton(text, &addr)";
+        c__stmt "if (status == 0) return NULL";
+        var size = 0;
+        c__stmt "size = sizeof(addr.s_addr)";
+        var obj = new InetAddress();
+        obj.numbers = new byte[size];
+        c__stmt "memcpy(obj->numbers->data, &addr.s_addr, size)";
+        c__stmt "obj->family = AF_INET";
+        return obj;
+    }
+
+    /**
+     * Lookup the given hostname in DNS.
+     */
+    static InetAddress lookup(String hostname) {
+	c__stmt "struct hostent *hp = gethostbyname(hostname)";
+	c__stmt "if (hp == NULL) return NULL";
+        var size = 0;
+        c__stmt "size = hp->h_length";
+        var obj = new InetAddress();
+        obj.numbers = new byte[size];
+        c__stmt "memcpy(obj->numbers->data, hp->h_addr, size)";
+        c__stmt "obj->family = hp->h_addrtype";
+        return obj;
+    }
+
+    /**
+     * Parse or lookup the given name as an IP address or hostname.
+     */
+    static InetAddress get(String hostname) {
+        var address = InetAddress.parse(hostname);
+        return address != null ? address : InetAddress.lookup(hostname);
+    }
+}

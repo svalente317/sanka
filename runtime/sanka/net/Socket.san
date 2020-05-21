@@ -59,4 +59,15 @@ class Socket {
     int close() {
         c__stmt "return close(this->fd) == 0 ? 0 : errno";
     }
+
+    int connect(InetAddress address, int port) {
+        c__stmt "this->fd = socket(AF_INET, SOCK_STREAM, 0)";
+        c__stmt "if (this->fd < 0) return errno";
+        c__stmt "struct sockaddr_in sa";
+        c__stmt "sa.sin_family = address->family";
+	c__stmt "memcpy(&sa.sin_addr, address->numbers->data, sizeof(sa.sin_addr))";
+        c__stmt "sa.sin_port = htons(port)";
+        c__stmt "int x = connect(this->fd, (struct sockaddr *) &sa, sizeof(sa))";
+        c__stmt "return x == 0 ? 0 : errno";
+    }
 }
