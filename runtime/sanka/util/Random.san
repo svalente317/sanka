@@ -1,0 +1,60 @@
+// -*- mode: Java; -*-
+package sanka.util;
+
+class Random {
+    /**
+     * Initialize random number generator so the application is not
+     * entirely deterministic from one run to the next.
+     * This is not cryptographically secure but it will get you randomness
+     * for a card game or something.
+     */
+    static void seedRandom() {
+        var seed = System.currentTimeMillis();
+        c__stmt "srandom(seed)";
+    }
+
+    /**
+     * @return random number across the entire range of signed 32 bit ints.
+     */
+    static int randomInt() {
+        c__stmt "return random()";
+    }
+
+    /**
+     * @return random number across the entire range of non-negative
+     * 32 bit ints.
+     */
+    static int randomUInt() {
+        while (true) {
+            var value = randomInt();
+            if (value >= 0) {
+                return value;
+            }
+            if (value > -2147483648) {
+                return -value;
+            }
+        }
+    }
+    
+    /**
+     * @return random UUID
+     */
+    static String randomUuid() {
+        var result = new byte[35];
+        var length = 0;
+        for (var x = 0; x < 5; x++) {
+            var id = randomInt();
+            for (var y = 0; y < 7; y++) {
+                var value = id & 15;
+                var digit = (value < 10) ? '0' + value : 'a' + (value-10);
+                result[length] = digit;
+                length++;
+                id = id >> 4;
+            }
+        }
+        var text = new String(result);
+        return text.substring(0, 8) + "-" + text.substring(8, 12) + "-" +
+            text.substring(12, 16) + "-" + text.substring(16, 20) + "-" +
+            text.substring(20, 32);
+    }
+}

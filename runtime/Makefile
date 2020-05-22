@@ -31,8 +31,8 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/json/StringEncoder.c \
 	bin/sanka/net/InetAddress.c \
 	bin/sanka/net/Socket.c \
-	bin/sanka/util/Integer.c
-
+	bin/sanka/util/Integer.c \
+	bin/sanka/util/Random.c
 
 OBJS=	bin/panic.o \
 	bin/array.o \

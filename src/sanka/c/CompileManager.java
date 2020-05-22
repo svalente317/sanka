@@ -42,6 +42,7 @@ public class CompileManager {
         }
         String filename = generateMainFile(mainClass);
         compileFile(filename, linkcommand);
+        String ofilename = linkcommand.get(linkcommand.size()-1);
         if (env.errorCount > 0) {
             return;
         }
@@ -61,6 +62,8 @@ public class CompileManager {
         if (status != 0) {
             env.printError(null, exeName + ": compiler exited with status " + status);
         }
+        new File(filename).delete();
+        new File(ofilename).delete();
     }
 
     private void compileFile(String filename, List<String> ofileList) throws Exception {
