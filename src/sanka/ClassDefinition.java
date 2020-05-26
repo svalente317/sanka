@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import sanka.antlr4.SankaLexer;
@@ -38,6 +39,7 @@ public class ClassDefinition {
     public boolean isAbstract;
     public boolean isSerializable;
     public boolean isSingleton;
+    public boolean isAnonymous;
     public String packageName;
     public String name;
     public ClassDefinition superclass;
@@ -48,6 +50,7 @@ public class ClassDefinition {
     public List<String> c_fields;
     int exportStatus;
     int constantsStatus;
+    int anonymousCount;
 
     ClassDefinition() {
         this.fieldList = new LinkedList<>();
@@ -99,94 +102,103 @@ public class ClassDefinition {
             return;
         }
         for (ClassBodyDeclarationContext item : ctx.classBody().classBodyDeclaration()) {
-            if (item.constDeclaration() != null) {
-                parseConstDeclaration(item.constDeclaration());
-            }
-            if (item.fieldDeclaration() != null) {
-                parseFields(item.fieldDeclaration());
-            }
-            if (item.getStart().getType() == SankaLexer.EXPORT) {
-                List<TerminalNode> nodes = item.Identifier();
-                String name = nodes.get(0).getText();
-                if (nodes.size() > 1) {
-                    name = name + "." + nodes.get(1).getText();
-                }
-                this.exports.add(name);
-            }
-            if (item.constructorDeclaration() != null) {
-                String name = item.constructorDeclaration().Identifier().getText();
-                if (!this.name.equals(name)) {
-                    env.printError(ctx, "method " + name + " missing return type");
-                    continue;
-                }
-                if (this.isAbstract) {
-                    env.printError(ctx, "abstract class cannot have constructor");
-                    continue;
-                }
-                MethodDefinition method = new MethodDefinition();
-                method.parse(null, null, name,
-                        item.constructorDeclaration().formalParameters(),
-                        item.constructorDeclaration().block());
-                int numArgs = method.parameters.size();
-                MethodDefinition prevMethod = getMethod(method.name, numArgs);
-                if (prevMethod != null) {
-                    env.printError(ctx, "class " + this.name + " constructor already defined" +
-                            " with " + numArgs + " parameters");
-                }
-                prevMethod = getMethod(method.name, null);
-                if (prevMethod != null) {
-                    prevMethod.isOverloaded = true;
-                    method.isOverloaded = true;
-                }
-                this.methodList.add(method);
-            }
-            if (item.methodDeclaration() != null) {
-                MethodDefinition method = new MethodDefinition();
-                method.parse(item.methodDeclaration());
-                if (method.name.equals(this.name)) {
-                    env.printError(ctx, "class " + this.name +
-                            " constructor cannot have return type");
-                }
-                int numArgs = method.parameters.size();
-                MethodDefinition prevMethod = getMethod(method.name, numArgs);
-                if (prevMethod != null) {
-                    env.printError(ctx, "class " + this.name + " method " + method.name +
-                            " already defined with " + numArgs + " parameters");
-                }
-                prevMethod = getMethod(method.name, null);
-                if (prevMethod != null) {
-                    prevMethod.isOverloaded = true;
-                    method.isOverloaded = true;
-                }
-                if (method.blockContext == null && !this.isAbstract) {
-                    env.printError(item, "class " + this.name + " is not abstract; " +
-                            "method " + method.name + " missing body");
-                }
-                if (method.blockContext == null && method.isPrivate) {
-                    env.printError(item, "abstract method " + method.name + " must be public");
-                }
-                this.methodList.add(method);
-            }
-            if (item.getStart().getType() == SankaLexer.C__INCLUDE) {
-                if (this.c_includes == null) {
-                    this.c_includes = new LinkedList<>();
-                }
-                String literal = item.StringLiteral().getText();
-                this.c_includes.add(LiteralUtils.evaluateStringLiteral(literal));
-            }
-            if (item.getStart().getType() == SankaLexer.C__FIELD) {
-                if (this.c_fields == null) {
-                    this.c_fields = new LinkedList<>();
-                }
-                String literal = item.StringLiteral().getText();
-                this.c_fields.add(LiteralUtils.evaluateStringLiteral(literal));
-            }
+            parseClassBodyDeclaration(item);
         }
         if (this.isSerializable) {
             SerializableUtils.addMethodsToClass(this);
         }
         if (this.isSingleton) {
             SingletonUtils.addMethodsToClass(this);
+        }
+    }
+
+    void parseClassBodyDeclaration(ClassBodyDeclarationContext item) {
+        Environment env = Environment.getInstance();
+        if (item.constDeclaration() != null) {
+            parseConstDeclaration(item.constDeclaration());
+        }
+        if (item.fieldDeclaration() != null) {
+            parseFields(item.fieldDeclaration());
+        }
+        if (item.getStart().getType() == SankaLexer.EXPORT) {
+            List<TerminalNode> nodes = item.Identifier();
+            String name = nodes.get(0).getText();
+            if (nodes.size() > 1) {
+                name = name + "." + nodes.get(1).getText();
+            }
+            this.exports.add(name);
+        }
+        if (item.constructorDeclaration() != null) {
+            String name = item.constructorDeclaration().Identifier().getText();
+            if (!this.name.equals(name)) {
+                env.printError(item, "method " + name + " missing return type");
+                return;
+            }
+            if (this.isAbstract) {
+                env.printError(item, "abstract class cannot have constructor");
+                return;
+            }
+            if (this.isAnonymous) {
+                env.printError(item, "anonymous class cannot have constructor");
+                return;
+            }
+            MethodDefinition method = new MethodDefinition();
+            method.parse(null, null, name,
+                    item.constructorDeclaration().formalParameters(),
+                    item.constructorDeclaration().block());
+            int numArgs = method.parameters.size();
+            MethodDefinition prevMethod = getMethod(method.name, numArgs);
+            if (prevMethod != null) {
+                env.printError(item, "class " + this.name + " constructor already defined" +
+                        " with " + numArgs + " parameters");
+            }
+            prevMethod = getMethod(method.name, null);
+            if (prevMethod != null) {
+                prevMethod.isOverloaded = true;
+                method.isOverloaded = true;
+            }
+            this.methodList.add(method);
+        }
+        if (item.methodDeclaration() != null) {
+            MethodDefinition method = new MethodDefinition();
+            method.parse(item.methodDeclaration());
+            if (method.name.equals(this.name)) {
+                env.printError(item, "class " + this.name +
+                        " constructor cannot have return type");
+            }
+            int numArgs = method.parameters.size();
+            MethodDefinition prevMethod = getMethod(method.name, numArgs);
+            if (prevMethod != null) {
+                env.printError(item, "class " + this.name + " method " + method.name +
+                        " already defined with " + numArgs + " parameters");
+            }
+            prevMethod = getMethod(method.name, null);
+            if (prevMethod != null) {
+                prevMethod.isOverloaded = true;
+                method.isOverloaded = true;
+            }
+            if (method.blockContext == null && !this.isAbstract) {
+                env.printError(item, "class " + this.name + " is not abstract; " +
+                        "method " + method.name + " missing body");
+            }
+            if (method.blockContext == null && method.isPrivate) {
+                env.printError(item, "abstract method " + method.name + " must be public");
+            }
+            this.methodList.add(method);
+        }
+        if (item.getStart().getType() == SankaLexer.C__INCLUDE) {
+            if (this.c_includes == null) {
+                this.c_includes = new LinkedList<>();
+            }
+            String literal = item.StringLiteral().getText();
+            this.c_includes.add(LiteralUtils.evaluateStringLiteral(literal));
+        }
+        if (item.getStart().getType() == SankaLexer.C__FIELD) {
+            if (this.c_fields == null) {
+                this.c_fields = new LinkedList<>();
+            }
+            String literal = item.StringLiteral().getText();
+            this.c_fields.add(LiteralUtils.evaluateStringLiteral(literal));
         }
     }
 
@@ -447,6 +459,18 @@ public class ClassDefinition {
                 getMethodWithBody(method.name, numArgs) == null) {
             env.printError(null, "class " + this.name + " must define method " + method.name);
         }
+    }
+
+    public void addPublicField(ParserRuleContext ctx, String name, TypeDefinition type) {
+        Environment env = Environment.getInstance();
+        if (getField(name) != null) {
+            env.printError(ctx, "field " + name + " declared twice");
+            return;
+        }
+        FieldDefinition field = new FieldDefinition();
+        field.name = name;
+        field.type = type;
+        this.fieldList.add(field);
     }
 
     public int depth() {

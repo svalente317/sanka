@@ -170,6 +170,16 @@ public interface SankaListener extends ParseTreeListener {
 	 */
 	void exitConstructorDeclaration(SankaParser.ConstructorDeclarationContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SankaParser#identifierList}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdentifierList(SankaParser.IdentifierListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#identifierList}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdentifierList(SankaParser.IdentifierListContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SankaParser#methodDeclaration}.
 	 * @param ctx the parse tree
 	 */
@@ -509,4 +519,24 @@ public interface SankaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLiteral(SankaParser.LiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SankaParser#anonymousClassBody}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnonymousClassBody(SankaParser.AnonymousClassBodyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#anonymousClassBody}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnonymousClassBody(SankaParser.AnonymousClassBodyContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SankaParser#anonymousClassBodyDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterAnonymousClassBodyDeclaration(SankaParser.AnonymousClassBodyDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SankaParser#anonymousClassBodyDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitAnonymousClassBodyDeclaration(SankaParser.AnonymousClassBodyDeclarationContext ctx);
 }

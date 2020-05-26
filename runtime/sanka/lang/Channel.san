@@ -96,6 +96,15 @@ class Channel {
     }
 
     /**
+     * Get the number of items that were queued in the channel at the time
+     * that this function call was processed. The data may be obsolete by
+     * the time the caller receives the response.
+     */
+    int getQueueSize() {
+        return this.size;
+    }
+
+    /**
      * Close the channel. If any calls to push() are waiting, then those
      * calls will return immediately, without pushing the item. If any
      * calls to pop() are waiting, then those calls will return immediately,

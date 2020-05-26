@@ -109,8 +109,12 @@ fieldModifier
     ;
 
 constructorDeclaration
-    :   Identifier formalParameters
-        block
+    :   Identifier formalParameters block
+    |   Identifier '(' identifierList? ')' ';'
+    ;
+
+identifierList
+    :   Identifier (',' Identifier)*
     ;
 
 methodDeclaration
@@ -287,6 +291,7 @@ primary
 
 creator
     :   typeType (arrayCreatorRest | classCreatorRest)
+    |   anonymousClassBody
     ;
 
 arrayCreatorRest
@@ -315,6 +320,15 @@ literal
     |   StringLiteral
     |   BooleanLiteral
     |   'null'
+    ;
+
+anonymousClassBody
+    :   '{' anonymousClassBodyDeclaration* '}'
+    ;
+
+anonymousClassBodyDeclaration
+    :   Identifier ':' expression ';'
+    |   classBodyDeclaration
     ;
 
 // LEXER

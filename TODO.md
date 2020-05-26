@@ -1,5 +1,7 @@
 # TODO
 
+* syntactic sugar for simple common constructor
+
 * generate code for static methods in abstract classes
 
 * Fix adding numbers while adding strings
@@ -32,8 +34,6 @@
 
 * Support expressions with qualified class name or classes in the current
   package (in ED.evaluatePrimary)
-
-* Support "new" with class body - adapter statements
 
 * Support 2d arrays - initialization and code generation
 

@@ -51,4 +51,11 @@ class InetAddress {
         var address = InetAddress.parse(hostname);
         return address != null ? address : InetAddress.lookup(hostname);
     }
+
+    /**
+     * Returns the loopback address, which in IPv4 is 127.0.0.1.
+     */
+    static InetAddress getLoopbackAddress() {
+        return parse("127.0.0.1");
+    }
 }

@@ -141,6 +141,12 @@ class ExpressionTranslator extends TranslationBase {
                 env.print(builder.toString());
             }
         }
+        if (expr.fieldList != null) {
+            for (int idx = 0; idx < expr.fieldList.length; idx++) {
+                String value = translate(expr.argList[idx]);
+                env.print(variableName + "->" + expr.fieldList[idx] + " = " + value + ";");
+            }
+        }
         return variableName;
     }
 

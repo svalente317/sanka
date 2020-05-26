@@ -1,12 +1,16 @@
 package sanka;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import sanka.ClassDefinition.FieldDefinition;
 import sanka.MethodDefinition.ParameterDefinition;
+import sanka.antlr4.SankaParser.AnonymousClassBodyContext;
+import sanka.antlr4.SankaParser.AnonymousClassBodyDeclarationContext;
 import sanka.antlr4.SankaParser.ArrayCreatorRestContext;
 import sanka.antlr4.SankaParser.CreatorContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
@@ -34,6 +38,7 @@ public class ExpressionDefinition {
     public String value;
     public TypeDefinition identifiedClass;
     public ExpressionDefinition[] argList;
+    public String[] fieldList;
     public String translatedThis;
 
     ExpressionDefinition copyAndClear() {
@@ -49,6 +54,7 @@ public class ExpressionDefinition {
         copy.value = this.value;
         copy.identifiedClass = this.identifiedClass;
         copy.argList = this.argList;
+        copy.fieldList = this.fieldList;
         copy.translatedThis = this.translatedThis;
 
         this.expressionType = null;
@@ -62,6 +68,7 @@ public class ExpressionDefinition {
         this.value = null;
         this.identifiedClass = null;
         this.argList = null;
+        this.fieldList = null;
         this.translatedThis = null;
         return copy;
     }
@@ -260,6 +267,10 @@ public class ExpressionDefinition {
      * Evaluate an expression like "new Class()" or "new Class[x]" or "new Class[]{...}".
      */
     void evaluateCreator(CreatorContext creator) {
+        if (creator.anonymousClassBody() != null) {
+            evaluateAnonymousCreator(creator.anonymousClassBody());
+            return;
+        }
         Environment env = Environment.getInstance();
         this.type = new TypeDefinition();
         this.type.parse(creator.typeType());
@@ -730,5 +741,43 @@ public class ExpressionDefinition {
         if (env.currentMethod.isStatic && !this.isStatic) {
             env.printError(ctx, "'super' method cannot be referenced from a static method");
         }
+    }
+
+    void evaluateAnonymousCreator(AnonymousClassBodyContext creator) {
+        Environment env = Environment.getInstance();
+        ClassDefinition parentClass = env.currentClass;
+        this.expressionType = ExpressionType.NEW_INSTANCE;
+        ClassDefinition classdef = new ClassDefinition();
+        classdef.packageName = env.currentPackage;
+        parentClass.anonymousCount++;
+        classdef.name = parentClass.name + "__" + parentClass.anonymousCount;
+        classdef.classPackageMap = new TreeMap<>();
+        classdef.classPackageMap.putAll(env.classPackageMap);
+        classdef.isAnonymous = true;
+        List<String> fieldList = new ArrayList<>();
+        List<ExpressionDefinition> valueList = new ArrayList<>();
+        for (AnonymousClassBodyDeclarationContext decl : creator.anonymousClassBodyDeclaration()) {
+            if (decl.classBodyDeclaration() != null) {
+                classdef.parseClassBodyDeclaration(decl.classBodyDeclaration());
+            } else if (decl.Identifier() != null) {
+                String name = decl.Identifier().getText();
+                ExpressionDefinition expression = new ExpressionDefinition();
+                expression.evaluate(decl.expression());
+                if (expression.type != null) {
+                    classdef.addPublicField(decl, name, expression.type);
+                    fieldList.add(name);
+                    valueList.add(expression);
+                }
+            }
+        }
+        env.classList.add(classdef);
+        classdef.evaluateConstants();
+        MethodDefinition parentMethod = env.currentMethod;
+        classdef.evaluate();
+        env.currentMethod = parentMethod;
+        env.currentClass = parentClass;
+        this.type = classdef.toTypeDefinition();
+        this.fieldList = fieldList.toArray(new String[0]);
+        this.argList = valueList.toArray(new ExpressionDefinition[0]);
     }
 }

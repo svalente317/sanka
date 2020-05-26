@@ -3,6 +3,7 @@
 /runtime/bin/
 /examples/sanka/
 /examples/*.o
+/examples/anonymoustest
 /examples/channeltest
 /examples/cheesefinder
 /examples/parsenumber

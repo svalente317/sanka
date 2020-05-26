@@ -224,7 +224,4 @@ project is an infrastructure for creating micro web services:
 
 * Should the language directly support threads and synchronization,
   or should they be supported only by the runtime class library?
-* Should the language support slices or channels as defined in Go?
-* Are there other constructs in other languages that are worth stealing?
-* Even though Sanka is an imperative language, it must support some kind of
-  adapter or closure or lambda. What is the best syntax for doing so?
+* What constructs from other languages are worth stealing?
