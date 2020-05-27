@@ -37,9 +37,7 @@ class ChannelTest {
 class Producer {
     private Channel channel;
     
-    Producer(Channel channel) {
-        this.channel = channel;
-    }
+    Producer(channel);
 
     void run() {
         var start = System.currentTimeMillis();
@@ -60,10 +58,7 @@ class Consumer {
     private int id;
     private Channel channel;
 
-    Consumer(int id, Channel channel) {
-        this.id = id;
-        this.channel = channel;
-    }
+    Consumer(id, channel);
 
     void run() {
         var start = System.currentTimeMillis();

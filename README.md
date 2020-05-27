@@ -224,4 +224,5 @@ project is an infrastructure for creating micro web services:
 
 * Should the language directly support threads and synchronization,
   or should they be supported only by the runtime class library?
+* Support parameterized types?
 * What constructs from other languages are worth stealing?

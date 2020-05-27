@@ -12,6 +12,7 @@ import sanka.antlr4.SankaParser.ClassBodyDeclarationContext;
 import sanka.antlr4.SankaParser.ClassDeclarationContext;
 import sanka.antlr4.SankaParser.ClassModifierContext;
 import sanka.antlr4.SankaParser.ConstDeclarationContext;
+import sanka.antlr4.SankaParser.ConstructorDeclarationContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.FieldDeclarationContext;
 import sanka.antlr4.SankaParser.FieldModifierContext;
@@ -129,7 +130,8 @@ public class ClassDefinition {
             this.exports.add(name);
         }
         if (item.constructorDeclaration() != null) {
-            String name = item.constructorDeclaration().Identifier().getText();
+            ConstructorDeclarationContext ctx = item.constructorDeclaration();
+            String name = ctx.Identifier().getText();
             if (!this.name.equals(name)) {
                 env.printError(item, "method " + name + " missing return type");
                 return;
@@ -142,14 +144,20 @@ public class ClassDefinition {
                 env.printError(item, "anonymous class cannot have constructor");
                 return;
             }
-            MethodDefinition method = new MethodDefinition();
-            method.parse(null, null, name,
-                    item.constructorDeclaration().formalParameters(),
-                    item.constructorDeclaration().block());
+            MethodDefinition method = null;
+            if (ctx.formalParameters() != null) {
+                method = new MethodDefinition();
+                method.parse(null, null, name, ctx.formalParameters(), ctx.block());
+            } else {
+                method = ConstructorUtils.makeAutoConstructor(this, ctx.identifierList());
+                if (method == null) {
+                    return;
+                }
+            }
             int numArgs = method.parameters.size();
             MethodDefinition prevMethod = getMethod(method.name, numArgs);
             if (prevMethod != null) {
-                env.printError(item, "class " + this.name + " constructor already defined" +
+                env.printError(item, "ctx " + this.name + " constructor already defined" +
                         " with " + numArgs + " parameters");
             }
             prevMethod = getMethod(method.name, null);

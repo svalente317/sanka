@@ -1,7 +1,5 @@
 # TODO
 
-* syntactic sugar for simple common constructor
-
 * generate code for static methods in abstract classes
 
 * Fix adding numbers while adding strings
