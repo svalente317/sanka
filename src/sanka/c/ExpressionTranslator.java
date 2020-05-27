@@ -575,7 +575,8 @@ class ExpressionTranslator extends TranslationBase {
      */
     static void
     addLeftAndRightToList(List<ExpressionDefinition> exprList, ExpressionDefinition expr) {
-        if (expr.expressionType == ExpressionType.BINARY && expr.operator.equals("+")) {
+        if (expr.expressionType == ExpressionType.BINARY && expr.operator.equals("+") &&
+                expr.type.isStringType()) {
             addLeftAndRightToList(exprList, expr.expression1);
             addLeftAndRightToList(exprList, expr.expression2);
         } else {

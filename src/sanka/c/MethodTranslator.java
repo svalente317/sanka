@@ -16,7 +16,7 @@ class MethodTranslator extends TranslationBase {
      */
     public static void translate(ClassDefinition classdef, MethodDefinition method, boolean isHeader) {
         translate(classdef, method, isHeader, false);
-        if (classdef.isAbstract && method.hasBody() && !method.isPrivate) {
+        if (classdef.isAbstract && method.hasBody() && method.canOverride()) {
             if (!isHeader) {
                 Environment.getInstance().print("");
             }
@@ -67,7 +67,8 @@ class MethodTranslator extends TranslationBase {
             builder.append(");");
             env.print(builder.toString());
         }
-        else if (classdef.isInterface || (classdef.isAbstract && !method.isPrivate && !isBase)) {
+        else if (classdef.isInterface ||
+                (classdef.isAbstract && method.canOverride() && !isBase)) {
             translateInterfaceBody(classdef, method);
         }
         else if (method.block != null) {

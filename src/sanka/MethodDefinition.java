@@ -105,6 +105,10 @@ public class MethodDefinition {
         return this.blockContext != null || this.exportFrom != null || this.generator != null;
     }
 
+    public boolean canOverride() {
+        return !(this.isPrivate || this.isStatic);
+    }
+
     void evaluate() {
         Environment env = Environment.getInstance();
         env.currentMethod = this;

@@ -1,12 +1,6 @@
 # TODO
 
-* generate code for static methods in abstract classes
-
-* Fix adding numbers while adding strings
-
 * output correct error when type in method signature is undefined
-
-* serializable class must have no-arg constructor.
 
 * implement typecast for interface and abstract classes.
 

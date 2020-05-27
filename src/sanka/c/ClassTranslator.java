@@ -121,7 +121,7 @@ public class ClassTranslator extends TranslationBase {
                 env.print("void *object;");
             }
             for (MethodDefinition method : classdef.methodList) {
-                if (!(method.isPrivate || method.isStatic || method.overrideCount > 0)) {
+                if (method.canOverride() && method.overrideCount == 0) {
                     MethodTranslator.translateInterface(classdef, method);
                 }
             }
