@@ -1,7 +1,5 @@
 # TODO
 
-* output correct error when type in method signature is undefined
-
 * implement typecast for interface and abstract classes.
 
 * interface extends interface

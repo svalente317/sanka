@@ -115,6 +115,14 @@ public class MethodDefinition {
         env.symbolTable.push(null);
         for (ParameterDefinition param : this.parameters) {
             env.symbolTable.put(param.name, param.type);
+            TypeDefinition baseType = param.type.baseType();
+            if (baseType.isPrimitiveType || (env.getClassDefinition(baseType) != null)) {
+                continue;
+            }
+            ImportManager.getInstance().importClass(baseType.packageName, baseType.name);
+            if (env.getClassDefinition(baseType) == null) {
+                env.printError(null, "method " + this.name + " type " + baseType + " undefined");
+            }
         }
         if (this.generator != null) {
             String methodBody = this.generator.generate();

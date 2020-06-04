@@ -36,7 +36,7 @@ public class ImportManager {
     }
 
     private void processImportContext(QualifiedNameContext importctx, boolean doImport) {
-    Environment env = Environment.getInstance();
+        Environment env = Environment.getInstance();
         List<TerminalNode> ids = importctx.Identifier();
         int idCount = ids.size();
         if (idCount < 2) {

@@ -469,7 +469,11 @@ public class ExpressionDefinition {
         if (this.expression1.type.arrayOf == null) {
             classdef = getAccessedClass();
             if (classdef == null) {
-                env.printError(expr, "class " + this.expression1.type + " undefined");
+                if (this.expression1.type.isPrimitiveType) {
+                    env.printError(expr, "" + this.expression1.type + " cannot be dereferenced");
+                } else {
+                    env.printError(expr, "class " + this.expression1.type + " undefined");
+                }
                 return;
             }
         } else if (this.expression1.type.keyType == null) {
