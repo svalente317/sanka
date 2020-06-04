@@ -1,6 +1,6 @@
 PREFIX=	/opt/sanka
 
-PROGS=	anonymoustest channeltest cheesefinder parsenumber processviewer total wordmap
+PROGS=	anonymoustest channeltest cheesefinder parsenumber processviewer sudoku total wordmap
 
 all:	$(PROGS)
 
@@ -18,6 +18,9 @@ parsenumber:	ParseNumber.san NumberMaps.san
 
 processviewer:	ProcessViewer.san
 	sanka $^ --exe $@ --main sanka.examples.ProcessViewer
+
+sudoku:		Sudoku.san
+	sanka $^ --exe $@ --main sanka.examples.Sudoku
 
 total:		Total.san
 	sanka $^ --exe $@ --main sanka.examples.Total

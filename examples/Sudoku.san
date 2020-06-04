@@ -1,0 +1,320 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+
+/**
+ * Each Block in the Sudoku board has either a well-defined value or a set
+ * of candidates that could be the final value.
+ */
+class Block {
+    int value;
+    int[] candidates;
+
+    Block(int size) {
+        this.candidates = new int[size];
+        for (var x = 0; x < size; x++) {
+            this.candidates[x] = x+1;
+        }
+    }
+
+    void set(int value) {
+        this.value = value;
+        this.candidates = null;
+    }
+
+    void remove(int candidate) {
+        if (this.candidates != null) {
+            var ln = this.candidates.length;
+            for (var x = 0; x < ln; x++) {
+                if (this.candidates[x] == candidate) {
+                    this.candidates[x] = this.candidates[ln-1];
+                    this.candidates.setLength(ln-1);
+                    return;
+                }
+            }
+        }
+    }
+}
+
+/**
+ * As we fill-in one value in the board, we may find one or more other
+ * values to fill-in.
+ */
+class StackItem {
+    int location;
+    int value;
+
+    StackItem(location, value);
+}
+
+/**
+ * Class to solve a Sudoku puzzle.
+ */
+class Sudoku {
+    int size;
+    Block[] board;
+    StackItem[] stack;
+    int[][] sequences;
+    int totalDefined;
+    boolean failed;
+    boolean isGuess;
+
+    Sudoku(int size) {
+        this.size = size;
+        this.board = new Block[size * size];
+        for (var i = 0; i < this.board.length; i++) {
+            this.board[i] = new Block(size);
+        }
+        this.stack = new StackItem[0];
+        this.sequences = new int[][0];
+
+        // Add horizontal sequences.
+        var current = 0;
+        var x;
+        for (x = 0; x < size; x++) {
+            var sequence = new int[size];
+            for (var y = 0; y < size; y++) {
+                sequence[y] = current;
+                current++;
+            }
+            this.sequences.add(sequence);
+        }
+
+        // Add vertical sequences.
+        for (x = 0; x < size; x++) {
+            var sequence = new int[size];
+            current = x;
+            for (var y = 0; y < size; y++) {
+                sequence[y] = current;
+                current = current + size;
+            }
+            this.sequences.add(sequence);
+        }
+
+        // Add square sequences.
+        var sqrt = (size == 16 ? 4 : (size == 9 ? 3 : (size == 4 ? 2 : 0)));
+        for (x = 0; x < sqrt; x++) {
+            for (var y = 0; y < sqrt; y++) {
+                var sequence = new int[size];
+                current = x * sqrt + y * sqrt * size;
+                for (var z = 0; z < size; z++) {
+                    sequence[z] = current;
+                    current++;
+                    if (current % sqrt == 0) {
+                        current = current - sqrt + size;
+                    }
+                }
+                this.sequences.add(sequence);
+            }
+        }
+    }
+
+    void add(int location, int value) {
+        this.stack.add(new StackItem(location, value));
+    }
+
+    /**
+     * Solve the puzzle.
+     */
+    void run() {
+        while (!this.failed) {
+            // runStack moves items from this.stack to this.totalDefined,
+            // and checkSequences adds more items to this.stack.
+            runStack();
+            if (this.totalDefined == this.board.length) {
+                return;
+            }
+            checkSequences();
+            if (this.stack.length > 0) {
+                continue;
+            }
+            guess();
+            if (this.stack.length == 0) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Fill-in what we absolutely know, which may generate new things
+     * that we absolutely know.
+     */
+    void runStack() {
+        while (this.stack.length > 0) {
+            var item = this.stack.pop();
+            var block = this.board[item.location];
+            if (block.value == item.value) {
+                continue;
+            }
+            if (block.value > 0) {
+                this.failed = true;
+                return;
+            }
+            this.board[item.location].set(item.value);
+            this.totalDefined++;
+            for (var sequence : this.sequences) {
+                if (!contains(sequence, item.location)) {
+                    continue;
+                }
+                for (var location : sequence) {
+                    block = this.board[location];
+                    if (block.candidates == null) {
+                        continue;
+                    }
+                    block.remove(item.value);
+                    if (block.candidates.length == 0) {
+                        this.failed = true;
+                        return;
+                    }
+                    if (block.candidates.length == 1) {
+                        add(location, block.candidates[0]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * TODO This is remarkably inefficient. Either use binary search or
+     * indexing or (the obvious choice) simply generate the sequences
+     * for the location, rather then searching for them.
+     */
+    boolean contains(int[] sequence, int location) {
+        for (var value : sequence) {
+            if (value == location) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Find some sequence where some number is only a legal candidate in
+     * one block in the sequence.
+     */
+    void checkSequences() {
+        for (var sequence : this.sequences) {
+            checkCandidates(sequence);
+            if (this.stack.length > 0) {
+                return;
+            }
+        }
+    }
+
+    /**
+     * In this sequence, is there some number which is only a legal candidate
+     * in one block in the sequence?
+     */
+    void checkCandidates(int[] sequence) {
+        var candidateToLocation = new int[this.size+1];
+        for (var x = 0; x < candidateToLocation.length; x++) {
+            candidateToLocation[x] = -1;
+        }
+        for (var location : sequence) {
+            var block = this.board[location];
+            if (block.candidates == null) {
+                continue;
+            }
+            for (var candidate : block.candidates) {
+                if (candidateToLocation[candidate] >= 0) {
+                    candidateToLocation[candidate] = -2;
+                } else if (candidateToLocation[candidate] == -1) {
+                    candidateToLocation[candidate] = location;
+                }
+            }
+        }
+        for (var value = 1; value <= this.size; value++) {
+            if (candidateToLocation[value] >= 0) {
+                add(candidateToLocation[value], value);
+            }
+        }
+    }
+
+    /**
+     * Print current board state.
+     */
+    void output() {
+        var current = 0;
+        while (current < this.board.length) {
+            var s = "";
+            for (var x = 0; x < this.size; x++) {
+                var value = this.board[current].value;
+                var ch = value == 0 ? '-' : new byte('0' + value);
+                s = s + " " + ch;
+                current++;
+            }
+            System.println(s.substring(1));
+        }
+    }
+
+    /**
+     * Usage: Specify the initial board state as a single argument with
+     * each row swept from left to right, followed by the next row with
+     * no space between them. Enter dash for empty spaces.
+     *
+     * For example: 3----19------7-4--1--42----531----7--49---------6------9---2-572-----------19--8- 
+     */
+    static void main(String[] argv) {
+        var game = new Sudoku(9);
+        var state = argv[1];
+        for (var location = 0; location < state.length(); location++) {
+            var ch = state[location];
+            if (ch != '-') {
+                game.add(location, ch-'0');
+            }
+        }
+        game.run();
+        game.output();
+    }
+
+    /**
+     * Find a block with two candidates. Guess one of them. If it fails,
+     * then the block definitely must be the other one.
+     */
+    void guess() {
+        if (this.isGuess) {
+            return;
+        }
+        for (var location = 0; location < this.board.length; location++) {
+            var block = this.board[location];
+            if (block.candidates != null && block.candidates.length == 2) {
+                makeGuess(location);
+                if (this.stack.length > 0) {
+                    return;
+                }
+            }
+        }
+    }
+    
+    void makeGuess(int location) {
+        System.println("guess location " + location);
+        // First, clone the board.
+        // TODO Make this more efficient. The sequences are read-only,
+        // so don't clone them. The blocks and candidates probably could
+        // be cloned more efficiently too.
+        var other = new Sudoku(this.size);
+        other.isGuess = true;
+        for (var x = 0; x < this.board.length; x++) {
+            var block = this.board[x];
+            if (block.candidates == null) {
+                other.stack.add(new StackItem(x, block.value));
+            }
+        }
+        var block = this.board[location];
+        other.add(location, block.candidates[0]);
+        other.run();
+        if (other.failed) {
+            System.println("guess failed for location " + location);
+            add(location, block.candidates[1]);
+            return;
+        }
+        if (other.totalDefined == other.board.length) {
+            System.println("guess succeeded for location " + location);
+            for (var y = 0; y < this.board.length; y++) {
+                block = this.board[y];
+                if (block.candidates != null) {
+                    add(y, other.board[y].value);
+                }
+            }
+        }
+    }
+}
