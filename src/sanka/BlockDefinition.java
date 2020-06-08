@@ -11,8 +11,12 @@ public class BlockDefinition {
     public SymbolTable.Frame frame;
 
     void evaluate(BlockContext ctx) {
+        evaluate(ctx, null);
+    }
+
+    void evaluate(BlockContext ctx, SymbolTable.Frame frame) {
         Environment env = Environment.getInstance();
-        env.symbolTable.push(null);
+        env.symbolTable.push(frame);
         List<StatementContext> statements = ctx.statement();
         this.block = new StatementDefinition[statements.size()];
         for (int idx = 0; idx < this.block.length; idx++) {

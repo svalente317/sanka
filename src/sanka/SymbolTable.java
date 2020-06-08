@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 public class SymbolTable {
 
-    static class Frame extends TreeMap<String, TypeDefinition> {
+    public static class Frame extends TreeMap<String, TypeDefinition> {
         private static final long serialVersionUID = 1;
     }
 

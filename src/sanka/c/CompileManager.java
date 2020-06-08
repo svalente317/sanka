@@ -59,11 +59,12 @@ public class CompileManager {
         linkcommand.add("-o");
         linkcommand.add(exeName);
         int status = executeCommand(linkcommand);
-        if (status != 0) {
+        if (status == 0) {
+            new File(filename).delete();
+            new File(ofilename).delete();
+        } else {
             env.printError(null, exeName + ": compiler exited with status " + status);
         }
-        new File(filename).delete();
-        new File(ofilename).delete();
     }
 
     private void compileFile(String filename, List<String> ofileList) throws Exception {

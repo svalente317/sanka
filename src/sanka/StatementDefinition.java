@@ -36,7 +36,7 @@ public class StatementDefinition {
     public ExpressionDefinition expression;
     public BlockDefinition block;
     public BlockDefinition elseBlock;
-    public StatementDefinition[] forStatements;
+    public BlockDefinition forBlock;
     public String valueName;
 
     /**
@@ -309,15 +309,13 @@ public class StatementDefinition {
      */
     void evaluateFor(ForControlContext forControl, BlockContext blockCtx) {
         if (forControl.enhancedForControl() != null) {
-            evaluateEnhancedFor(forControl.enhancedForControl());
+            evaluateEnhancedFor(forControl.enhancedForControl(), blockCtx);
         } else {
-            evaluateClassicFor(forControl);
+            evaluateClassicFor(forControl, blockCtx);
         }
-        this.block = new BlockDefinition();
-        this.block.evaluate(blockCtx);
     }
 
-    void evaluateEnhancedFor(EnhancedForControlContext forControl) {
+    void evaluateEnhancedFor(EnhancedForControlContext forControl, BlockContext blockCtx) {
         this.statementType = StatementType.ENHANCED_FOR;
         Environment env = Environment.getInstance();
         List<TerminalNode> vars = forControl.Identifier();
@@ -347,39 +345,49 @@ public class StatementDefinition {
                         "to iterate over " + type);
             }
         }
-        env.symbolTable.put(this.name, type);
+        SymbolTable.Frame frame = new SymbolTable.Frame();
+        frame.put(this.name, type);
         if (this.valueName != null) {
-            env.symbolTable.put(this.valueName, valueType);
+            frame.put(this.valueName, valueType);
         }
+        this.block = new BlockDefinition();
+        this.block.evaluate(blockCtx, frame);
     }
 
-    void evaluateClassicFor(ForControlContext forControl) {
+    void evaluateClassicFor(ForControlContext forControl, BlockContext blockCtx) {
         this.statementType = StatementType.FOR;
-        this.forStatements = new StatementDefinition[2];
+        Environment env = Environment.getInstance();
+        env.symbolTable.push(null);
+        StatementDefinition initStatement = null, incStatement = null;
         ForInitContext forInit = forControl.forInit();
         if (forInit != null) {
-            this.forStatements[0] = new StatementDefinition();
+            initStatement = new StatementDefinition();
             if (forInit.variableDeclaration() != null) {
-                this.forStatements[0].evaluateVariableDeclaration(forInit.variableDeclaration());
+                initStatement.evaluateVariableDeclaration(forInit.variableDeclaration());
             }
             else if (forInit.variableAssignment() != null) {
-                this.forStatements[0].evaluateVariableAssignment(forInit.variableAssignment());
+                initStatement.evaluateVariableAssignment(forInit.variableAssignment());
             }
             else if (forInit.expression() != null) {
-                this.forStatements[0].evaluateExpressionStatement(forInit.expression());
+                initStatement.evaluateExpressionStatement(forInit.expression());
             }
         }
         evaluateBooleanExpression(forControl.expression());
         ForIncrementContext forIncrement = forControl.forIncrement();
         if (forIncrement != null) {
-            this.forStatements[1] = new StatementDefinition();
+            incStatement = new StatementDefinition();
             if (forIncrement.variableAssignment() != null) {
-                this.forStatements[1].evaluateVariableAssignment(forIncrement.variableAssignment());
+                incStatement.evaluateVariableAssignment(forIncrement.variableAssignment());
             }
             else if (forIncrement.expression() != null) {
-                this.forStatements[1].evaluateExpressionStatement(forIncrement.expression());
+                incStatement.evaluateExpressionStatement(forIncrement.expression());
             }
         }
+        this.block = new BlockDefinition();
+        this.block.evaluate(blockCtx);
+        this.forBlock = new BlockDefinition();
+        this.forBlock.block = new StatementDefinition[] { initStatement, incStatement };
+        this.forBlock.frame = env.symbolTable.pop();
     }
 
     /**

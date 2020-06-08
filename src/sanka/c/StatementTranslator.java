@@ -114,12 +114,19 @@ class StatementTranslator extends TranslationBase {
             env.print("}");
             return;
         case FOR:
-            if (statement.forStatements[0] != null) {
-                translate(statement.forStatements[0]);
+            StatementDefinition initStatement = statement.forBlock.block[0];
+            StatementDefinition incStatement = statement.forBlock.block[1];
+            if (!statement.forBlock.frame.isEmpty()) {
+                env.symbolTable.push(statement.forBlock.frame);
+                env.print("{");
+                env.level++;
+            }
+            if (initStatement != null) {
+                translate(initStatement);
             }
             // Should generate different code for loops that don't use "continue".
             text = null;
-            if (statement.forStatements[1] != null) {
+            if (incStatement != null) {
                 text = env.getTmpVariable();
                 env.print("int " + text + " = 0;");
             }
@@ -128,7 +135,7 @@ class StatementTranslator extends TranslationBase {
             if (text != null) {
                 env.print("if (" + text + " != 0) {");
                 env.level++;
-                translate(statement.forStatements[1]);
+                translate(incStatement);
                 env.level--;
                 env.print("}");
                 env.print(text + " = 1;");
@@ -141,6 +148,11 @@ class StatementTranslator extends TranslationBase {
             translateBlock(statement.block, false);
             env.level--;
             env.print("}");
+            if (!statement.forBlock.frame.isEmpty()) {
+                env.level--;
+                env.print("}");
+                env.symbolTable.pop();
+            }
             return;
         case ENHANCED_FOR:
             TypeDefinition exprType = statement.expression.type;
