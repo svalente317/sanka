@@ -1,6 +1,6 @@
 # TODO
 
-* implement typecast for interface and abstract classes.
+* implement typecast abstract classes, and verify that case labels are valid.
 
 * interface extends interface
 

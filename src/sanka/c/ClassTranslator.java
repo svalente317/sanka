@@ -129,6 +129,7 @@ public class ClassTranslator extends TranslationBase {
         else if (classdef.isInterface) {
             env.print("void *object;");
             env.print("void *base;");
+            env.print("const char *baseType;");
             for (MethodDefinition method : classdef.methodList) {
                 if (!(method.isPrivate || method.isStatic)) {
                     MethodTranslator.translateInterface(classdef, method);

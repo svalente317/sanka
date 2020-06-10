@@ -131,6 +131,9 @@ class ExpressionTranslator extends TranslationBase {
             env.print(variableName + "->object = " + baseExpr + ";");
             String text = baseClass.isInterface ? baseExpr + "->base" : variableName + "->object";
             env.print(variableName + "->base = " + text + ";");
+            text = baseClass.isInterface ? baseExpr + "->baseType" :
+                "\"" + expr.expression1.type.toString() + "\"";
+            env.print(variableName + "->baseType = " + text + ";");
             String typeName = expr.expression1.type.name;
             for (MethodDefinition method : classdef.methodList) {
                 builder = new StringBuilder();

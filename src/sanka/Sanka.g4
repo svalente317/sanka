@@ -192,6 +192,7 @@ statement
     |   'for' '(' forControl ')' block
     |   'while' parExpression block
     |   'switch' parExpression block
+    |   'typeswitch' parExpression block
     |   switchLabel
     |   'return' expression? ';'
     |   'break' ';'
@@ -361,9 +362,10 @@ PRIVATE       : 'private';
 RETURN        : 'return';
 SHORT         : 'short';
 STATIC        : 'static';
+SUPER         : 'super';
 SWITCH        : 'switch';
 THIS          : 'this';
-SUPER         : 'super';
+TYPESWITCH    : 'typeswitch';
 VAR           : 'var';
 VOID          : 'void';
 WHILE         : 'while';

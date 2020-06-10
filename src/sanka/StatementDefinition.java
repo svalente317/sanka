@@ -26,8 +26,8 @@ import sanka.antlr4.SankaParser.VariableDeclarationContext;
 public class StatementDefinition {
 
     public static enum StatementType {
-        DECLARATION, ASSIGNMENT, INC, DEC, IF, WHILE, FOR, ENHANCED_FOR, SWITCH, CASE, DEFAULT,
-        RETURN, BREAK, CONTINUE, EXPRESSION, SEMI, C__STMT, BLOCK
+        DECLARATION, ASSIGNMENT, INC, DEC, IF, WHILE, FOR, ENHANCED_FOR, SWITCH, TYPESWITCH,
+        CASE, DEFAULT, RETURN, BREAK, CONTINUE, EXPRESSION, SEMI, C__STMT, BLOCK
     }
 
     public StatementType statementType;
@@ -63,7 +63,7 @@ public class StatementDefinition {
                     env.printError(ctx, "constant expression required");
                 }
             } else if (ctx.switchLabel().typeType() != null) {
-                // TODO this.statementType = StatementType.TYPECASE ?
+                this.statementType = StatementType.CASE;
                 this.expression = new ExpressionDefinition();
                 this.expression.type = new TypeDefinition();
                 this.expression.type.parse(ctx.switchLabel().typeType());
@@ -102,6 +102,9 @@ public class StatementDefinition {
             return;
         case SankaLexer.SWITCH:
             evaluateSwitch(ctx);
+            return;
+        case SankaLexer.TYPESWITCH:
+            evaluateTypeswitch(ctx);
             return;
         case SankaLexer.RETURN:
             this.statementType = StatementType.RETURN;
@@ -399,17 +402,47 @@ public class StatementDefinition {
         this.expression = new ExpressionDefinition();
         this.expression.evaluate(ctx.parExpression().expression());
         TypeDefinition type = this.expression.type;
-        boolean isInterface = false;
         if (type != null && !(type.isIntegralType() || type.isStringType())) {
-            ClassDefinition classdef = env.getClassDefinition(type);
-            isInterface = classdef != null && classdef.isInterface;
-            if (!isInterface) {
-                env.printError(ctx, "incompatible types: switch statement must use " +
-                        "integral type or String or interface");
-            }
+            env.printError(ctx, "incompatible types: switch statement must use " +
+                    "integral type or String");
         }
+        evaluateSwitchBlock(ctx.block(), false);
+    }
+
+    /**
+     * Evaluate a "typeswitch" block with labels and statements.
+     */
+    void evaluateTypeswitch(StatementContext ctx) {
+        Environment env = Environment.getInstance();
+        this.statementType = StatementType.TYPESWITCH;
+        this.expression = new ExpressionDefinition();
+        this.expression.evaluate(ctx.parExpression().expression());
+        TypeDefinition type = this.expression.type;
+        if (type == null) {
+            return;
+        }
+        if (type.isPrimitiveType) {
+            env.printError(ctx, "type " + type + " is not a class");
+            return;
+        }
+        ClassDefinition classdef = env.getClassDefinition(type);
+        if (classdef == null) {
+            env.printError(ctx, "class " + type + " undefined");
+            return;
+        }
+        if (!(classdef.isInterface || classdef.isAbstract)) {
+            env.printError(ctx, "cannot typeswitch on concrete class " + type);
+        }
+        evaluateSwitchBlock(ctx.block(), true);
+    }
+
+    /**
+     * Evaluate the block of a switch or typeswitch.
+     */
+    private void evaluateSwitchBlock(BlockContext ctx, boolean isTypeswitch) {
+        Environment env = Environment.getInstance();
         this.block = new BlockDefinition();
-        this.block.evaluate(ctx.block());
+        this.block.evaluate(ctx);
         if (this.expression.type == null) {
             return;
         }
@@ -429,10 +462,14 @@ public class StatementDefinition {
             // recursive. You cannot have a "case" statement inside an "if" statement.
             if (item.statementType == StatementType.CASE && item.expression.type != null) {
                 item.valueName = "approved";
-                if (isInterface) {
+                if (isTypeswitch) {
                     if (item.name == null) {
                         env.printError(ctx, "case statement must include variable declaration");
                     }
+                    if (!labels.add(item.expression.type.toString())) {
+                        env.printError(ctx, "duplicate case type: " + item.expression.type);
+                    }
+                    // TODO verify legal type
                     continue;
                 }
                 if (item.name != null) {

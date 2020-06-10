@@ -219,6 +219,9 @@ class StatementTranslator extends TranslationBase {
             exprText = null;
             if (statement.expression.type.isStringType()) {
                 exprText = env.getTmpVariable();
+                env.print("int " + exprText + " = 0;");
+                String name = translateExpression(statement.expression);
+                env.print("NULLCHECK(" + name + ");");
                 List<String> labels = new ArrayList<>();
                 for (StatementDefinition item : statement.block.block) {
                     if (item.statementType == StatementType.CASE) {
@@ -229,9 +232,6 @@ class StatementTranslator extends TranslationBase {
                         item.expression.value = Integer.toString(labels.size());
                     }
                 }
-                String name = translateExpression(statement.expression);
-                env.print("NULLCHECK(" + name + ");");
-                env.print("int " + exprText + " = 0;");
                 boolean doElse = false;
                 for (int idx = 0; idx < labels.size(); idx++) {
                     text = "if (strcmp(" + name + ", " + labels.get(idx) + ") == 0) " +
@@ -245,12 +245,42 @@ class StatementTranslator extends TranslationBase {
             env.print("switch (" + exprText + ")");
             translateBlock(statement.block, true);
             return;
+        case TYPESWITCH:
+        	exprText = env.getTmpVariable();
+            env.print("int " + exprText + " = 0;");
+            String name = translateExpression(statement.expression);
+            env.print("NULLCHECK(" + name + ");");
+            List<String> labels = new ArrayList<>();
+            for (StatementDefinition item : statement.block.block) {
+                if (item.statementType == StatementType.CASE) {
+                    labels.add(item.expression.type.toString());
+                    item.expression.value = Integer.toString(labels.size());
+                    item.valueName = name;
+                }
+            }
+            name = name + "->baseType";
+            boolean doElse = false;
+            for (int idx = 0; idx < labels.size(); idx++) {
+                text = "if (strcmp(" + name + ", \"" + labels.get(idx) + "\") == 0) " +
+                        exprText + " = " + (idx+1) + ";";
+                env.print(doElse ? "else " + text : text);
+                doElse = true;
+            }
+            env.print("switch (" + exprText + ")");
+            translateBlock(statement.block, true);
+            return;
         case CASE:
             if (statement.valueName == null) {
                 env.printError(null, "case statement must be inside a switch block");
             } else {
-                // TODO typecase
-                env.print("case " + translateExpression(statement.expression) + ":;");
+                if (statement.name == null) {
+                    env.print("case " + translateExpression(statement.expression) + ":;");
+                } else {
+                    env.print("case " + statement.expression.value + ":;");
+                    String ctype = translateType(statement.expression.type);
+                    env.print(ctype + statement.name + " = (" + ctype + ") " +
+                    		  statement.valueName + "->base;");
+                }
             }
             return;
         case DEFAULT:
