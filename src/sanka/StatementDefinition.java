@@ -406,7 +406,7 @@ public class StatementDefinition {
             env.printError(ctx, "incompatible types: switch statement must use " +
                     "integral type or String");
         }
-        evaluateSwitchBlock(ctx.block(), false);
+        evaluateSwitchBlock(ctx.block(), null);
     }
 
     /**
@@ -433,13 +433,13 @@ public class StatementDefinition {
         if (!(classdef.isInterface || classdef.isAbstract)) {
             env.printError(ctx, "cannot typeswitch on concrete class " + type);
         }
-        evaluateSwitchBlock(ctx.block(), true);
+        evaluateSwitchBlock(ctx.block(), classdef);
     }
 
     /**
      * Evaluate the block of a switch or typeswitch.
      */
-    private void evaluateSwitchBlock(BlockContext ctx, boolean isTypeswitch) {
+    private void evaluateSwitchBlock(BlockContext ctx, ClassDefinition classdef) {
         Environment env = Environment.getInstance();
         this.block = new BlockDefinition();
         this.block.evaluate(ctx);
@@ -462,14 +462,14 @@ public class StatementDefinition {
             // recursive. You cannot have a "case" statement inside an "if" statement.
             if (item.statementType == StatementType.CASE && item.expression.type != null) {
                 item.valueName = "approved";
-                if (isTypeswitch) {
+                if (classdef != null) {
                     if (item.name == null) {
                         env.printError(ctx, "case statement must include variable declaration");
                     }
                     if (!labels.add(item.expression.type.toString())) {
                         env.printError(ctx, "duplicate case type: " + item.expression.type);
                     }
-                    // TODO verify legal type
+                    verifyLegalCaseType(ctx, classdef, item.expression.type);
                     continue;
                 }
                 if (item.name != null) {
@@ -493,5 +493,31 @@ public class StatementDefinition {
                 item.valueName = "approved";
             }
         }
+    }
+
+    private void verifyLegalCaseType(ParserRuleContext ctx, ClassDefinition classdef,
+            TypeDefinition type) {
+        Environment env = Environment.getInstance();
+        if (type.isPrimitiveType || type.arrayOf != null) {
+            env.printError(ctx, "typeswitch case must be a class, not " + type);
+            return;
+        }
+        ClassDefinition typeClass = env.getClassDefinition(type);
+        if (typeClass == null) {
+            ImportManager.getInstance().importClass(type.packageName, type.name);
+            typeClass = env.getClassDefinition(type);
+        }
+        if (typeClass == null) {
+            env.printError(ctx, "class " + type + " undefined");
+            return;
+        }
+        if (classdef.isInterface) {
+            if (!TypeUtils.isInterfaceImplemented(classdef, typeClass)) {
+                env.printError(ctx, "class " + type + " does not implement " +
+                        classdef.toTypeDefinition());
+            }
+            return;
+        }
+        // TODO verify type extends classdef
     }
 }

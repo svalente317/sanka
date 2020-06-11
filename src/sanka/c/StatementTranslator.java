@@ -246,7 +246,7 @@ class StatementTranslator extends TranslationBase {
             translateBlock(statement.block, true);
             return;
         case TYPESWITCH:
-        	exprText = env.getTmpVariable();
+            exprText = env.getTmpVariable();
             env.print("int " + exprText + " = 0;");
             String name = translateExpression(statement.expression);
             env.print("NULLCHECK(" + name + ");");
@@ -279,7 +279,7 @@ class StatementTranslator extends TranslationBase {
                     env.print("case " + statement.expression.value + ":;");
                     String ctype = translateType(statement.expression.type);
                     env.print(ctype + statement.name + " = (" + ctype + ") " +
-                    		  statement.valueName + "->base;");
+                              statement.valueName + "->base;");
                 }
             }
             return;

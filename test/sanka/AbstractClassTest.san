@@ -6,51 +6,51 @@ class Globals {
 }
 
 abstract class AbstractClass {
-    void printOne() {
+    void addOne() {
         Globals.RESULTS.add("1");
     }
 
-    void printTwo();
-    void printThree();
+    void addTwo();
+    void addThree();
 }
 
 abstract class MiddleClass extends AbstractClass {
-    void printTwo() {
+    void addTwo() {
         Globals.RESULTS.add("2");
     }
 }
 
 class ConcreteClass extends MiddleClass {
-    void printThree() {
+    void addThree() {
         Globals.RESULTS.add("3");
     }
 }
 
 class VeryConcreteClass extends MiddleClass {
-    void printOne() {
+    void addOne() {
         Globals.RESULTS.add("1a");
     }
 
-    void printThree() {
-        Globals.RESULTS.add("3");
+    void addThree() {
+        Globals.RESULTS.add("3a");
     }
 }
 
-class Main {
+class AbstractClassTest {
     static int main(String[] argv) {
         Globals.RESULTS = new String[0];
 
         var o = new ConcreteClass();
-        o.printOne();
-        o.printTwo();
-        o.printThree();
+        o.addOne();
+        o.addTwo();
+        o.addThree();
 
         var o2 = new VeryConcreteClass();
-        o2.printOne();
-        o2.printTwo();
-        o.printThree();
+        o2.addOne();
+        o2.addTwo();
+        o2.addThree();
 
-        var expected = new String[]{"1", "2", "3", "1a", "2", "3"};
+        var expected = new String[]{"1", "2", "3", "1a", "2", "3a"};
         for (var idx = 0; idx < expected.length; idx++) {
             if (Globals.RESULTS[idx] != expected[idx]) {
                 System.println("idx=" + idx + " expected=" + expected[idx] +

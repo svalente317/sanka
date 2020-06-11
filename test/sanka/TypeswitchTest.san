@@ -1,0 +1,76 @@
+// -*- mode: Java; -*-
+package sanka.test;
+import sanka.lang.Object;
+
+class Globals {
+    static int[] RESULTS;
+}
+
+abstract class EmptyBase {}
+
+class Adder extends EmptyBase {
+    int base;
+    Adder(base);
+
+    int add(int value) {
+        Globals.RESULTS.add(this.base + value);
+    }
+}
+
+class Subtracter extends EmptyBase {
+    int base;
+    Subtracter(base);
+
+    int subtract(int value) {
+        Globals.RESULTS.add(this.base - value);
+    }
+}
+
+class TypeswitchTest extends BaseTest {
+
+    void use(Object o, int value) {
+        typeswitch (o) {
+        case Adder a:
+            a.add(value);
+            break;
+        case Subtracter s:
+            s.subtract(value);
+            break;
+        default:
+            Globals.RESULTS.add(value);
+            break;
+        }
+    }
+
+    /*
+    void useBase(EmptyBase b, int value) {
+        typeswitch (b) {
+        case Adder a:
+            a.add(value);
+            break;
+        case Subtracter s:
+            s.subtract(value);
+            break;
+        default:
+            Globals.RESULTS.add(value);
+            break;
+        }
+    }
+    */
+
+    void run() {
+        Globals.RESULTS = new int[0];
+        use(new Adder(100), 17);
+        use(new Subtracter(200), 17);
+        use(this, 17);
+        assertEquals(3, Globals.RESULTS.length, "length");
+        assertEquals(117, Globals.RESULTS[0], "adder");
+        assertEquals(183, Globals.RESULTS[1], "subtracter");
+        assertEquals( 17, Globals.RESULTS[2], "default");
+        System.println(getFailureCount() == 0 ? "ok" : "FAIL");
+    }
+
+    static void main(String[] argv) {
+        new TypeswitchTest().run();
+    }
+}
