@@ -8,6 +8,8 @@ import java.util.List;
 
 import sanka.ClassDefinition;
 import sanka.Environment;
+import sanka.MethodDefinition;
+import sanka.TypeDefinition;
 
 public class CompileManager {
 
@@ -40,7 +42,10 @@ public class CompileManager {
             File cfile = ClassTranslator.getClassFilename(classdef, false);
             compileFile(cfile.getPath(), linkcommand);
         }
-        String filename = generateMainFile(mainClass);
+        String filename = generateMainFile(mcd);
+        if (filename == null) {
+            return;
+        }
         compileFile(filename, linkcommand);
         String ofilename = linkcommand.get(linkcommand.size()-1);
         if (env.errorCount > 0) {
@@ -107,19 +112,28 @@ public class CompileManager {
         System.out.println(builder.toString());
     }
 
-    private String generateMainFile(String mainClass) throws Exception {
+    private String generateMainFile(ClassDefinition classdef) throws Exception {
         Environment env = Environment.getInstance();
-        String packageName = null;
-        String className = mainClass;
-        int idx = mainClass.lastIndexOf('.');
-        if (idx >= 0) {
-            packageName = mainClass.substring(0,  idx);
-            className = className.substring(idx+1);
+        MethodDefinition method = classdef.getMethod("main", 1);
+        if (method == null || !method.isStatic || method.isPrivate) {
+            env.printError(null, "class " + classdef.name + " must define public " +
+                    "static main() function");
+            return null;
+        }
+        if (method.isOverloaded) {
+            env.printError(null, "class " + classdef.name + " must not overload main()");
+            return null;
+        }
+        if (!(method.returnType.equals(TypeDefinition.INT_TYPE) ||
+              method.returnType.equals(TypeDefinition.VOID_TYPE))) {
+            env.printError(null,  "class " + classdef.name + " main() must return int");
+            return null;
         }
         File tmpfile = File.createTempFile("main", ".c");
         env.writer = new BufferedWriter(new FileWriter(tmpfile));
         env.print(ClassTranslator.INCLUDE_SANKA_HEADER);
-        env.print("#include <" + ClassTranslator.getHeaderFileName(packageName, className) + ">");
+        String fname = ClassTranslator.getHeaderFileName(classdef.packageName, classdef.name);
+        env.print("#include <" + fname + ">");
         env.print("");
         env.print("int main(int argc, char *const *argv) {");
         env.level++;
@@ -127,8 +141,13 @@ public class CompileManager {
         env.print("struct array arr;");
         env.print("arr.data = argv;");
         env.print("arr.length = argc;");
-        env.print(TranslationBase.translateMethodName(className, "main") + "(&arr);");
-        env.print("return 0;");
+        String call = TranslationBase.translateMethodName(classdef.name, "main") + "(&arr);";
+        if (method.returnType.equals(TypeDefinition.VOID_TYPE)) {
+            env.print(call);
+            env.print("return 0");
+        } else {
+            env.print("return " + call);
+        }
         env.level--;
         env.print("}");
         env.writer.close();

@@ -1,0 +1,45 @@
+// -*- mode: Java; -*-
+package sanka.test;
+
+abstract class BaseTest {
+
+    private int failureCount;
+
+    void assert(boolean value, String text) {
+        if (!value) {
+            System.println("FAIL: " + text);
+            this.failureCount++;
+        }
+    }
+
+    void assertEquals(int expected, int actual, String text) {
+        if (expected != actual) {
+            System.println("FAIL: " + text + ": expected=" + expected +
+                " actual=" + actual);
+            this.failureCount++;
+        }
+    }
+
+    void assertString(String expected, String actual, String text) {
+        if (expected != actual) {
+            System.println("FAIL: " + text + ": expected=" + expected +
+                " actual=" + actual);
+            this.failureCount++;
+        }
+    }
+
+    int getFailureCount() {
+        return this.failureCount;
+    }
+
+    int exit() {
+        if (this.failureCount == 0) {
+            System.println("ok");
+        }
+        return this.failureCount;
+    }
+
+    void removeDirectory(String directoryName) {
+        // TODO implement me recursively
+    }
+}
