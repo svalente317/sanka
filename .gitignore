@@ -2,7 +2,6 @@ bin
 lib
 examples/sanka
 examples/*.o
-examples/anonymoustest
 examples/channeltest
 examples/cheesefinder
 examples/parsenumber
@@ -11,5 +10,6 @@ examples/sudoku
 examples/total
 examples/wordmap
 test/AbstractClassTest
+test/AnonymousClassTest
 test/SerializableTest
 test/TypeswitchTest

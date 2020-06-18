@@ -1,6 +1,11 @@
-all:	AbstractClassTest SerializableTest TypeswitchTest
+TESTS=	AbstractClassTest AnonymousClassTest SerializableTest TypeswitchTest
+all:	$(TESTS)
 
 AbstractClassTest: sanka/AbstractClassTest.san
+	sanka --top bin $< --exe $@ --main sanka.test.$@
+	./$@
+
+AnonymousClassTest: sanka/AnonymousClassTest.san
 	sanka --top bin $< --exe $@ --main sanka.test.$@
 	./$@
 
@@ -13,6 +18,6 @@ TypeswitchTest: sanka/TypeswitchTest.san
 	./$@
 
 clean: .DUMMY
-	rm -rf AbstractClassTest SerializableTest TypeswitchTest bin
+	rm -rf $(TESTS) bin
 
 .DUMMY:

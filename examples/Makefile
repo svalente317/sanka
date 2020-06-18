@@ -1,11 +1,8 @@
 PREFIX=	/opt/sanka
 
-PROGS=	anonymoustest channeltest cheesefinder parsenumber processviewer sudoku total wordmap
+PROGS=	channeltest cheesefinder parsenumber processviewer sudoku total wordmap
 
 all:	$(PROGS)
-
-anonymoustest:	AnonymousTest.san
-	sanka $^ --exe $@ --main sanka.examples.ATMainClass
 
 channeltest:	ChannelTest.san
 	sanka $^ --exe $@ --main sanka.examples.ChannelTest

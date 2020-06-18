@@ -1,5 +1,5 @@
 // -*- mode: Java; -*-
-package sanka.examples;
+package sanka.test;
 import sanka.lang.Runnable;
 
 class AnonymousMaker {
@@ -10,7 +10,7 @@ class AnonymousMaker {
         return x + " " + y;
     }
 
-    Runnable makeRunnable(int parameter) {
+    Runnable makeRunnable(String[] results) {
         return new {
             // In these assignments, the RHS is evaluated in the current
             // context. So they can access "this", instance methods,
@@ -18,7 +18,7 @@ class AnonymousMaker {
             // are stored in the new Runnable object.
             //
             fullName: append(this.firstName, this.lastName);
-            value: parameter;
+            results: results;
 
             // run() is a method in the new unnamed class.
             // This class has no relationship to the AnonymousMaker class.
@@ -26,27 +26,35 @@ class AnonymousMaker {
             // variables, etc.
             //
             void run() {
-                System.println("fullName is " + this.fullName);
-                System.println("value is " + this.value);
+                this.results.add(this.fullName);
             }
         };
     }
 }
 
-class ATMainClass {
+class AnonymousClassTest extends BaseTest {
     /**
      * Briefly create an instance of the AnonymousMaker class. The instance
      * is used and then discarded. When this function returns, that object
      * may be garbage collected, but the new Runnable object remain live.
      */
-    static Runnable makeRunnableOnly() {
+    Runnable makeRunnableOnly(String[] results) {
         var parent = new AnonymousMaker();
         parent.firstName = "John";
         parent.lastName = "Doe";
-        return parent.makeRunnable(17);
+        return parent.makeRunnable(results);
     }
 
-    static void main(String[] argv) {
-        makeRunnableOnly().run();
+    void testAnonymousClass() {
+        var results = new String[0];
+        var runnable = makeRunnableOnly(results);
+        runnable.run();
+        assertString("John Doe", results[0], "runnable results");
+    }
+
+    static int main(String[] argv) {
+        var test = new AnonymousClassTest();
+        test.testAnonymousClass();
+        return test.exit();
     }
 }
