@@ -144,7 +144,7 @@ public class CompileManager {
         String call = TranslationBase.translateMethodName(classdef.name, "main") + "(&arr);";
         if (method.returnType.equals(TypeDefinition.VOID_TYPE)) {
             env.print(call);
-            env.print("return 0");
+            env.print("return 0;");
         } else {
             env.print("return " + call);
         }

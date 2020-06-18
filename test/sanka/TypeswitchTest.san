@@ -58,7 +58,7 @@ class TypeswitchTest extends BaseTest {
     }
     */
 
-    void run() {
+    void testInterfaceTypeswitch() {
         Globals.RESULTS = new int[0];
         use(new Adder(100), 17);
         use(new Subtracter(200), 17);
@@ -67,10 +67,11 @@ class TypeswitchTest extends BaseTest {
         assertEquals(117, Globals.RESULTS[0], "adder");
         assertEquals(183, Globals.RESULTS[1], "subtracter");
         assertEquals( 17, Globals.RESULTS[2], "default");
-        System.println(getFailureCount() == 0 ? "ok" : "FAIL");
     }
 
-    static void main(String[] argv) {
-        new TypeswitchTest().run();
+    static int main(String[] argv) {
+        var test = new TypeswitchTest();
+        test.testInterfaceTypeswitch();
+        return test.exit();
     }
 }

@@ -36,8 +36,8 @@ class VeryConcreteClass extends MiddleClass {
     }
 }
 
-class AbstractClassTest {
-    static int main(String[] argv) {
+class AbstractClassTest extends BaseTest {
+    void testAbstractClass() {
         Globals.RESULTS = new String[0];
 
         var o = new ConcreteClass();
@@ -53,12 +53,15 @@ class AbstractClassTest {
         var expected = new String[]{"1", "2", "3", "1a", "2", "3a"};
         for (var idx = 0; idx < expected.length; idx++) {
             if (Globals.RESULTS[idx] != expected[idx]) {
-                System.println("idx=" + idx + " expected=" + expected[idx] +
-                               " value=" + Globals.RESULTS[idx]);
-                return -1;
+                assertString(expected[idx], Globals.RESULTS[idx],
+                             "value at idx=" + idx);
             }
         }
-        System.println("ok");
-        return 0;
+    }
+
+    static int main(String[] argv) {
+        var test = new AbstractClassTest();
+        test.testAbstractClass();
+        return test.exit();
     }
 }

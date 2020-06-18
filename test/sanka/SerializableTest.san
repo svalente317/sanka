@@ -16,8 +16,7 @@ serializable class ScalarTest {
     Integer key;
 }
 
-serializable class SerializableTest {
-
+serializable class SerializableClass {
     short  s;
     int    i;
     long   lg;
@@ -44,61 +43,63 @@ serializable class SerializableTest {
         this.stringArr = new String[]{ "x", "y", "z" };
         this.dummyArr = new Dummy[]{ new Dummy(), null, new Dummy() };
     }
+}
 
-    static void main(String[] argv) {
-        var st = new SerializableTest();
+class SerializableTest extends BaseTest {
+    void testSerializableClass() {
+        var st = new SerializableClass();
         st.setup();
         var jo = st.toJson();
 
-        var t = new SerializableTest();
+        var t = new SerializableClass();
         t.fromJson(jo);
-        var b1 = (t.s == -1000);
-        var b2 = (t.i == 8888);
-        var b3 = (t.lg == -2345678901);
-        var b4 = (t.str == "column 1" + new byte(9) + "column 2");
-        var b5 = (t.nullString == null);
-        System.println("" + b1 + " " + b2 + " " + b3 + " " + b4 + " " + b5);
-        b1 = (t.shortArr.length == 2);
-        b2 = (t.nullArr == null);
-        b3 = (t.longArr.length == 2);
-        b4 = (t.stringArr.length == 3);
-        b5 = (t.longArr[0] == 54321098765);
-        System.println("" + b1 + " " + b2 + " " + b3 + " " + b4 + " " + b5);
-        b1 = (t.d.key == "value");
-        b2 = (t.nullDummy == null);
-        b3 = (t.dummyArr.length == 3);
-        b4 = (t.dummyArr[1] == null);
-        b5 = (t.dummyArr[2].key == "value");
-        System.println("" + b1 + " " + b2 + " " + b3 + " " + b4 + " " + b5);
-        // System.println(t.toJson().toString());
+        assert(t.s == -1000, "short");
+        assert(t.i == 8888, "int");
+        assert(t.lg == -2345678901, "long");
+        assert(t.str == "column 1" + new byte(9) + "column 2", "string");
+        assert(t.nullString == null, "null string");
+        assert(t.shortArr.length == 2, "short array");
+        assert(t.nullArr == null, "null array");
+        assert(t.longArr.length == 2, "long array");
+        assert(t.stringArr.length == 3, "string array");
+        assert(t.longArr[0] == 54321098765, "long array contents");
+        assert(t.d.key == "value", "class");
+        assert(t.nullDummy == null,  "null class");
+        assert(t.dummyArr.length == 3, "class array");
+        assert(t.dummyArr[1] == null, "class array null");
+        assert(t.dummyArr[2].key == "value", "class array item");
 
         var text = "{\"s\":\"string\", \"xxx\":17, \"STR\":0, " +
             "\"i\":5, \"lg\":null, \"shortArr\":[\"a\", 1.1, null], " +
             "\"stringArr\":[null, 1]}";
         jo = JsonObject.parse(text);
-        t = new SerializableTest();
+        t = new SerializableClass();
         t.fromJson(jo);
-        System.println("" + (t.i == 5));
+        assert(t.i == 5, "json to class");
 
         text = "{\"dummyArr\":[{\"key\":\"v1\"},null,{\"key\":\"v2\"}]}";
         jo = JsonObject.parse(text);
         t.nullArr = new int[1];
         t.fromJson(jo);
-        b1 = (t.nullArr == null);
-        b2 = (t.dummyArr.length == 3);
-        b3 = (t.dummyArr[0].key == "v1");
-        b4 = (t.dummyArr[1] == null);
-        b5 = (t.dummyArr[2].key == "v2");
-        System.println("" + b1 + " " + b2 + " " + b3 + " " + b4 + " " + b5);
+        assert(t.nullArr == null, "j null array");
+        assert(t.dummyArr.length == 3, "j array");
+        assert(t.dummyArr[0].key == "v1", "j array 0");
+        assert(t.dummyArr[1] == null, "j array 1");
+        assert(t.dummyArr[2].key == "v2", "j array 2");
 
         var s = new ScalarTest();
         text = "{\"key\": 17}";
         jo = JsonObject.parse(text);
         s.fromJson(jo);
-        b1 = (s.key.intValue() == 17);
+        assert(s.key.intValue() == 17, "Integer");
         jo = JsonObject.parse("{}");
         s.fromJson(jo);
-        b2 = (s.key == null);
-        System.println("" + b1 + " " + b2);
+        assert(s.key == null, "null Integer");
+    }
+
+    static int main(String[] argv) {
+        var test = new SerializableTest();
+        test.testSerializableClass();
+        return test.exit();
     }
 }
