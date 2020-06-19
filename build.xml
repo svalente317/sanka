@@ -3,6 +3,7 @@
 
   <path id="classpath">
     <pathelement location="/usr/share/java/antlr4-runtime.jar"/>
+    <pathelement location="/usr/share/java/commons-compress.jar"/>
   </path>
 
   <target name="resolve" description="retrieve dependencies with ivy">

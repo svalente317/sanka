@@ -32,6 +32,7 @@ public class SankaCompiler {
         List<CompilationUnitContext> contextList = new ArrayList<>();
         String mainClass = null;
         String exeName = null;
+        String libName = null;
         for (int idx = 0; idx < argv.length; idx++) {
             String arg = argv[idx];
             if (arg.equals("-I")) {
@@ -67,6 +68,11 @@ public class SankaCompiler {
                 env.addLibrary(arg);
                 continue;
             }
+            if (arg.equals("--create-library")) {
+                idx++;
+                libName = argv[idx];
+                continue;
+            }
             if ((mainClass != null && exeName == null) || (mainClass == null && exeName != null)) {
                 System.err.println("Specify --main and --exe together");
                 System.exit(INVALID_ARGUMENT);
@@ -86,6 +92,9 @@ public class SankaCompiler {
         compiler.translate();
         if (env.errorCount > 0) {
             System.exit(CANNOT_TRANSLATE);
+        }
+        if (libName != null) {
+            CompileManager.getInstance().createLibrary(libName);
         }
         if (mainClass != null) {
             CompileManager.getInstance().compile(mainClass, exeName);

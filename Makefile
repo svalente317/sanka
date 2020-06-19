@@ -8,14 +8,16 @@
 
 PREFIX=/opt/sanka
 
-UNAME :=	$(shell uname)
+UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
-ANTLR_RUNTIME=	/usr/share/java/antlr4-runtime.jar
+ANTLR_RUNTIME=    /usr/share/java/antlr4-runtime.jar
+COMMONS_COMPRESS= /usr/share/java/commons-compress.jar
 endif
 ifeq ($(UNAME), Darwin)
 ANTLR_FILE=	lib/antlr4-runtime-4.5.1.jar
 ANTLR_RUNTIME=	$(PREFIX)/$(ANTLR_FILE)
 endif
+LIBS=           $(ANTLR_RUNTIME):$(COMMONS_COMPRESS)
 
 all:	bin/sanka.jar bin/sanka.sh
 
@@ -24,7 +26,7 @@ bin/sanka.jar: FORCE
 
 bin/sanka.sh: FORCE
 	echo '#!/bin/sh' > $@
-	echo exec java -cp ${PREFIX}/share/sanka.jar:$(ANTLR_RUNTIME) \
+	echo exec java -cp ${PREFIX}/share/sanka.jar:$(LIBS) \
 	sanka/SankaCompiler -I ${PREFIX}/include -L ${PREFIX}/lib '"$$@"' >> $@
 	chmod 755 $@
 

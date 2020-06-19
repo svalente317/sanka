@@ -103,6 +103,14 @@ public class ClassTranslator extends TranslationBase {
         return dirName + className + ".h";
     }
 
+    static String getSankaImportFileName(ClassDefinition classdef) {
+        String dirName = "";
+        if (classdef.packageName != null) {
+            dirName = StringUtils.replaceDot(classdef.packageName, '/') + "/";
+        }
+        return dirName + classdef.name + ".san";
+    }
+
     /**
      * Translate ClassDefinition object data to a C header file.
      */
