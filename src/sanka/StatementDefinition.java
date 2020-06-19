@@ -425,7 +425,7 @@ public class StatementDefinition {
             env.printError(ctx, "type " + type + " is not a class");
             return;
         }
-        ClassDefinition classdef = env.getClassDefinition(type);
+        ClassDefinition classdef = env.loadClassDefinition(type);
         if (classdef == null) {
             env.printError(ctx, "class " + type + " undefined");
             return;
@@ -502,11 +502,7 @@ public class StatementDefinition {
             env.printError(ctx, "typeswitch case must be a class, not " + type);
             return;
         }
-        ClassDefinition typeClass = env.getClassDefinition(type);
-        if (typeClass == null) {
-            ImportManager.getInstance().importClass(type.packageName, type.name);
-            typeClass = env.getClassDefinition(type);
-        }
+        ClassDefinition typeClass = env.loadClassDefinition(type);
         if (typeClass == null) {
             env.printError(ctx, "class " + type + " undefined");
             return;

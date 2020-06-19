@@ -1,5 +1,11 @@
-TESTS=	AbstractClassTest AnonymousClassTest SerializableTest TypeswitchTest
+TESTS=	InterfaceTest AbstractClassTest AnonymousClassTest \
+	SerializableTest TypeswitchTest
+
 all:	$(TESTS)
+
+InterfaceTest: sanka/InterfaceTest.san
+	sanka --top bin $< --exe $@ --main sanka.test.$@
+	./$@
 
 AbstractClassTest: sanka/AbstractClassTest.san
 	sanka --top bin $< --exe $@ --main sanka.test.$@

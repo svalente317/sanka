@@ -138,9 +138,9 @@ public class ExpressionDefinition {
     ClassDefinition getAccessedClass() {
         Environment env = Environment.getInstance();
         if (this.expression1.expressionType == ExpressionType.CLASS_IDENTIFIER) {
-            return env.getClassDefinition(this.expression1.identifiedClass);
+            return env.loadClassDefinition(this.expression1.identifiedClass);
         }
-        return env.getClassDefinition(this.expression1.type);
+        return env.loadClassDefinition(this.expression1.type);
     }
 
     /**
@@ -280,7 +280,7 @@ public class ExpressionDefinition {
             baseType = baseType.arrayOf;
         }
         if (!baseType.isPrimitiveType) {
-            classdef = env.getClassDefinition(baseType);
+            classdef = env.loadClassDefinition(baseType);
             if (classdef == null) {
                 env.printError(creator, "class " + baseType + " undefined");
                 this.type = null;
@@ -304,6 +304,10 @@ public class ExpressionDefinition {
                 return;
             }
             evaluateSingleNumericArgCreator(exprlist);
+            return;
+        }
+        if (classdef.isAbstract) {
+            env.printError(creator, "cannot create new instance of abstract class " + this.type);
             return;
         }
         int numArgs = exprlist == null ? 0 : exprlist.expression().size();

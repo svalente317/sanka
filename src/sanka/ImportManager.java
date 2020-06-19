@@ -55,13 +55,6 @@ public class ImportManager {
     }
 
     /**
-     * Read a superclass definition while parsing a class.
-     */
-    void importClass(ParserRuleContext ctx, String packageName, String className) {
-        importFile(null, packageName, className, false);
-    }
-
-    /**
      * Read a class definition so that we can compare interfaces, etc. to it.
      */
     void importClass(String packageName, String className) {

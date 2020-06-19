@@ -143,9 +143,7 @@ class SerializableUtils {
      */
     static void evaluateClass(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
-        ImportManager.getInstance().importClass(
-                SERIALIZABLE_TYPE.packageName, SERIALIZABLE_TYPE.name);
-        ClassDefinition serializableClass = env.getClassDefinition(SERIALIZABLE_TYPE);
+        ClassDefinition serializableClass = env.loadClassDefinition(SERIALIZABLE_TYPE);
         if (serializableClass == null) {
             env.printError(null, "interface " + SERIALIZABLE_TYPE + " not found");
             return;
@@ -167,7 +165,7 @@ class SerializableUtils {
                 // We do not yet support translation of maps to json.
                 error = true;
             } else {
-                ClassDefinition fieldClass = env.getClassDefinition(type);
+                ClassDefinition fieldClass = env.loadClassDefinition(type);
                 error = (fieldClass == null ||
                         !TypeUtils.isInterfaceImplemented(serializableClass, fieldClass));
             }

@@ -107,7 +107,7 @@ class ExpressionTranslator extends TranslationBase {
         builder.append(translateTypeDeref(expr.type));
         builder.append("));");
         env.print(builder.toString());
-        ClassDefinition classdef = env.getClassDefinition(expr.type);
+        ClassDefinition classdef = getClassDefinition(expr.type);
         int numArgs = expr.argList == null ? 0 : expr.argList.length;
         MethodDefinition constructor = classdef.getMethod(classdef.name, numArgs);
         translateSuperclasses(classdef, variableName);
@@ -126,7 +126,7 @@ class ExpressionTranslator extends TranslationBase {
             env.print(builder.toString());
         }
         if (classdef.isInterface) {
-            ClassDefinition baseClass = env.getClassDefinition(expr.expression1.type);
+            ClassDefinition baseClass = getClassDefinition(expr.expression1.type);
             String baseExpr = translate(expr.expression1);
             env.print(variableName + "->object = " + baseExpr + ";");
             String text = baseClass.isInterface ? baseExpr + "->base" : variableName + "->object";

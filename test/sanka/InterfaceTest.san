@@ -1,0 +1,47 @@
+// -*- mode: Java; -*-
+package sanka.test;
+
+interface One {
+    void addOne();
+}
+
+interface Two extends One {
+    void addTwo();
+}
+
+class ConcreteClass {
+    int[] results;
+
+    ConcreteClass(results);
+
+    void addOne() {
+        this.results.add(1);
+    }
+
+    void addTwo() {
+        this.results.add(2);
+    }
+}
+
+class InterfaceTest extends BaseTest {
+
+    void use(Two item) {
+        item.addOne();
+        item.addTwo();
+    }
+
+    void testInterface() {
+        var results = new int[0];
+        var item = new ConcreteClass(results);
+        use(item);
+        assertEquals(2, results.length, "length");
+        assertEquals(1, results[0], "results[0]");
+        assertEquals(2, results[1], "results[1]");
+    }
+
+    static int main(String[] argv) {
+        var test = new InterfaceTest();
+        test.testInterface();
+        return test.exit();
+    }
+}

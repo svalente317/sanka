@@ -113,11 +113,16 @@ public class Environment {
 
     // Pass 2
 
-    public ClassDefinition getClassDefinition(TypeDefinition typeDefinition) {
-        if (typeDefinition.isPrimitiveType || typeDefinition.arrayOf != null) {
+    public ClassDefinition loadClassDefinition(TypeDefinition type) {
+        if (type.isPrimitiveType || type.arrayOf != null) {
             return null;
         }
-        return getClassDefinition(typeDefinition.packageName, typeDefinition.name);
+        ClassDefinition classdef = getClassDefinition(type.packageName, type.name);
+        if (classdef != null || type.packageName == null) {
+            return classdef;
+        }
+        ImportManager.getInstance().importClass(type.packageName, type.name);
+        return getClassDefinition(type.packageName, type.name);
     }
 
     // Pass 3

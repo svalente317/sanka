@@ -150,4 +150,9 @@ abstract class TranslationBase {
     static String typeToMapKeyFieldName(TypeDefinition type) {
         return type.equals(TypeDefinition.STRING_TYPE) ? "cp" : "i";
     }
+
+    static ClassDefinition getClassDefinition(TypeDefinition type) {
+        Environment env = Environment.getInstance();
+        return env.getClassDefinition(type.packageName, type.name);
+    }
 }

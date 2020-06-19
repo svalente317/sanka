@@ -72,7 +72,7 @@ extendsClass
     ;
 
 interfaceDeclaration
-    :   classModifier* 'interface' Identifier typeParameters? interfaceBody
+    :   classModifier* 'interface' Identifier typeParameters? extendsClass? interfaceBody
     ;
 
 classBody

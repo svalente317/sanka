@@ -55,12 +55,8 @@ public class TypeUtils {
             return false;
         }
         Environment env = Environment.getInstance();
-        ClassDefinition exprClass = env.getClassDefinition(expr.type);
-        ClassDefinition typeClass = env.getClassDefinition(type);
-        if (typeClass == null) {
-            ImportManager.getInstance().importClass(type.packageName, type.name);
-            typeClass = env.getClassDefinition(type);
-        }
+        ClassDefinition exprClass = env.loadClassDefinition(expr.type);
+        ClassDefinition typeClass = env.loadClassDefinition(type);
         if (exprClass == null || typeClass == null) {
             return false;
         }
@@ -165,7 +161,7 @@ public class TypeUtils {
             return false;
         }
         Environment env = Environment.getInstance();
-        ClassDefinition classdef = env.getClassDefinition(type);
+        ClassDefinition classdef = env.loadClassDefinition(type);
         return classdef != null && classdef.isInterface;
     }
 }

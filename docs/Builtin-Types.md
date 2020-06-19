@@ -40,15 +40,8 @@ so the return value must be an `int`. Or you can cast the result back
 to a short. This is fine:
 ~~~
 short doArithmetic(short s1, short s2) {
-    return (short)(s1 + s2);
-}
-~~~
-
-TODO: I don't like casting. I want Sanka to feel familiar to C and
-Java programmers, but I'm considering dropping casts from the
-language, and using this syntax instead:
-~~~
     return new short(s1 + s2);
+}
 ~~~
 
 Of course, in any arithmetic operation, if one of the operands is a
@@ -82,7 +75,7 @@ characters as integer literals. For example, this statement:
 ~~~
 is equivalent to this statement:
 ~~~
-    var v = (byte) 65;
+    var v = new byte(65);
 ~~~
 
 ## Class Types
@@ -109,9 +102,8 @@ initialized from a series of ascii characters in quotes:
 ~~~
 
 To create a String with bytes that do not have corresponding ascii
-characters, use a more complex form of string literal. (This has not
-been defined yet. Please define it if you like.) Or, use an array of
-bytes:
+characters, use escape codes in the string literal. Or, use an array
+of bytes:
 ~~~
     var arr = new byte[]{1, 2, 3};
     var s = new String(arr);
@@ -154,9 +146,8 @@ arrays support primitive types, and builtin and user-defined classes:
     var arr3 = new UserDefinedClass[9];
 ~~~
 
-The array elements are initialzed to zero for numeric types, and null
-for class types. (And false for boolean. Note that boolean arrays are
-not very space efficient.)
+The array elements are initialzed to zero/false for scalar types, and
+null for class types.  not very space efficient.)
 
 An array can be initialized with a number of items or with a sequence
 of items:
@@ -208,17 +199,17 @@ type). The difference is that a map is indexed by non-sequential
 integers or strings.
 
 To initialize a map, use the same notation as an array, except that
-instead of a number of items, specify `int` or `String`:
+instead of a number of items, specify `class int` or `class String`:
 ~~~
-    var map1 = new double[String];
-    var map2 = new String[int];
-    var map3 = new UserDefinedClass[int];
+    var map1 = new double[class String];
+    var map2 = new String[class int];
+    var map3 = new UserDefinedClass[class int];
 ~~~
 
 Maps use square bracket notation on the left-hand-side to set an
 element, and on the right-hand-side to get an element.
 ~~~
-    var map = new String[String];
+    var map = new String[class String];
     map["hello"] = "world";
     var s = arr["hello"];
 ~~~

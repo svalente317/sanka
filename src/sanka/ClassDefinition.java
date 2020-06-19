@@ -89,11 +89,7 @@ public class ClassDefinition {
             TypeDefinition type = new TypeDefinition();
             type.parse(ctx.extendsClass().typeType());
             if (!type.isPrimitiveType && type.arrayOf == null) {
-                this.superclass = env.getClassDefinition(type);
-                if (this.superclass == null) {
-                    ImportManager.getInstance().importClass(ctx, type.packageName, type.name);
-                    this.superclass = env.getClassDefinition(type);
-                }
+                this.superclass = env.loadClassDefinition(type);
             }
             if (this.superclass == null) {
                 env.printError(ctx, "superclass " + type + " not found");
@@ -325,6 +321,26 @@ public class ClassDefinition {
         Environment env = Environment.getInstance();
         this.isInterface = true;
         this.name = ctx.Identifier().getText();
+        ClassDefinition halfInterface = null;
+        if (ctx.extendsClass() != null) {
+            TypeDefinition type = new TypeDefinition();
+            type.parse(ctx.extendsClass().typeType());
+            if (type.isPrimitiveType || type.arrayOf != null) {
+                env.printError(ctx, "interface must extend interface, not " + type);
+            } else {
+                halfInterface = env.loadClassDefinition(type);
+                if (halfInterface == null) {
+                    env.printError(ctx, "interface " + type + " not defined");
+                } else if (!halfInterface.isInterface) {
+                    env.printError(ctx, "interface must extend interface, not " + type);
+                }
+            }
+        }
+        if (halfInterface != null) {
+            // Maybe we should clone the fields and methods?
+            this.fieldList.addAll(halfInterface.fieldList);
+            this.methodList.addAll(halfInterface.methodList);
+        }
         if (ctx.interfaceBody().interfaceBodyDeclaration() == null) {
             return;
         }
@@ -382,6 +398,7 @@ public class ClassDefinition {
                 continue;
             }
             TypeDefinition type = fielddef.type;
+            // TODO use getClassDefinition(type)?
             ClassDefinition superclass = env.getClassDefinition(type.packageName, type.name);
             if (superclass == null) {
                 env.printError(null, "export " + qualifiedName() + "." + fieldName +

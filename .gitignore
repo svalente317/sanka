@@ -11,5 +11,6 @@ examples/total
 examples/wordmap
 test/AbstractClassTest
 test/AnonymousClassTest
+test/InterfaceTest
 test/SerializableTest
 test/TypeswitchTest

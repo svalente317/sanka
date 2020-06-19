@@ -1,12 +1,8 @@
 # TODO
 
-* implement typecast abstract classes, and verify that case labels are valid.
-
-* interface extends interface
-
 * can String, array, and map implement interfaces?
 
-* do not allow abstract class to be instantiated
+* implement typecast for abstract classes
 
 * float to double promotion?
 
@@ -21,9 +17,6 @@
 * Parameterized types
 
 * Improve support for char literals and complex literals?
-
-* Support expressions with qualified class name or classes in the current
-  package (in ED.evaluatePrimary)
 
 * Support 2d arrays - initialization and code generation
 
