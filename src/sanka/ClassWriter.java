@@ -39,11 +39,16 @@ public class ClassWriter {
                 }
                 builder.append(field.type.toString() + " " + field.name + ";\n");
             } else {
-                // TODO
+                builder.append("const " + field.name + " = ");
+                builder.append(writeConstantValue(field.value));
+                builder.append(";\n");
             }
         }
         for (MethodDefinition method : classdef.methodList) {
             if (method.isPrivate) {
+                continue;
+            }
+            if (classdef.isAbstract && !method.hasBody()) {
                 continue;
             }
             if (method.isStatic) {
@@ -59,10 +64,16 @@ public class ClassWriter {
                 builder.append(comma + param.type.toString() + " " + param.name);
                 comma = ",";
             }
-            builder.append(") {}\n");
+            builder.append(")");
+            builder.append((classdef.isInterface ? ";" : " {}") + "\n");
         }
         builder.append("}\n");
         return builder.toString();
+    }
+
+    private static String writeConstantValue(ExpressionDefinition expr) {
+        String value = expr.value;
+        return expr.type.isStringType() ? "\"" + value + "\"" : value;
     }
 
     public static void writeFile(ClassDefinition classdef, File file) throws IOException {

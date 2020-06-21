@@ -14,6 +14,7 @@ import sanka.antlr4.SankaParser.ImportDeclarationContext;
 import sanka.antlr4.SankaParser.TypeDeclarationContext;
 import sanka.c.ClassTranslator;
 import sanka.c.CompileManager;
+import sanka.c.LibraryManager;
 
 public class SankaCompiler {
 
@@ -29,10 +30,11 @@ public class SankaCompiler {
     public static void main(String[] argv) throws Exception {
         Environment env = Environment.getInstance();
         SankaCompiler compiler = new SankaCompiler();
-        List<CompilationUnitContext> contextList = new ArrayList<>();
         String mainClass = null;
         String exeName = null;
         String libName = null;
+        List<String> libraryList = new ArrayList<>();
+        List<String> sankaList = new ArrayList<>();
         for (int idx = 0; idx < argv.length; idx++) {
             String arg = argv[idx];
             if (arg.equals("-I")) {
@@ -64,22 +66,37 @@ public class SankaCompiler {
                 compiler.skipImports = true;
                 continue;
             }
-            if (arg.startsWith("-l")) {
-                env.addLibrary(arg);
-                continue;
-            }
             if (arg.equals("--create-library")) {
                 idx++;
                 libName = argv[idx];
                 continue;
             }
-            if ((mainClass != null && exeName == null) || (mainClass == null && exeName != null)) {
-                System.err.println("Specify --main and --exe together");
-                System.exit(INVALID_ARGUMENT);
+            if (arg.equals("--lib")) {
+                idx++;
+                libraryList.add(argv[idx]);
+                continue;
             }
-            SankaLexer lexer = new SankaLexer(CharStreams.fromFileName(arg));
-            SankaParser parser = new SankaParser(new CommonTokenStream(lexer));
+            if (arg.startsWith("-l")) {
+                env.addCLibrary(arg);
+                continue;
+            }
+            sankaList.add(arg);
+        }
+        if ((mainClass != null && exeName == null) || (mainClass == null && exeName != null)) {
+            System.err.println("Specify --main and --exe together");
+            System.exit(INVALID_ARGUMENT);
+        }
+        List<CompilationUnitContext> contextList = new ArrayList<>();
+        for (String filename : sankaList) {
+            SankaLexer lexer = new SankaLexer(CharStreams.fromFileName(filename));
+            SankaParser parser = makeSankaParser(filename, lexer);
             contextList.add(parser.compilationUnit());
+        }
+        if (env.errorCount > 0) {
+            System.exit(CANNOT_PARSE);
+        }
+        for (String library : libraryList) {
+            LibraryManager.getInstance().unpackLibrary(library);
         }
         compiler.parse(contextList);
         if (env.errorCount > 0) {
@@ -94,11 +111,19 @@ public class SankaCompiler {
             System.exit(CANNOT_TRANSLATE);
         }
         if (libName != null) {
-            CompileManager.getInstance().createLibrary(libName);
+            LibraryManager.getInstance().createLibrary(libName);
         }
         if (mainClass != null) {
             CompileManager.getInstance().compile(mainClass, exeName);
         }
+        LibraryManager.getInstance().cleanup();
+    }
+
+    public static SankaParser makeSankaParser(String filename, SankaLexer lexer) {
+        SankaParser parser = new SankaParser(new CommonTokenStream(lexer));
+        parser.removeErrorListeners();
+        parser.addErrorListener(new MyParseErrorListener(filename));
+        return parser;
     }
 
     /**

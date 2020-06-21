@@ -2,19 +2,11 @@ package sanka.c;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.compress.archivers.ar.ArArchiveOutputStream;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.utils.IOUtils;
-
 import sanka.ClassDefinition;
-import sanka.ClassWriter;
 import sanka.Environment;
 import sanka.MethodDefinition;
 import sanka.TypeDefinition;
@@ -60,14 +52,17 @@ public class CompileManager {
             return;
         }
         linkcommand.add(0, GCC);
+        if (env.libraries != null) {
+            linkcommand.addAll(env.libraries);
+        }
         for (String libPath : env.libPath) {
             linkcommand.add("-L" + libPath);
         }
         linkcommand.add("-lsankaruntime");
         linkcommand.add("-lgc");
         linkcommand.add("-lpthread");
-        if (env.libraries != null) {
-            linkcommand.addAll(env.libraries);
+        if (env.cLibraries != null) {
+            linkcommand.addAll(env.cLibraries);
         }
         linkcommand.add("-o");
         linkcommand.add(exeName);
@@ -80,7 +75,7 @@ public class CompileManager {
         }
     }
 
-    private void compileFile(String filename, List<String> ofileList) throws Exception {
+    public void compileFile(String filename, List<String> ofileList) throws Exception {
         Environment env = Environment.getInstance();
         List<String> command = new ArrayList<>();
         command.add(GCC);
@@ -102,7 +97,7 @@ public class CompileManager {
         ofileList.add(objfilename);
     }
 
-    private int executeCommand(List<String> command) throws Exception {
+    public int executeCommand(List<String> command) throws Exception {
         String[] args = command.toArray(new String[0]);
         printCommand(args);
         Process process = Runtime.getRuntime().exec(args);
@@ -161,97 +156,6 @@ public class CompileManager {
         env.writer.close();
         env.writer = null;
         return tmpfile.getAbsolutePath();
-    }
-
-    public void createLibrary(String filename) throws Exception {
-        Environment env = Environment.getInstance();
-        List<String> ofileList = new ArrayList<>();
-        for (ClassDefinition classdef : env.classList) {
-            if (classdef.isImport) {
-                continue;
-            }
-            File cfile = ClassTranslator.getClassFilename(classdef, false);
-            compileFile(cfile.getPath(), ofileList);
-        }
-        if (env.errorCount > 0) {
-            return;
-        }
-
-        // Create the lib[name].a file containing the .o files.
-        // This will be used by gcc to link executables using this library.
-        InputStream istream;
-        String name;
-        File tmpfile = File.createTempFile("sanka", ".tmp");
-        FileOutputStream arFile = new FileOutputStream(tmpfile);
-        ArArchiveOutputStream arStream = new ArArchiveOutputStream(arFile);
-        int counter = 1;
-        for (String ofilename : ofileList) {
-            File ofile = new File(ofilename);
-            name = getShortName(ofile, counter);
-            arStream.putArchiveEntry(arStream.createArchiveEntry(ofile, name));
-            istream = new FileInputStream(ofile);
-            IOUtils.copy(istream, arStream);
-            istream.close();
-            arStream.closeArchiveEntry();
-            counter++;
-        }
-        arStream.close();
-
-        // Create the [name].tar file with everything that sanka needs to use this library.
-        // This includes sanka headers, C headers, and object files.
-        FileOutputStream tarFile = new FileOutputStream(filename);
-        TarArchiveOutputStream tarStream = new TarArchiveOutputStream(tarFile);
-
-        // Include lib[name].a in the library.
-        name = new File(filename).getName();
-        int idx = name.lastIndexOf('.');
-        name = (idx > 0) ? name.substring(0, idx) : name;
-        tarStream.putArchiveEntry(tarStream.createArchiveEntry(tmpfile, "lib" + name + ".a"));
-        istream = new FileInputStream(tmpfile);
-        IOUtils.copy(istream, tarStream);
-        istream.close();
-        tarStream.closeArchiveEntry();
-
-        // Include skeleton .san files for all classes in the library.
-        for (ClassDefinition classdef : env.classList) {
-            if (classdef.isImport || classdef.isAnonymous) {
-                continue;
-            }
-            ClassWriter.writeFile(classdef, tmpfile);
-            name = ClassTranslator.getSankaImportFileName(classdef);
-            tarStream.putArchiveEntry(tarStream.createArchiveEntry(tmpfile, name));
-            istream = new FileInputStream(tmpfile);
-            IOUtils.copy(istream, tarStream);
-            istream.close();
-            tarStream.closeArchiveEntry();
-        }
-
-        // Include all .h files in the library.
-        for (ClassDefinition classdef : env.classList) {
-            if (classdef.isImport || classdef.isAnonymous) {
-                continue;
-            }
-            File hfile = ClassTranslator.getClassFilename(classdef, true);
-            name = ClassTranslator.getHeaderFileName(classdef.packageName, classdef.name);
-            tarStream.putArchiveEntry(tarStream.createArchiveEntry(hfile, name));
-            istream = new FileInputStream(hfile);
-            IOUtils.copy(istream, tarStream);
-            istream.close();
-            tarStream.closeArchiveEntry();
-        }
-        tarStream.close();
-    }
-
-    private static String getShortName(File file, int counter) {
-        String name = file.getName();
-        if (name.length() < 16) {
-            return name;
-        }
-        int idx = name.indexOf('.');
-        String part1 = (idx < 0) ? name : name.substring(0, idx);
-        String part2 = "" + counter;
-        String part3 = (idx < 0) ? "" : name.substring(idx);
-        return part1.substring(0, 15-part2.length()-part3.length()) + part2 + part3;
     }
 
     private static CompileManager instance = null;

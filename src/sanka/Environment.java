@@ -18,6 +18,7 @@ public class Environment {
     public List<String> importPath;
     public List<String> libPath;
     public List<String> libraries;
+    public List<String> cLibraries;
     public List<ClassDefinition> classList;
     String currentPackage;
     Map<String, String> classPackageMap;
@@ -43,25 +44,32 @@ public class Environment {
 
     // Pass 1
 
-    void addImportPath(String importDir) {
+    public void addImportPath(String importDir) {
         if (this.importPath == null) {
             this.importPath = new LinkedList<>();
         }
         this.importPath.add(importDir);
     }
 
-    void addLibPath(String libDir) {
+    public void addLibPath(String libDir) {
         if (this.libPath == null) {
             this.libPath = new LinkedList<>();
         }
         this.libPath.add(libDir);
     }
 
-    void addLibrary(String arg) {
+    public void addLibrary(String arg) {
         if (this.libraries == null) {
             this.libraries = new LinkedList<>();
         }
         this.libraries.add(arg);
+    }
+
+    public void addCLibrary(String arg) {
+        if (this.cLibraries == null) {
+            this.cLibraries = new LinkedList<>();
+        }
+        this.cLibraries.add(arg);
     }
 
     /**

@@ -31,6 +31,12 @@ public class ClassDefinition {
         public boolean isStatic;
         public boolean isInline;
         public boolean isConst;
+
+        // This is the initial value for static fields, and the constant value for const fields.
+        // It is always a compile-time constant stored as a String in value.value.
+        // For numeric constants, the expressionType is LITERAL.
+        // For String constants, it may be either LITERAL or a FIELD_ACCESS that refers to
+        // another constant field.
         public ExpressionDefinition value;
     }
 
@@ -524,12 +530,13 @@ public class ClassDefinition {
         env.classPackageMap = this.classPackageMap;
         for (FieldDefinition field : this.fieldList) {
             if (field.isConst && field.expression != null) {
-                field.value = new ExpressionDefinition();
-                field.value.evaluate(field.expression);
-                if (field.value.value == null) {
+                ExpressionDefinition expr = new ExpressionDefinition();
+                expr.evaluate(field.expression);
+                if (expr.value == null) {
                     env.printError(field.expression, "initial value must be simple constant");
                 }
-                field.type = field.value.type;
+                field.type = expr.type;
+                field.value = expr;
             }
         }
         env.currentClass = oldCurrentClass;
@@ -543,14 +550,15 @@ public class ClassDefinition {
         env.classPackageMap = this.classPackageMap;
         for (FieldDefinition field : this.fieldList) {
             if (!field.isConst && field.expression != null) {
-                field.value = new ExpressionDefinition();
-                field.value.evaluate(field.expression);
-                if (field.value.value == null) {
+                ExpressionDefinition expr = new ExpressionDefinition();
+                expr.evaluate(field.expression);
+                if (expr.value == null) {
                     env.printError(field.expression, "initial value must be simple constant");
-                } else if (!TypeUtils.isCompatible(field.type, field.value)) {
+                } else if (!TypeUtils.isCompatible(field.type, expr)) {
                      env.printError(field.expression, "incompatible types: " +
-                             field.value.type + " cannot be converted to " + field.type);
+                             expr.type + " cannot be converted to " + field.type);
                 }
+                field.value = expr;
             }
         }
         if (this.isInterface) {
