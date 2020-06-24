@@ -71,7 +71,7 @@ arithmetic? I should care more about this.
 Sanka does not have a character type. However, it does recognize ascii
 characters as integer literals. For example, this statement:
 ~~~
-    var v = 'a';
+    var v = 'A';
 ~~~
 is equivalent to this statement:
 ~~~
@@ -85,7 +85,6 @@ line between "language features" and "class-library features". All
 three act like user-defined classes:
 
 * The classes have public fields and methods
-* Instances of these types can match interfaces
 * Variables of these types can be `null`
 
 However, all three are partially built into the language. (There is
@@ -101,12 +100,14 @@ initialized from a series of ascii characters in quotes:
     var s = "Hello, world!";
 ~~~
 
-To create a String with bytes that do not have corresponding ascii
-characters, use escape codes in the string literal. Or, use an array
-of bytes:
+To create a String with a byte that does not have a corresponding
+ascii character, use an escape code to represent the byte. The code is
+a backslash followed by the three digits of the byte in octal.  Or,
+use an array of bytes. For example, here `s1` and `s2` are the same
+three-byte String:
 ~~~
-    var arr = new byte[]{1, 2, 3};
-    var s = new String(arr);
+    var s1 = new String(new byte[]{1, 2, 3});
+    var s2 = "\001\002\003";
 ~~~
 
 An application may choose to interpret these bytes as UTF-8,
@@ -135,6 +136,7 @@ The `String` class has these methods:
 * `String substring(int beginIndex, int endIndex)` Return a substring
 * `String substring(int beginIndex)` Return a suffix
 * `byte[] toByteArray()` Return a copy of the bytes in the String
+* `String toString()` Return this
 
 ## Array
 

@@ -1,29 +1,21 @@
 # TODO
 
-* can String, array, and map implement interfaces?
+* json library: control characters when parsing and unparsing strings
 
-* implement typecast for abstract classes
+* support typecast for abstract classes
 
-* float to double promotion?
+* support classes with the same name in different packages
 
-* Error if two classes have same qualified name
-
-* Support classes with the same name in different packages
-
-* Support static field initialized to literal array
+* support static field initialized to literal array
 
 * support inline fields
 
-* Parameterized types
+* support 2d arrays - initialization and code generation
 
-* Improve support for char literals and complex literals?
+* support map[idx]++
 
-* Support 2d arrays - initialization and code generation
+* support super() in constructor
 
 * what if map changes during iteration?
 
-* json library: control characters when parsing and unparsing strings
-
-* Support MAP[IDX]++ in StatementDefinition.translateMapAssignment
-
-* Support super() in constructor
+* support parameterized types?

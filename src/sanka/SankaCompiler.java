@@ -167,6 +167,9 @@ public class SankaCompiler {
                 ClassDefinition classdef = new ClassDefinition();
                 classdef.packageName = env.currentPackage;
                 classdef.name = name;
+                if (env.getClassDefinition(classdef.packageName, classdef.name) != null) {
+                    env.printError(item, "class " + classdef.qualifiedName() + " defined twice");
+                }
                 env.classList.add(classdef);
             }
         }
