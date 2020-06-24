@@ -213,9 +213,16 @@ public class StatementDefinition {
                     assignable.expression(1));
             lhsType = this.lhsExpression.type;
             TypeDefinition containerType = this.lhsExpression.expression1.type;
-            if (containerType != null && containerType.isStringType()) {
-                env.printError(assignable, "String instance cannot be modified");
-                return;
+            if (containerType != null) {
+                if (containerType.isStringType()) {
+                    env.printError(assignable, "String instance cannot be modified");
+                    return;
+                }
+                if (containerType.keyType != null && (this.statementType == StatementType.INC ||
+                        this.statementType == StatementType.DEC)) {
+                    env.printError(assignable, "map entry cannot be incremented / decremented");
+                    return;
+                }
             }
         }
         else if (assignable.expression(0) != null) {

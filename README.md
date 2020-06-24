@@ -214,7 +214,7 @@ the compiler evaluates the type of the RHS, and that is the type of
 `x`.  Then, it is a compile error for `x` to be used as any other
 type.
 
-***Other Features***
+**Other Features**
 
 Sanka supports several other syntax constructs that Java does not.
 They are documented in [docs/Other-Features.md](docs/Other-Features.md).
