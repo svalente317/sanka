@@ -65,4 +65,8 @@ class System {
     static int getuid() {
         c__stmt "return getuid()";
     }
+
+    static String getenv(String name) {
+        c__stmt "return getenv(name)";
+    }
 }

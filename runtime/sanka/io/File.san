@@ -1,16 +1,6 @@
 // -*- mode: Java; -*-
 package sanka.io;
 
-class FileStats {
-    boolean isFile;
-    boolean isDirectory;
-    boolean isLink;
-    long lastModified;
-    long length;
-    int uid;
-    int gid;
-}
-
 /**
  * An abstract representation of file and directory pathnames.
  */
