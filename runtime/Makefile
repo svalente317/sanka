@@ -32,6 +32,7 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/net/InetAddress.c \
 	bin/sanka/net/Socket.c \
 	bin/sanka/test/BaseTest.c \
+	bin/sanka/util/Base64.c \
 	bin/sanka/util/Integer.c \
 	bin/sanka/util/Random.c
 

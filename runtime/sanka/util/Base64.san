@@ -1,0 +1,56 @@
+// -*- mode: Java; -*-
+package sanka.util;
+
+singleton class Base64 {
+
+    private String encodeMap;
+    private byte[] decodeMap;
+
+    Base64() {
+        this.encodeMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+            "abcdefghijklmnopqrstuvwxyz0123456789+/";
+        this.decodeMap = new byte[128];
+        for (var idx = 0; idx < 64; idx++) {
+            var ch = this.encodeMap[idx];
+            this.decodeMap[ch] = new byte(idx);
+        }
+    }
+
+    byte[] decode(String in) {
+        var iLen = in.length();
+        while (iLen > 0 && in[iLen-1] == '=') {
+            iLen--;
+        }
+        var oLen = (iLen*3) / 4;
+        var out = new byte[oLen];
+        var ip = 0;
+        var op = 0;
+        while (ip < iLen) {
+            var i0 = ip < iLen && in[ip] > 0 ? in[ip] : 0;
+            ip++;
+            var i1 = ip < iLen && in[ip] > 0 ? in[ip] : 0;
+            ip++;
+            var i2 = ip < iLen && in[ip] > 0 ? in[ip] : 0;
+            ip++;
+            var i3 = ip < iLen && in[ip] > 0 ? in[ip] : 0;
+            ip++;
+            i0 = this.decodeMap[i0];
+            i1 = this.decodeMap[i1];
+            i2 = this.decodeMap[i2];
+            i3 = this.decodeMap[i3];
+            if (op < oLen) {
+                out[op] = (i0 << 2) | (i1 >> 4);
+                op++;
+            }
+            if (op < oLen) {
+                out[op] = ((i1 & 0xf) << 4) | (i2 >> 2);
+                op++;
+            }
+            if (op < oLen) {
+                out[op] = ((i2 & 0x3) << 6) | i3;
+                op++;
+            }
+        }
+        return out;
+    }
+}
