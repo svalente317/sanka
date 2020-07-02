@@ -48,11 +48,6 @@ public class ClassTranslator extends TranslationBase {
         String symbol = classdef.packageName == null ? classdef.name :
                 StringUtils.replaceDot(classdef.packageName, '_') + "_" + classdef.name;
         env.writer = new BufferedWriter(new FileWriter(destFile));
-        if (classdef.c_includes != null) {
-            for (String c_include : classdef.c_includes) {
-                env.print("#include <" + c_include + ">");
-            }
-        }
         if (isHeader) {
             symbol = symbol + "_h_INCLUDED";
             env.print("#ifndef " + symbol);
@@ -63,6 +58,11 @@ public class ClassTranslator extends TranslationBase {
         } else {
             env.print(INCLUDE_SANKA_HEADER);
             env.typeList.add(classdef.toTypeDefinition());
+        }
+        if (classdef.c_includes != null) {
+            for (String c_include : classdef.c_includes) {
+                env.print("#include <" + c_include + ">");
+            }
         }
         for (TypeDefinition type : env.typeList) {
             env.print("#include <" + getHeaderFileName(type.packageName, type.name) + ">");

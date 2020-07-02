@@ -43,8 +43,8 @@ OBJS=	bin/panic.o \
 	$(SRCS:.c=.o)
 
 CC=	gcc
-DBG=	-O6
-CFLAGS=	$(DBG) -I. -Ibin
+DBG=	-O3
+CFLAGS=	$(DBG) -I. -Ibin -I$(PREFIX)/include
 
 all:	bin bin/libsankaruntime.a
 
@@ -53,7 +53,7 @@ bin:
 
 bin/libsankaruntime.a: $(OBJS)
 	rm -f $@
-	ar rc $@ $^
+	ar cqs $@ $^
 
 $(SRCS):
 	sanka --skip-imports --top bin `find sanka -name '*.san'`

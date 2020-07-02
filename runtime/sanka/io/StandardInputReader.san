@@ -9,5 +9,6 @@ singleton class StandardInputReader {
     }
 
     int close() {
+        return 0;
     }
 }

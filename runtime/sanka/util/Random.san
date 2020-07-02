@@ -2,6 +2,8 @@
 package sanka.util;
 
 class Random {
+    c__include "stdlib.h";
+
     /**
      * Initialize random number generator so the application is not
      * entirely deterministic from one run to the next.

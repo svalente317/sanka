@@ -38,7 +38,7 @@ class Socket {
     Socket accept() {
         var new_fd = 0;
         c__stmt "struct sockaddr_in sa";
-        c__stmt "int len = sizeof(sa)";
+        c__stmt "socklen_t len = sizeof(sa)";
         c__stmt "new_fd = accept(this->fd, (struct sockaddr *) &sa, &len)";
         if (new_fd < 0) {
             return null;

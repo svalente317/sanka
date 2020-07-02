@@ -19,7 +19,7 @@ singleton class StringEncoder {
         var idx = 0;
         var escapes = 0;
         for (var ch : str) {
-            if (ch > 0 && ch < 128) {
+            if (ch > 0) {
                 var enc = this.map[ch];
                 if (enc > 0) {
                     out[idx] = '\\';

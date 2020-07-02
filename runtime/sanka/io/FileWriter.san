@@ -25,6 +25,6 @@ class FileWriter {
 
     int sync() {
         c__stmt "fflush(this->fp)";
-        c__stmt "return fdatasync(fileno(this->fp)) == 0 ? 0 : errno";
+        c__stmt "return fsync(fileno(this->fp)) == 0 ? 0 : errno";
     }
 }
