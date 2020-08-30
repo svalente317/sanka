@@ -1,0 +1,35 @@
+// -*- mode: Java; -*-
+package sanka.io;
+
+class IOUtils {
+    /**
+     * Read entire contents of stream into memory.
+     */
+    static byte[] readStream(Reader reader) {
+        var chain = new byte[][0];
+        while (true) {
+            var data = new byte[4096];
+            var status = reader.read(data);
+            if (status <= 0) {
+                break;
+            }
+            if (status < data.length) {
+                data.setLength(status);
+            }
+            chain.add(data);
+        }
+        if (chain.length == 0) {
+            return null;
+        }
+        var size = 0;
+        for (var data : chain) {
+            size = size + data.length;
+        }
+        var results = new byte[size];
+        results.setLength(0);
+        for (var data : chain) {
+            results.addAll(data);
+        }
+        return results;
+    }
+}

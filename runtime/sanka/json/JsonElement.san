@@ -64,13 +64,13 @@ class JsonElement {
     }
 
     JsonElement makeArray(JsonElement[] value) {
-        this.type = ARRAY_TYPE;
+        this.type = (value == null ? NULL_TYPE : ARRAY_TYPE);
         c__stmt "this->data.arr = value";
         return this;
     }
 
     JsonElement makeObject(JsonObject value) {
-        this.type = OBJECT_TYPE;
+        this.type = (value == null ? NULL_TYPE : OBJECT_TYPE);
         c__stmt "this->data.obj = value";
         return this;
     }
@@ -153,7 +153,6 @@ class JsonElement {
             return StringEncoder.get().encodeAndQuote(text);
         case ARRAY_TYPE:
             var arr = getAsArray();
-            var isNull = (arr == null);
             if (arr.length == 0) {
                 return "[]";
             }

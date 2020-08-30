@@ -1,0 +1,67 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+import sanka.json.JsonElement;
+import sanka.json.JsonObject;
+import sanka.json.StringEncoder;
+import sanka.io.IOUtils;
+import sanka.io.StandardInputReader;
+
+singleton class JsonFormatter {
+
+    void format(JsonElement value) {
+        printElement(value, "", "", "");
+    }
+
+    void printElement(JsonElement value, String prefix, String suffix,
+                      String indent) {
+        switch (value.type) {
+        case JsonElement.ARRAY_TYPE:
+            var arr = value.getAsArray();
+            if (arr.length == 0) {
+                System.println(prefix + "[]" + suffix);
+            } else {
+                System.println(prefix + "[");
+                printArray(arr, indent + "    ");
+                System.println(indent + "]" + suffix);
+            }
+            break;
+        case JsonElement.OBJECT_TYPE:
+            System.println(prefix + "{");
+            printObject(value.getAsObject(), indent + "    ");
+            System.println(indent + "}" + suffix);
+            break;
+        default:
+            System.println(prefix + value.toString() + suffix);
+        }
+    }
+
+    void printObject(JsonObject obj, String indent) {
+        var members = obj.getMembers();
+        for (var idx = 0; idx < members.length; idx++) {
+            var member = members[idx];
+            var key = StringEncoder.get().encodeAndQuote(member.key);
+            var prefix = indent + key + ": ";
+            var suffix = (idx + 1 < members.length) ? "," : "";
+            printElement(member.value, prefix, suffix, indent);
+        }
+    }
+
+    void printArray(JsonElement[] arr, String indent) {
+        for (var idx = 0; idx < arr.length; idx++) {
+            var value = arr[idx];
+            var suffix = (idx + 1 < arr.length) ? "," : "";
+            printElement(value, indent, suffix, indent);
+        }
+    }
+
+    static void main(String[] argv) {
+        var data = IOUtils.readStream(StandardInputReader.get());
+        var text = new String(data);
+        var element = JsonElement.parse(text);
+        if (element == null) {
+            System.println("json parse failed");
+            return;
+        }
+        JsonFormatter.get().format(element);
+    }
+}
