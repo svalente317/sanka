@@ -1,0 +1,15 @@
+// -*- mode: Java; -*-
+package sanka.examples.xml;
+import sanka.io.StandardInputReader;
+import sanka.xml.XmlParser;
+
+class XmlFormatter {
+
+    static void main(String[] argv) {
+        var reader = StandardInputReader.get();
+        var parser = new XmlParser();
+        var processor = new XmlFormatProcessor();
+        parser.parse(reader, null, processor);
+        reader.close();
+    }
+}
