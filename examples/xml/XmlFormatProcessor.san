@@ -11,73 +11,73 @@ class XmlFormatProcessor {
     private Frame[] stack;
 
     XmlFormatProcessor() {
-    this.stack = new Frame[0];
+        this.stack = new Frame[0];
     }
 
     void startElement(String tag, String[] attrs) {
-    flush();
+        flush();
         var line = "<" + tag;
         for (var idx = 0; idx < attrs.length; idx = idx+2) {
-        line = line + " " + attrs[idx] + "=" + quote(attrs[idx+1]);
-    }
-    var frame = new Frame();
-    frame.entry = line;
-    this.stack.add(frame);
+            line = line + " " + attrs[idx] + "=" + quote(attrs[idx+1]);
+        }
+        var frame = new Frame();
+        frame.entry = line;
+        this.stack.add(frame);
     }
 
     void handleData(String data) {
-    // TODO Trim whitespace? And how to join consecutive data?
-    // Add a space or a newline between them?
+        // TODO Trim whitespace? And how to join consecutive data?
+        // Add a space or a newline between them?
 
-    var frame = this.stack[this.stack.length-1];
-    if (frame.data == null) {
-        frame.data = data;
-    } else {
-        frame.data = frame.data + data;
-    }
+        var frame = this.stack[this.stack.length-1];
+        if (frame.data == null) {
+            frame.data = data;
+        } else {
+            frame.data = frame.data + data;
+        }
     }
 
     void endElement(String tag) {
-    var frame = this.stack.pop();
-    var indent = spaces(this.stack.length);
-    if (frame.entry != null) {
-        if (frame.data == null) {
-        System.println(indent + frame.entry + " />");
+        var frame = this.stack.pop();
+        var indent = spaces(this.stack.length);
+        if (frame.entry != null) {
+            if (frame.data == null) {
+                System.println(indent + frame.entry + " />");
+            } else {
+                System.println(indent + frame.entry + ">" + frame.data +
+                               "</" + tag + ">");
+            }
         } else {
-        System.println(indent + frame.entry + ">" + frame.data +
-                   "</" + tag + ">");
+            System.println(indent + "</" + tag + ">");
         }
-    } else {
-        System.println(indent + "</" + tag + ">");
-    }
     }
 
     private void flush() {
-    if (this.stack.length == 0) {
-        return;
-    }
-    var frame = this.stack[this.stack.length-1];
-    if (frame.entry != null) {
-        var indent = spaces(this.stack.length-1);
-        System.println(indent + frame.entry + ">");
-        frame.entry = null;
-    }
-    if (frame.data != null) {
-        var indent = spaces(this.stack.length);
-        System.println(indent + frame.data);
-        frame.data = null;
-    }
+        if (this.stack.length == 0) {
+            return;
+        }
+        var frame = this.stack[this.stack.length-1];
+        if (frame.entry != null) {
+            var indent = spaces(this.stack.length-1);
+            System.println(indent + frame.entry + ">");
+            frame.entry = null;
+        }
+        if (frame.data != null) {
+            var indent = spaces(this.stack.length);
+            System.println(indent + frame.data);
+            frame.data = null;
+        }
     }
 
     private static String spaces(int level) {
-    var s = "";
+        var s = "";
         for (var idx = 0; idx < level; idx++) {
             s = s + "  ";
         }
-    return s;
+        return s;
     }
 
     private static String quote(String value) {
-    return "\"" + value + "\"";
+        return "\"" + value + "\"";
     }
 }
