@@ -1,0 +1,131 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+import sanka.io.FileReader;
+import sanka.io.FileWriter;
+import sanka.io.IOUtils;
+
+/**
+ * This utility encodes a file into a Sanka source file.
+ * Include this source file in your Sanka application, in order to access
+ * the file contents as a String. So the file only needs to exist at compile
+ * time, not at run time.
+ *
+ * Note that a Sanka String cannot contain the zero byte. So if the file
+ * contains zeros, then it should be encoded as a byte array rather than
+ * as a String.
+ *
+ * Usage: file_to_sanka --class a.b.c.Class --const CONST_NAME filename
+ *
+ * generates a file named Class.san, in the package a.b.c.Class,
+ * with a public const of CONST_NAME.
+ */
+class FileToSanka {
+    
+    static int main(String[] args) {
+        var className = null;
+        var constName = null;
+        var dirName = null;
+        var filename = null;
+        var error = false;
+        for (var idx = 1; idx < args.length; idx++) {
+            switch (args[idx]) {
+            case "--class":
+                idx++;
+                className = args[idx];
+                break;
+            case "--const":
+                idx++;
+                constName = args[idx];
+                break;
+            case "--dir":
+                idx++;
+                dirName = args[idx];
+                break;
+            default:
+                if (filename != null) {
+                    error = true;
+                }
+                filename = args[idx];
+                break;
+            }
+        }
+        if (error || className == null || constName == null ||
+            filename == null) {
+            System.println("Usage: file_to_sanka --class a.b.c.Class " +
+                           "--const CONST_NAME filename");
+            return -1;
+        }
+
+        var reader = new FileReader();
+        var status = reader.open(filename);
+        if (status != 0) {
+            System.println(filename + ": " + System.strerror(status));
+            return -1;
+        }
+        var data = IOUtils.readStream(reader);
+        reader.close();
+
+        var legal = new boolean[256];
+        for (var x = 'a'; x <= 'z'; x++) {
+            legal[x] = true;
+        }
+        for (var x = 'A'; x <= 'Z'; x++) {
+            legal[x] = true;
+        }
+        for (var x = '0'; x <= '9'; x++) {
+            legal[x] = true;
+        }
+        for (var ch : " ~!@#$%^&*()-=_+[]{}|;:,./<>?") {
+            legal[ch] = true;
+        }
+        var encoded = new byte[0];
+        for (var i : data) {
+            if (legal[i]) {
+                encoded.add(i);
+            } else if (i == '\n') {
+                encoded.add('\\');
+                encoded.add('n');
+            } else if (i == '\r') {
+                encoded.add('\\');
+                encoded.add('r');
+            } else {                
+                var d1 = i & 7;
+                var d2 = (i >> 3) & 7;
+                var d3 = (i >> 6);
+                encoded.add('\\');
+                encoded.add('0'+d3);
+                encoded.add('0'+d2);
+                encoded.add('0'+d1);
+            }
+        }
+
+        var packageName = null;
+        var idx = className.lastIndexOf('.');
+        if (idx > 0) {
+            packageName = className.substring(0, idx);
+            className = className.substring(idx+1);
+        }
+        filename = className;
+        if (dirName != null) {
+            filename = dirName + "/" + filename;
+        }
+        filename = filename + ".san";
+        var writer = new FileWriter();
+        status = writer.open(filename);
+        if (status != 0) {
+            System.println(filename + ": " + System.strerror(status));
+            return -1;
+        }
+        if (packageName != null) {
+            writer.print("package " + packageName + ";\n");
+        }
+        writer.print("class " + className + " {\n");
+        writer.print("const " + constName + " = \"");
+        writer.write(encoded);
+        writer.print("\";\n");
+        writer.print("}\n");
+        writer.close();
+        return 0;
+    }
+}
+

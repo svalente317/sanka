@@ -1,6 +1,6 @@
 PREFIX=	/opt/sanka
 
-PROGS=	channeltest cheesefinder json_format parsenumber processviewer sudoku total wordmap
+PROGS=	channeltest cheesefinder file_to_sanka json_format parsenumber processviewer sudoku total wordmap
 
 all:	$(PROGS)
 
@@ -9,6 +9,9 @@ channeltest:	ChannelTest.san
 
 cheesefinder:		CheeseFinder.san Mouse.san
 	sanka $^ --exe $@ --main sanka.examples.CheeseFinder
+
+file_to_sanka:	FileToSanka.san
+	sanka $^ --exe $@ --main sanka.examples.FileToSanka
 
 json_format:	JsonFormatter.san
 	sanka $^ --exe $@ --main sanka.examples.JsonFormatter

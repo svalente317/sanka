@@ -27,4 +27,8 @@ class FileWriter {
         c__stmt "fflush(this->fp)";
         c__stmt "return fsync(fileno(this->fp)) == 0 ? 0 : errno";
     }
+
+    int print(String text) {
+        c__stmt "return fwrite(text, 1, strlen(text), this->fp)";
+    }
 }

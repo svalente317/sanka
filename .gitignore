@@ -4,6 +4,7 @@ examples/sanka
 examples/*.o
 examples/channeltest
 examples/cheesefinder
+examples/file_to_sanka
 examples/json_format
 examples/parsenumber
 examples/processviewer
