@@ -149,7 +149,7 @@ arrays support primitive types, and builtin and user-defined classes:
 ~~~
 
 The array elements are initialzed to zero/false for scalar types, and
-null for class types.  not very space efficient.)
+null for class types.
 
 An array can be initialized with a number of items or with a sequence
 of items:
@@ -186,8 +186,8 @@ arr.add(17);
 
 Initially, `arr` is the three element array `{0, 0, 0}`, and no
 further memory has been allocated. After the call to add(), it is the
-four element array `{0, 0, 0, 17}`. And there may be a little extra
-memory at the end of the array, so that the next call to add() can
+four element array `{0, 0, 0, 17}`. And there may be a extra memory
+reserved at the end of the array, so that the next call to add() can
 be processed efficiently.
 
 Of course, the arithmetic operators and the comparison operators are
@@ -227,6 +227,15 @@ The `Map` class has these methods:
 * `boolean remove(K key)` Remove the key from the map. Return true
   if key was found and removed.
 * `void clear()` Remove all keys from the map
+
+Maps support iteration over the key-value pairs, in order of the
+sorted keys.
+
+~~~
+    for (var key, value : map) {
+        System.println("key=" + key + " value=" + value);
+    }
+~~~
 
 ## Errors
 
