@@ -1,5 +1,6 @@
 // -*- mode: Java; -*-
 package sanka.json;
+import sanka.io.IOUtils;
 import sanka.json.JsonElement;
 import sanka.json.JsonObject;
 
@@ -295,5 +296,15 @@ class JsonParser {
             idx = parser.skipSpace(idx);
         }
         return idx == parser.length ? elem: null;
+    }
+
+    /**
+     * Read and parse the JSON file contents.
+     *
+     * @return the parsed JSON element or null
+     */
+    static JsonElement parseFile(String filename) {
+        var body = IOUtils.readFileAsString(filename);
+        return body == null ? null : JsonParser.parse(body);
     }
 }

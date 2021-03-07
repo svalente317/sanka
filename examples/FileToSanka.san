@@ -62,7 +62,7 @@ class FileToSanka {
             System.println(filename + ": " + System.strerror(status));
             return -1;
         }
-        var data = IOUtils.readStream(reader);
+        var data = reader.readFile();
         reader.close();
 
         var legal = new boolean[256];
