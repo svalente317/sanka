@@ -1,6 +1,7 @@
 #define GC_THREADS 1
 #include <gc.h>
 #include <rb.h>
+#include <string.h>
 
 /* Part 1: panic.c -- primitive types, pointers */
 

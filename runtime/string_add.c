@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 #include "sanka_header.h"
 
 int STRING_EQUALS(const char *s1, const char *s2) {

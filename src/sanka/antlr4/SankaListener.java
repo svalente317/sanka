@@ -1,4 +1,4 @@
-// Generated from Sanka.g4 by ANTLR 4.7.2
+// Generated from Sanka.g4 by ANTLR 4.9.2
 
     package sanka.antlr4;
 
@@ -239,16 +239,6 @@ public interface SankaListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitClassOrInterfaceType(SankaParser.ClassOrInterfaceTypeContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SankaParser#typeArguments}.
-	 * @param ctx the parse tree
-	 */
-	void enterTypeArguments(SankaParser.TypeArgumentsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SankaParser#typeArguments}.
-	 * @param ctx the parse tree
-	 */
-	void exitTypeArguments(SankaParser.TypeArgumentsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SankaParser#primitiveType}.
 	 * @param ctx the parse tree

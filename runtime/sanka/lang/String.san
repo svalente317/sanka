@@ -2,7 +2,6 @@
 package sanka.lang;
 
 class String {
-    c__include "string.h";
 
     String(byte[] arr) {
         // To initialize a String, the translator generates a call to

@@ -9,7 +9,6 @@ class InetAddress {
     c__include "netinet/in.h";
     c__include "arpa/inet.h";
     c__include "netdb.h";
-    c__include "string.h";
 
     byte[] numbers;
     int family;

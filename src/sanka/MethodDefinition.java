@@ -24,8 +24,8 @@ public class MethodDefinition {
         public String name;
     }
 
-    static interface BlockGenerator {
-        public String generate();
+    interface BlockGenerator {
+        String generate();
     }
 
     BlockContext blockContext;

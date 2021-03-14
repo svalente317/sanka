@@ -145,12 +145,12 @@ typeType
     ;
 
 classOrInterfaceType
-    :   ( Identifier '.' )* Identifier typeArguments?
+    :   ( Identifier '.' )* Identifier
     ;
 
-typeArguments
-    :   '<' typeType (',' typeType)* '>'
-    ;
+//typeArguments
+//    :   '<' typeType (',' typeType)* '>'
+//    ;
 
 primitiveType
     :   'boolean'
@@ -281,6 +281,7 @@ expression
     |   expression '||' expression
     |   expression '?' expression ':' expression
     |   'super' '.' Identifier
+    |   '(' classOrInterfaceType ')' expression
     ;
 
 primary

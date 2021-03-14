@@ -12,6 +12,7 @@ import sanka.MethodDefinition.ParameterDefinition;
 import sanka.antlr4.SankaParser.AnonymousClassBodyContext;
 import sanka.antlr4.SankaParser.AnonymousClassBodyDeclarationContext;
 import sanka.antlr4.SankaParser.ArrayCreatorRestContext;
+import sanka.antlr4.SankaParser.ClassOrInterfaceTypeContext;
 import sanka.antlr4.SankaParser.CreatorContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.ExpressionListContext;
@@ -21,11 +22,11 @@ import sanka.antlr4.SankaParser.PrimaryContext;
 
 public class ExpressionDefinition {
 
-    public static enum ExpressionType {
+    public enum ExpressionType {
         LITERAL, IDENTIFIER, CLASS_IDENTIFIER, NEW_INSTANCE, NEW_ARRAY_WITH_VALUES,
         NEW_ARRAY, NEW_MAP, UNARY, FIELD_ACCESS, BINARY, ARRAY_ACCESS, FUNCTION_CALL,
-        TERNARY, SUPERCLASS, SUPER_DOT_METHOD
-    };
+        TERNARY, SUPERCLASS, SUPER_DOT_METHOD, TYPE_CAST
+    }
 
     public ExpressionType expressionType;
     public TypeDefinition type;
@@ -106,6 +107,10 @@ public class ExpressionDefinition {
             }
             return;
         case 4:
+            if (ctx.classOrInterfaceType() != null) {
+                evaluateTypeCast(ctx.classOrInterfaceType(), ctx.expression(0));
+                return;
+            }
             String left_op = ((TerminalNode) ctx.getChild(1)).getSymbol().getText();
             String right_op = ((TerminalNode) ctx.getChild(3)).getSymbol().getText();
             if (left_op.equals("[") && right_op.equals("]")) {
@@ -787,5 +792,40 @@ public class ExpressionDefinition {
         this.type = classdef.toTypeDefinition();
         this.fieldList = fieldList.toArray(new String[0]);
         this.argList = valueList.toArray(new ExpressionDefinition[0]);
+    }
+
+    void evaluateTypeCast(ClassOrInterfaceTypeContext classCtx, ExpressionContext ctx) {
+        Environment env = Environment.getInstance();
+        this.type = new TypeDefinition();
+        this.type.parse(classCtx);
+        ClassDefinition classdef = env.loadClassDefinition(this.type);
+        if (classdef == null) {
+            env.printError(classCtx, "class " + this.type + " undefined");
+            return;
+        }
+        if (classdef.isInterface || classdef.isAbstract) {
+            env.printError(classCtx, "cannot cast to " + this.type +
+                    " because it is not concrete");
+            return;
+        }
+        this.expressionType = ExpressionType.TYPE_CAST;
+        this.expression1 = new ExpressionDefinition();
+        this.expression1.evaluate(ctx);
+        if (this.expression1.type == null) {
+            return;
+        }
+        ClassDefinition interfaceDef = env.loadClassDefinition(this.expression1.type);
+        if (interfaceDef == null) {
+            env.printError(classCtx, "class " + this.expression1.type + " undefined");
+            return;
+        }
+        if (!interfaceDef.isInterface) {
+            env.printError(classCtx, "cannot cast " + this.expression1.type +
+                    " because it is not an interface");
+            return;
+        }
+        if (!TypeUtils.isInterfaceImplemented(interfaceDef, classdef)) {
+            env.printError(classCtx, "class " + classdef + " does not implement " + interfaceDef);
+        }
     }
 }

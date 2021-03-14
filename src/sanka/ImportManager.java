@@ -92,7 +92,7 @@ public class ImportManager {
                     " not found for import");
             return;
         }
-        SankaLexer lexer = null;
+        SankaLexer lexer;
         try {
             lexer = new SankaLexer(CharStreams.fromFileName(pathname));
         } catch (IOException ioe) {

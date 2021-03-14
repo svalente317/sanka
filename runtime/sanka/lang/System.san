@@ -4,7 +4,6 @@ package sanka.lang;
 class System {
     c__include "stdio.h";
     c__include "stdlib.h";
-    c__include "string.h";
     c__include "unistd.h";
     c__include "sys/time.h";
     c__include "time.h";

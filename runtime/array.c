@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <string.h>
 #include "sanka_header.h"
 
 const char *ARRAY_BOUNDS_ERROR = "array bounds error";

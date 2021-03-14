@@ -5,6 +5,7 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import sanka.antlr4.SankaParser;
 import sanka.antlr4.SankaParser.TypeTypeContext;
 
 public class TypeDefinition implements Comparable<TypeDefinition> {
@@ -44,16 +45,6 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
         this.name = name;
     }
 
-    TypeDefinition copy() {
-        TypeDefinition copy = new TypeDefinition();
-        copy.isPrimitiveType = this.isPrimitiveType;
-        copy.packageName = this.packageName;
-        copy.name = this.name;
-        copy.arrayOf = this.arrayOf == null ? null : this.arrayOf.copy();
-        copy.keyType = this.keyType;
-        return copy;
-    }
-
     @Override
     public String toString() {
         if (this.keyType != null) {
@@ -86,21 +77,26 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
             Token token = ctx.primitiveType().getStart();
             this.isPrimitiveType = true;
             this.name = token.getText();
+            return;
         }
         if (ctx.classOrInterfaceType() != null) {
-            List<TerminalNode> ids = ctx.classOrInterfaceType().Identifier();
-            int idCount = ids.size();
-            if (idCount == 1) {
-                this.name = ids.get(0).getText();
-            } else {
-                this.packageName = ids.get(0).getText();
-                for (int i = 1; i < idCount-1; i++) {
-                    this.packageName += "." + ids.get(i).getText();
-                }
-                this.name = ids.get(idCount-1).getText();
-            }
+            parse(ctx.classOrInterfaceType());
         }
-        if (this.isPrimitiveType || this.packageName != null || this.name == null) {
+    }
+
+    void parse(SankaParser.ClassOrInterfaceTypeContext ctx) {
+        List<TerminalNode> ids = ctx.Identifier();
+        int idCount = ids.size();
+        if (idCount == 1) {
+            this.name = ids.get(0).getText();
+        } else {
+            this.packageName = ids.get(0).getText();
+            for (int i = 1; i < idCount-1; i++) {
+                this.packageName += "." + ids.get(i).getText();
+            }
+            this.name = ids.get(idCount-1).getText();
+        }
+        if (this.packageName != null || this.name == null) {
             return;
         }
         Environment env = Environment.getInstance();

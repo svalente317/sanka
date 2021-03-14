@@ -69,7 +69,7 @@ class Consumer {
             }
             var now = System.currentTimeMillis();
             var ts = "" + (now - start);
-            System.println(ts + " pop " + this.id + " " + item);
+            System.println(ts + " pop " + this.id + " " + (String) item);
             var millis = System.random(4);
             System.sleep(millis);
         }

@@ -25,7 +25,7 @@ import sanka.antlr4.SankaParser.VariableDeclarationContext;
 
 public class StatementDefinition {
 
-    public static enum StatementType {
+    public enum StatementType {
         DECLARATION, ASSIGNMENT, INC, DEC, IF, WHILE, FOR, ENHANCED_FOR, SWITCH, TYPESWITCH,
         CASE, DEFAULT, RETURN, BREAK, CONTINUE, EXPRESSION, SEMI, C__STMT, BLOCK
     }
@@ -203,7 +203,7 @@ public class StatementDefinition {
                 return;
             }
         }
-        TypeDefinition lhsType = null;
+        TypeDefinition lhsType;
         AssignableContext assignable = assignment.assignable();
         if (assignable.Identifier() == null) {
             // The LHS is made of two expressions: The array and index.

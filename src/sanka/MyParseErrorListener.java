@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 public class MyParseErrorListener extends BaseErrorListener {
-    private String filename;
+    private final String filename;
 
     public MyParseErrorListener(String filename) {
         this.filename = filename;

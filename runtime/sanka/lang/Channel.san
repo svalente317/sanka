@@ -10,7 +10,7 @@ class Channel {
     private inline Mutex mutex;
     private inline Condition fullCond;
     private inline Condition emptyCond;
-    private inline String[] data;
+    private inline Object[] data;
     private int size;
     private int current;
     private boolean closed;
@@ -27,7 +27,7 @@ class Channel {
         this.mutex = new Mutex();
         this.fullCond = new Condition();
         this.emptyCond = new Condition();
-        this.data = new String[maxSize];
+        this.data = new Object[maxSize];
         this.size = 0;
         this.current = 0;
         this.closed = false;
@@ -37,7 +37,7 @@ class Channel {
      * Add an item to the end of the queue. If the channel already holds
      * maxSize items, then block until some other thread calls pop().
      */
-    void push(String item) {
+    void push(Object item) {
         this.mutex.lock();
         if (this.maxSize > 0) {
             while (this.size == this.maxSize) {
@@ -66,7 +66,7 @@ class Channel {
      * Remove and return the item from the front of the queue. If the queue
      * is empty, then block until some other thread calls push().
      */
-    String pop() {
+    Object pop() {
         this.mutex.lock();
         while (this.size == 0) {
             if (this.closed) {

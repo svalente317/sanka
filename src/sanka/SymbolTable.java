@@ -9,7 +9,7 @@ public class SymbolTable {
         private static final long serialVersionUID = 1;
     }
 
-    private Stack<Frame> stack;
+    private final Stack<Frame> stack;
 
     SymbolTable() {
         this.stack = new Stack<>();

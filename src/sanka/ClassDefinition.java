@@ -146,7 +146,7 @@ public class ClassDefinition {
                 env.printError(item, "anonymous class cannot have constructor");
                 return;
             }
-            MethodDefinition method = null;
+            MethodDefinition method;
             if (ctx.formalParameters() != null) {
                 method = new MethodDefinition();
                 method.parse(null, null, name, ctx.formalParameters(), ctx.block());

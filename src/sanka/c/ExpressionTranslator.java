@@ -52,6 +52,8 @@ class ExpressionTranslator extends TranslationBase {
             return translateSuperclass(expr);
         case SUPER_DOT_METHOD:
             return translateSuperDotMethod(expr);
+        case TYPE_CAST:
+            return translateTypeCast(expr, variableName);
         }
         return null;
     }
@@ -667,5 +669,28 @@ class ExpressionTranslator extends TranslationBase {
         expr.translatedThis = "this"; // TODO add cast
         String name = translateMethodName(className, expr.method);
         return getBaseTranslatedName(name);
+    }
+
+    static String translateTypeCast(ExpressionDefinition expr, String variableName) {
+        Environment env = Environment.getInstance();
+        String text = translate(expr.expression1);
+        env.print("NULLCHECK(" + text + ");");
+        StringBuilder builder = new StringBuilder();
+        if (variableName == null) {
+            builder.append(translateTypeSpace(expr.type));
+            variableName = env.getTmpVariable();
+        }
+        builder.append(variableName);
+        builder.append(" = strcmp(");
+        builder.append(text);
+        builder.append("->baseType, \"");
+        builder.append(expr.type.toString());
+        builder.append("\") == 0 ? (");
+        builder.append(translateType(expr.type));
+        builder.append(") ");
+        builder.append(text);
+        builder.append("->object : NULL;");
+        env.print(builder.toString());
+        return variableName;
     }
 }
