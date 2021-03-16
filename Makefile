@@ -11,12 +11,6 @@ PREFIX=/opt/sanka
 all:
 	@echo use \'./gradlew\' to build and \'make install\' to install
 
-bin/sanka.sh: FORCE
-	echo '#!/bin/sh' > $@
-	echo exec java -cp ${PREFIX}/share/sanka.jar:$(LIBS) \
-	sanka/SankaCompiler -I ${PREFIX}/include -L ${PREFIX}/lib '"$$@"' >> $@
-	chmod 755 $@
-
 install:
 	./gradlew installDist
 	mkdir -p $(PREFIX)/bin
@@ -24,7 +18,9 @@ install:
 	cp build/install/sanka/lib/sanka.jar $(PREFIX)/lib/
 	cp build/install/sanka/lib/antlr4-runtime-4.9.2.jar $(PREFIX)/lib/
 	cp build/install/sanka/lib/commons-compress-1.20.jar $(PREFIX)/lib/
-	./make_script.sh $(PREFIX) $(PREFIX)/bin/sanka
+	@echo '#!/bin/sh' > build/sanka
+	@echo exec java -cp $(PREFIX)/lib/sanka.jar:$(PREFIX)/lib/antlr4-runtime-4.9.2.jar:$(PREFIX)/lib/commons-compress-1.20.jar sanka/SankaCompiler -I $(PREFIX)/include -L $(PREFIX)/lib '"$$@"' >> build/sanka
+	install -m 755 build/sanka $(PREFIX)/bin/sanka
 
 AO=https://github.com/ivmai/libatomic_ops/releases/download/v7.6.8/libatomic_ops-7.6.8.tar.gz
 GC=https://github.com/ivmai/bdwgc/releases/download/v7.6.10/gc-7.6.10.tar.gz
