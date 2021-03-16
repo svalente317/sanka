@@ -11,6 +11,9 @@ PREFIX=/opt/sanka
 all:
 	@echo use \'./gradlew\' to build and \'make install\' to install
 
+clean:
+	./gradlew clean
+
 install:
 	./gradlew installDist
 	mkdir -p $(PREFIX)/bin
