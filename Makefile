@@ -24,9 +24,9 @@ I_COMMONS_COMPRESS= $(PREFIX)/$(COMMONS_COMPRESS)
 LIBS=               $(I_ANTLR_RUNTIME):$(I_COMMONS_COMPRESS)
 endif
 
-SRCS=   src/sanka/*.java \
-        src/sanka/c/*.java \
-        src/sanka/antlr4/*.java
+SRCS=   src/main/java/sanka/*.java \
+        src/main/java/sanka/c/*.java \
+        src/main/java/sanka/antlr4/*.java
 
 TOP=    bin
 
