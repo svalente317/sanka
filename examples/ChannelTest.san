@@ -63,13 +63,13 @@ class Consumer {
     void run() {
         var start = System.currentTimeMillis();
         while (true) {
-            var item = this.channel.pop();
+            var item = (String) this.channel.pop();
             if (item == null) {
                 return;
             }
             var now = System.currentTimeMillis();
             var ts = "" + (now - start);
-            System.println(ts + " pop " + this.id + " " + (String) item);
+            System.println(ts + " pop " + this.id + " " + item);
             var millis = System.random(4);
             System.sleep(millis);
         }

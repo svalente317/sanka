@@ -674,18 +674,19 @@ class ExpressionTranslator extends TranslationBase {
     static String translateTypeCast(ExpressionDefinition expr, String variableName) {
         Environment env = Environment.getInstance();
         String text = translate(expr.expression1);
-        env.print("NULLCHECK(" + text + ");");
         StringBuilder builder = new StringBuilder();
         if (variableName == null) {
             builder.append(translateTypeSpace(expr.type));
             variableName = env.getTmpVariable();
         }
         builder.append(variableName);
-        builder.append(" = strcmp(");
+        builder.append(" = (");
+        builder.append(text);
+        builder.append(" != NULL && strcmp(");
         builder.append(text);
         builder.append("->baseType, \"");
         builder.append(expr.type.toString());
-        builder.append("\") == 0 ? (");
+        builder.append("\") == 0) ? (");
         builder.append(translateType(expr.type));
         builder.append(") ");
         builder.append(text);
