@@ -1,7 +1,7 @@
+.gradle
 .idea
 *.iml
-bin
-lib
+build
 examples/sanka
 examples/*.o
 examples/channeltest
@@ -13,8 +13,3 @@ examples/processviewer
 examples/sudoku
 examples/total
 examples/wordmap
-test/AbstractClassTest
-test/AnonymousClassTest
-test/InterfaceTest
-test/SerializableTest
-test/TypeswitchTest
