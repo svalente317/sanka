@@ -175,4 +175,15 @@ class JsonObject {
     JsonObject getAsObject() {
         return this;
     }
+
+    JsonElement toJson() {
+        return new JsonElement().makeObject(this);
+    }
+
+    void fromJson(JsonElement element) {
+        var obj = element.getAsObject();
+        if (obj != null) {
+            this.members = obj.members;
+        }
+    }
 }

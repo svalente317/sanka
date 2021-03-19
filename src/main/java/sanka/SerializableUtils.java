@@ -17,7 +17,7 @@ class SerializableUtils {
     static final String FROM_JSON_ELEMENT_ARG = "elem";
 
     /**
-     * Add MethodDefinitions for toJson() and fromJson().
+     * Add MethodDefinitions for toJsonObject() and fromJsonObject() and toJson() and fromJson().
      */
     static void addMethodsToClass(final ClassDefinition classdef) {
         Environment env = Environment.getInstance();
@@ -30,7 +30,7 @@ class SerializableUtils {
         method.isPrivate = false;
         method.isStatic = false;
         method.returnType = JSON_OBJECT_TYPE;
-        method.name = "toJson";
+        method.name = "toJsonObject";
         current = classdef.getMethod(method.name, 0);
         if (current != null) {
             if (!method.sameSignature(current)) {
@@ -45,7 +45,7 @@ class SerializableUtils {
                         SerializableUtils.evaluateClass(classdef);
                         isEvaluated[0] = true;
                     }
-                    return SerializableUtils.generateToJson(classdef);
+                    return SerializableUtils.generateToJsonObject(classdef);
                 }
             };
             classdef.methodList.add(method);
@@ -54,7 +54,7 @@ class SerializableUtils {
         method.isPrivate = false;
         method.isStatic = false;
         method.returnType = TypeDefinition.VOID_TYPE;
-        method.name = "fromJson";
+        method.name = "fromJsonObject";
         param = new ParameterDefinition();
         param.type = JSON_OBJECT_TYPE;
         param.name = FROM_JSON_ARG;
@@ -73,19 +73,16 @@ class SerializableUtils {
                         SerializableUtils.evaluateClass(classdef);
                         isEvaluated[0] = true;
                     }
-                    return SerializableUtils.generateFromJson(classdef);
+                    return SerializableUtils.generateFromJsonObject(classdef);
                 }
             };
             classdef.methodList.add(method);
         }
-
-        // And also the toJsonElement() and fromJsonElement() methods.
-        // You probably will never use these.
         method = new MethodDefinition();
         method.isPrivate = false;
         method.isStatic = false;
         method.returnType = JSON_ELEMENT_TYPE;
-        method.name = "toJsonElement";
+        method.name = "toJson";
         current = classdef.getMethod(method.name, 0);
         if (current != null) {
             if (!method.sameSignature(current)) {
@@ -109,7 +106,7 @@ class SerializableUtils {
         method.isPrivate = false;
         method.isStatic = false;
         method.returnType = TypeDefinition.VOID_TYPE;
-        method.name = "fromJsonElement";
+        method.name = "fromJson";
         param = new ParameterDefinition();
         param.type = JSON_ELEMENT_TYPE;
         param.name = FROM_JSON_ELEMENT_ARG;
@@ -133,8 +130,6 @@ class SerializableUtils {
             };
             classdef.methodList.add(method);
         }
-
-
     }
 
     /**
@@ -179,7 +174,7 @@ class SerializableUtils {
     /**
      * Generate the Sanka code for writing public fields to JSON.
      */
-    static String generateToJson(ClassDefinition classdef) {
+    static String generateToJsonObject(ClassDefinition classdef) {
         StringBuilder builder = new StringBuilder();
         builder.append("{var obj = new sanka.json.JsonObject();");
         for (FieldDefinition field : classdef.fieldList) {
@@ -199,7 +194,7 @@ class SerializableUtils {
                     builder.append("if (" + fn + "[i] == null) {");
                     builder.append("arr[i] = new sanka.json.JsonElement();");
                     builder.append("} else {");
-                    builder.append("arr[i] = " + fn + "[i].toJsonElement();}");
+                    builder.append("arr[i] = " + fn + "[i].toJson();}");
                 }
                 builder.append("} obj.setArray(\"" + field.name + "\", arr);}");
             } else if (field.type.isStringType() || field.type.isPrimitiveType) {
@@ -207,7 +202,7 @@ class SerializableUtils {
                 builder.append("(\"" + field.name + "\", " + fn + ");");
             } else {
                 builder.append("if (" + fn + " != null) {");
-                builder.append("obj.set(\"" + field.name + "\", " + fn + ".toJsonElement());}");
+                builder.append("obj.set(\"" + field.name + "\", " + fn + ".toJson());}");
             }
         }
         builder.append("return obj;}");
@@ -272,9 +267,9 @@ class SerializableUtils {
     }
 
     /**
-     * Generate the list of statements for setting public fields from JSON.
+     * Generate the Sanka code for reading public fields from JSON.
      */
-    static String generateFromJson(ClassDefinition classdef) {
+    static String generateFromJsonObject(ClassDefinition classdef) {
         StringBuilder builder = new StringBuilder();
         String obj = FROM_JSON_ARG;
         String tmparr = null, tmp = null;
@@ -301,7 +296,7 @@ class SerializableUtils {
                     builder.append("var item = " + tmparr + "[i];");
                     builder.append("if (item != null && item.type > 0) { ");
                     builder.append(fn + "[i] = new " + type + "();");
-                    builder.append(fn + "[i].fromJsonElement(item);");
+                    builder.append(fn + "[i].fromJson(item);");
                     builder.append("} else { " + fn + "[i] = null; }");
                 }
                 builder.append("}} else { " + fn + " = null; }");
@@ -313,7 +308,7 @@ class SerializableUtils {
                 builder.append(tmp + " = " + obj + ".get(\"" + field.name + "\");");
                 builder.append("if (" + tmp + " != null) { ");
                 builder.append(fn + " = new " + field.type + "();");
-                builder.append(fn + ".fromJsonElement(" + tmp + ");");
+                builder.append(fn + ".fromJson(" + tmp + ");");
                 builder.append("} else { " + fn + " = null; }");
             } else {
                 builder.append(fn + " = " + obj + "." + jsonObject_get_methodName(field.type));
@@ -385,17 +380,17 @@ class SerializableUtils {
     }
 
     /**
-     * Generate the stubs toJsonElement() and fromJsonElement().
+     * Generate the Serializable interface, using toJsonObject() and fromJsonObject().
      */
     static String generateToJsonElement(ClassDefinition classdef) {
-        return "{return new sanka.json.JsonElement().makeObject(this.toJson());}";
+        return "{return new sanka.json.JsonElement().makeObject(this.toJsonObject());}";
 
     }
 
     static String generateFromJsonElement(ClassDefinition classdef) {
         StringBuilder builder = new StringBuilder();
         builder.append("{ var tmp = " + FROM_JSON_ELEMENT_ARG + ".getAsObject();");
-        builder.append("if (tmp != null) { this.fromJson(tmp); } }");
+        builder.append("if (tmp != null) { this.fromJsonObject(tmp); } }");
         return builder.toString();
     }
 }

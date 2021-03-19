@@ -49,10 +49,10 @@ class SerializableTest extends BaseTest {
     void testSerializableClass() {
         var st = new SerializableClass();
         st.setup();
-        var jo = st.toJson();
+        var jo = st.toJson().getAsObject();
 
         var t = new SerializableClass();
-        t.fromJson(jo);
+        t.fromJson(new JsonElement().makeObject(jo));
         assert(t.s == -1000, "short");
         assert(t.i == 8888, "int");
         assert(t.lg == -2345678901, "long");
@@ -74,13 +74,13 @@ class SerializableTest extends BaseTest {
             "\"stringArr\":[null, 1]}";
         jo = JsonObject.parse(text);
         t = new SerializableClass();
-        t.fromJson(jo);
+        t.fromJsonObject(jo);
         assert(t.i == 5, "json to class");
 
         text = "{\"dummyArr\":[{\"key\":\"v1\"},null,{\"key\":\"v2\"}]}";
         jo = JsonObject.parse(text);
         t.nullArr = new int[1];
-        t.fromJson(jo);
+        t.fromJsonObject(jo);
         assert(t.nullArr == null, "j null array");
         assert(t.dummyArr.length == 3, "j array");
         assert(t.dummyArr[0].key == "v1", "j array 0");
@@ -90,10 +90,10 @@ class SerializableTest extends BaseTest {
         var s = new ScalarTest();
         text = "{\"key\": 17}";
         jo = JsonObject.parse(text);
-        s.fromJson(jo);
+        s.fromJsonObject(jo);
         assert(s.key.intValue() == 17, "Integer");
         jo = JsonObject.parse("{}");
-        s.fromJson(jo);
+        s.fromJsonObject(jo);
         assert(s.key == null, "null Integer");
     }
 

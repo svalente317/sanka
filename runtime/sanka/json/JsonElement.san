@@ -170,4 +170,13 @@ class JsonElement {
     static JsonElement parse(String text) {
         return JsonParser.parse(text);
     }
+
+    JsonElement toJson() {
+        return this;
+    }
+
+    void fromJson(JsonElement element) {
+        this.type = element.type;
+        c__stmt "this->data = element->data";
+    }
 }

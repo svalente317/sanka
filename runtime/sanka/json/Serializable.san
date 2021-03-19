@@ -2,9 +2,6 @@
 package sanka.json;
 
 interface Serializable {
-    JsonObject toJson();
-    void fromJson(JsonObject obj);
-
-    JsonElement toJsonElement();
-    void fromJsonElement(JsonElement element);
+    JsonElement toJson();
+    void fromJson(JsonElement element);
 }

@@ -21,18 +21,11 @@ class Integer {
         return this.value;
     }
 
-    JsonObject toJson() {
-        return null;
-    }
-
-    void fromJson(JsonObject obj) {
-    }
-
-    JsonElement toJsonElement() {
+    JsonElement toJson() {
         return new JsonElement().makeLong(this.value);
     }
 
-    void fromJsonElement(JsonElement element) {
+    void fromJson(JsonElement element) {
         this.value = element.getAsLong();
     }
 }
