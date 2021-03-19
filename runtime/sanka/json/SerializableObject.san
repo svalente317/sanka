@@ -1,0 +1,7 @@
+// -*- mode: Java; -*-
+package sanka.json;
+
+interface SerializableObject {
+    JsonObject toJsonObject();
+    void fromJsonObject(JsonObject object);
+}
