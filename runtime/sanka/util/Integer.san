@@ -28,4 +28,37 @@ class Integer {
     void fromJson(JsonElement element) {
         this.value = element.getAsLong();
     }
+
+    String toString(int base) {
+        if (this.value == 0) {
+            return "0";
+        }
+        var i = this.value;
+        var negative = false;
+        if (i < 0) {
+            i = -i;
+            negative = true;
+        }
+        var str = new byte[34];
+        var len = 0;
+        while (i > 0) {
+            var rem = new byte(i % base);
+            str[len] = (rem > 9) ? (rem-10) + 'a' : rem + '0';
+            len++;
+            i = i / base;
+        }
+        if (negative) {
+            str[len] = '-';
+            len++;
+        }
+        str.setLength(len);
+        var half = len >> 1;
+        len--;
+        for (var x = 0; x < half; x++) {
+            var t = str[x];
+            str[x] = str[len-x];
+            str[len-x] = t;
+        }
+        return new String(str);
+    }
 }
