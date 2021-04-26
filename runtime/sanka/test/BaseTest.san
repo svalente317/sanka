@@ -1,5 +1,7 @@
 // -*- mode: Java; -*-
 package sanka.test;
+import sanka.io.File;
+import sanka.io.FileStats;
 
 abstract class BaseTest {
 
@@ -39,7 +41,32 @@ abstract class BaseTest {
         return this.failureCount;
     }
 
-    void removeDirectory(String directoryName) {
-        // TODO implement me recursively
+    int removeDirectory(File directory) {
+        var failureCount = 0;
+        var names = directory.list();
+        if (names == null) {
+            failureCount++;
+        } else {
+            var stats = new FileStats();
+            for (var name : names) {
+                var child = new File(directory, name);
+                stats.isDirectory = false;
+                if (child.getStats(stats, false) != 0) {
+                    failureCount++;
+                }
+                if (stats.isDirectory) {
+                    var results = removeDirectory(child);
+                    failureCount = failureCount + results;
+                } else {
+                    if (!child.delete()) {
+                        failureCount++;
+                    }
+                }
+            }
+            if (!directory.delete()) {
+                failureCount++;
+            }
+        }
+        return failureCount;
     }
 }
