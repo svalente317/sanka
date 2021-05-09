@@ -51,4 +51,36 @@ class IOUtils {
         var body = IOUtils.readFile(filename);
         return body == null ? null : new String(body);
     }
+
+    /**
+     * Recursively remove the given directory and its contents.
+     */
+    static int removeDirectory(File directory) {
+        var failureCount = 0;
+        var names = directory.list();
+        if (names == null) {
+            failureCount++;
+        } else {
+            var stats = new FileStats();
+            for (var name : names) {
+                var child = new File(directory, name);
+                stats.isDirectory = false;
+                if (child.getStats(stats, false) != 0) {
+                    failureCount++;
+                }
+                if (stats.isDirectory) {
+                    var results = removeDirectory(child);
+                    failureCount = failureCount + results;
+                } else {
+                    if (!child.delete()) {
+                        failureCount++;
+                    }
+                }
+            }
+            if (!directory.delete()) {
+                failureCount++;
+            }
+        }
+        return failureCount;
+    }
 }
