@@ -35,8 +35,11 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/net/Socket.c \
 	bin/sanka/test/BaseTest.c \
 	bin/sanka/util/Base64.c \
+	bin/sanka/util/DateFormat.c \
+	bin/sanka/util/DateTime.c \
 	bin/sanka/util/Integer.c \
-	bin/sanka/util/Random.c
+	bin/sanka/util/Random.c \
+	bin/sanka/util/StringUtils.c
 
 OBJS=	bin/panic.o \
 	bin/array.o \

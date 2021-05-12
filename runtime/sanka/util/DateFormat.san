@@ -1,0 +1,47 @@
+// -*- mode: Java; -*-
+package sanka.util;
+
+class DateFormat {
+    c__include "time.h";
+
+    /**
+     * Parse the given date according to the given format.
+     *
+     * If the the format does not contain %z (time zone), then
+     * results.timeMillis is the date in UTC.
+     *
+     * @return true if the entire format was matched. Even if this is false,
+     * some fields may be matched and updated in results.
+     */
+    static boolean parse(String datetime, String format, DateTime results) {
+        var parseCount = 0;
+        var unixTime = new long(0);
+        c__stmt "struct tm tm";
+        c__stmt "tm.tm_year = tm.tm_mon = tm.tm_mday = tm.tm_hour = tm.tm_min = tm.tm_sec = 0";
+        c__stmt "tm.tm_gmtoff = 0";
+        c__stmt "char *cp = strptime(datetime, format, &tm)";
+        c__stmt "if (cp != NULL) parseCount = (int)(cp - datetime)";
+        c__stmt "unixTime = tm.tm_gmtoff";
+        c__stmt "tm.tm_gmtoff = 0";
+        c__stmt "unixTime = timegm(&tm) - unixTime";
+        results.timeMillis = unixTime * 1000;
+        c__stmt "results->year = tm.tm_year";
+        c__stmt "results->month = tm.tm_mon";
+        c__stmt "results->mday = tm.tm_mday";
+        c__stmt "results->hour = tm.tm_hour";
+        c__stmt "results->minute = tm.tm_min";
+        c__stmt "results->second = tm.tm_sec";
+        return (datetime.length() == parseCount);
+    }
+
+    static String unparse(String format, long time, boolean local) {
+        c__stmt "time_t t = (time_t)(time / 1000)";
+        c__stmt "struct tm tm";
+        c__stmt "if (local) localtime_r(&t, &tm); else gmtime_r(&t, &tm)";
+        c__stmt "char buffer[80]";
+        c__stmt "struct array a";
+        c__stmt "a.data = buffer";
+        c__stmt "a.length = strftime(buffer, 80, format, &tm)";
+        c__stmt "return NEW_STRING(&a)";
+    }
+}

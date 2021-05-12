@@ -26,17 +26,6 @@ class System {
         c__stmt "return ((long long)now.tv_sec)*1000 + (now.tv_usec/1000)";
     }
 
-    static String formatTime(String format, long time, boolean local) {
-        c__stmt "time_t t = (time_t)(time / 1000)";
-        c__stmt "struct tm tm";
-        c__stmt "if (local) localtime_r(&t, &tm); else gmtime_r(&t, &tm)";
-        c__stmt "char buffer[80]";
-        c__stmt "struct array a";
-        c__stmt "a.data = buffer";
-        c__stmt "a.length = strftime(buffer, 80, format, &tm)";
-        c__stmt "return NEW_STRING(&a)";
-    }
-
     static void sleep(int millis) {
         c__stmt "usleep(millis * 1000)";
     }

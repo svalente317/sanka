@@ -1,4 +1,8 @@
 #define GC_THREADS 1
+#ifdef __linux__
+#define _XOPEN_SOURCE 600
+#define _DEFAULT_SOURCE 1
+#endif
 #include <gc.h>
 #include <rb.h>
 #include <string.h>
