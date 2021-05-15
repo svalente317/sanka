@@ -33,7 +33,8 @@ class FunnyReader {
         return len;
     }
 
-    void close() {
+    int close() {
+        return 0;
     }
 }
 

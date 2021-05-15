@@ -8,12 +8,18 @@ package sanka.io;
 class LineReader {
     const MAX_LINE_LENGTH = 8096;
 
+    private int maxLineLength;
     private Reader reader;
     private byte[] prefix;
 
     LineReader(Reader reader) {
+        this.maxLineLength = MAX_LINE_LENGTH;
         this.reader = reader;
         this.prefix = null;
+    }
+
+    void setMaxLineLength(int value) {
+        this.maxLineLength = value;
     }
 
     /**
@@ -30,7 +36,8 @@ class LineReader {
      * Finally, if necessary, it will block until the stream provides data
      * that terminates the line.
      *
-     * If the stream reaches 8096 bytes without LF, then this returns null.
+     * If the stream reaches 8096 bytes without LF, then this returns that
+     * block of data as a line. And the next line starts with the next byte.
      *
      * @return the next line from the stream
      */
@@ -41,46 +48,52 @@ class LineReader {
             if (eol >= 0) {
                 var line = this.prefix;
                 this.prefix = arraySuffix(this.prefix, eol+1);
-                stripLine(line, eol);
+                if (eol > 0 && line[eol-1] == '\r') {
+                    eol--;
+                }
+                line.setLength(eol);
                 return new String(line);
             }
         }
         var buffer = null;
+        var next = 0;
         while (true) {
             buffer = new byte[1024];
             var len = this.reader.read(buffer);
             if (len <= 0) {
-                return null;
+                buffer = this.prefix;
+                this.prefix = null;
+                return buffer == null ? null : new String(buffer);
             }
             buffer.setLength(len);
             eol = findByte(buffer, '\n');
             if (eol >= 0) {
+                next = eol+1;
                 break;
             }
             if (this.prefix == null) {
                 this.prefix = buffer;
                 continue;
             }
-            if (this.prefix.length + buffer.length >= MAX_LINE_LENGTH) {
-                return null;
+            next = this.maxLineLength - this.prefix.length;
+            if (next >= 0 && next < len) {
+                break;
             }
             this.prefix.addAll(buffer);
         }
-        if (eol == 0 && this.prefix != null &&
-            this.prefix[this.prefix.length-1] == '\r') {
-            var line = this.prefix;
-            line.setLength(line.length-1);
-            buffer.delete(0, 1);
-            this.prefix = buffer;
-            return new String(line);
-        }
-        var newPrefix = arraySuffix(buffer, eol+1);
-        stripLine(buffer, eol);
+        var newPrefix = arraySuffix(buffer, next);
+        buffer.setLength(next);
         if (this.prefix != null) {
             this.prefix.addAll(buffer);
             buffer = this.prefix;
         }
         this.prefix = newPrefix;
+        if (buffer.length > 0 && buffer[buffer.length-1] == '\n') {
+            buffer.setLength(buffer.length-1);
+            if (buffer.length > 0 && buffer[buffer.length-1] == '\r') {
+                buffer.setLength(buffer.length-1);
+            }
+        }
         return new String(buffer);
     }
 
@@ -102,13 +115,6 @@ class LineReader {
             suffix[idx] = arr[start+idx];
         }
         return suffix;
-    }
-
-    private void stripLine(byte[] line, int eol) {
-        if (eol > 0 && line[eol-1] == '\r') {
-            eol--;
-        }
-        line.setLength(eol);
     }
 
     /**
