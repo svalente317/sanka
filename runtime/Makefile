@@ -10,6 +10,7 @@ PREFIX=/opt/sanka
 
 SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/lang/Condition.c \
+	bin/sanka/lang/Math.c \
 	bin/sanka/lang/Mutex.c \
 	bin/sanka/lang/Runnable.c \
 	bin/sanka/lang/String.c \

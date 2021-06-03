@@ -1,6 +1,7 @@
 // -*- mode: Java; -*-
 package sanka.json;
 import sanka.io.IOUtils;
+import sanka.lang.Math;
 import sanka.json.JsonElement;
 import sanka.json.JsonObject;
 
@@ -242,10 +243,7 @@ class JsonParser {
                 }
             }
         }
-        if (idx == this.length) {
-            return idx;
-        }
-        if (this.text[idx] == '.') {
+        if (idx < this.length && this.text[idx] == '.') {
             isFrac = true;
             idx++;
             ch = this.text[idx];
@@ -268,7 +266,45 @@ class JsonParser {
                 }
             }
         }
-        // TODO E sign digits
+        if (idx < this.length &&
+            (this.text[idx] == 'e' || this.text[idx] == 'E')) {
+            idx++;
+            var exp = 0;
+            var isMinusExp = false;
+            ch = this.text[idx];
+            if (ch == '+' || ch == '-') {
+                isMinusExp = (ch == '-');
+                idx++;
+                ch = this.text[idx];
+            }
+            if (!(ch >= '0' && ch <= '9')) {
+                this.errorIdx = idx;
+                return -1;
+            }
+            while (true) {
+                exp = (exp*10) + (ch-'0');
+                idx++;
+                if (idx == this.length) {
+                    break;
+                }
+                ch = this.text[idx];
+                if (!(ch >= '0' && ch <= '9')) {
+                    break;
+                }
+            }
+            if (isMinusExp) {
+                exp = -exp;
+            }
+            if (!isFrac) {
+                fval = ival;
+            }
+            fval = fval * Math.pow(10.0, exp);
+            if (!isFrac && !isMinusExp && fval < 2147483647) {
+                ival = new int(fval);
+            } else {
+                isFrac = true;
+            }
+        }
         if (isFrac) {
             if (isMinus) {
                 fval = -fval;

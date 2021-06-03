@@ -1,0 +1,10 @@
+// -*- mode: Java; -*-
+package sanka.lang;
+
+class Math {
+    c__include "math.h";
+
+    static double pow(double base, double power) {
+        c__stmt "return pow(base, power)";
+    }
+}
