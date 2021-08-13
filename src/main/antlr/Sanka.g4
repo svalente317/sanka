@@ -122,11 +122,6 @@ methodDeclaration
         (block | ';')
     ;
 
-blockOrSemi
-    :   block
-    |   ';'
-    ;
-
 interfaceBodyDeclaration
     :   constDeclaration
     |   interfaceMethodDeclaration
@@ -147,10 +142,6 @@ typeType
 classOrInterfaceType
     :   ( Identifier '.' )* Identifier
     ;
-
-//typeArguments
-//    :   '<' typeType (',' typeType)* '>'
-//    ;
 
 primitiveType
     :   'boolean'
@@ -282,6 +273,8 @@ expression
     |   expression '?' expression ':' expression
     |   'super' '.' Identifier
     |   '(' classOrInterfaceType ')' expression
+    |   arrayDefinition
+    |   mapDefinition
     ;
 
 primary
@@ -297,13 +290,17 @@ creator
     ;
 
 arrayCreatorRest
-    :   '[' ']' '{' expressionList? '}'
-    |   '[' expression ']'
+    :   '[' expression ']'
+    |   '[' ']' arrayDefinition
     |   '[' 'class' typeType ']' mapDefinition?
     ;
 
 classCreatorRest
     :    '(' expressionList? ')' classBody?
+    ;
+
+arrayDefinition
+    :    '{' expressionList? '}'
     ;
 
 mapDefinition

@@ -12,6 +12,7 @@ import sanka.MethodDefinition.ParameterDefinition;
 import sanka.antlr4.SankaParser.AnonymousClassBodyContext;
 import sanka.antlr4.SankaParser.AnonymousClassBodyDeclarationContext;
 import sanka.antlr4.SankaParser.ArrayCreatorRestContext;
+import sanka.antlr4.SankaParser.ArrayDefinitionContext;
 import sanka.antlr4.SankaParser.ClassOrInterfaceTypeContext;
 import sanka.antlr4.SankaParser.CreatorContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
@@ -85,6 +86,14 @@ public class ExpressionDefinition {
         }
         if (ctx.creator() != null) {
             evaluateCreator(ctx.creator());
+            return;
+        }
+        if (ctx.arrayDefinition() != null) {
+            evaluateArrayDefinition(ctx.arrayDefinition());
+            return;
+        }
+        if (ctx.mapDefinition() != null) {
+            // TODO evaluateMapDefinition(ctx.mapDefinition());
             return;
         }
         int count = ctx.getChildCount();
@@ -347,7 +356,27 @@ public class ExpressionDefinition {
             checkIntegralType(ctx.expression(), this.expression1.type);
             return;
         }
-        // Case 2 of 3. "new type[class String]".
+        // Case 2 of 3. "new type[]{ value, ... }".
+        if (ctx.arrayDefinition() != null) {
+            this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
+            TypeDefinition arrayType = new TypeDefinition();
+            arrayType.arrayOf = this.type;
+            this.type = arrayType;
+            ExpressionListContext expressionList = ctx.arrayDefinition().expressionList();
+            if (expressionList != null) {
+                List<ExpressionContext> exprList = expressionList.expression();
+                this.argList = new ExpressionDefinition[exprList.size()];
+                for (int idx = 0; idx < this.argList.length; idx++) {
+                    this.argList[idx] = new ExpressionDefinition();
+                    this.argList[idx].evaluate(exprList.get(idx));
+                    checkRequiredType(exprList.get(idx), this.type.arrayOf, this.argList[idx]);
+                }
+            } else {
+                this.argList = new ExpressionDefinition[0];
+            }
+            return;
+        }
+        // Case 3 of 3. "new type[class String]".
         // Currently, this.type is the type of the map values.
         if (ctx.typeType() != null) {
             this.expressionType = ExpressionType.NEW_MAP;
@@ -373,22 +402,6 @@ public class ExpressionDefinition {
                 }
             }
             return;
-        }
-        // Case 3 of 3. "new type[]{ value, ... }".
-        this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
-        TypeDefinition arrayType = new TypeDefinition();
-        arrayType.arrayOf = this.type;
-        this.type = arrayType;
-        if (ctx.expressionList() != null) {
-            List<ExpressionContext> exprList = ctx.expressionList().expression();
-            this.argList = new ExpressionDefinition[exprList.size()];
-            for (int idx = 0; idx < this.argList.length; idx++) {
-                this.argList[idx] = new ExpressionDefinition();
-                this.argList[idx].evaluate(exprList.get(idx));
-                checkRequiredType(exprList.get(idx), this.type.arrayOf, this.argList[idx]);
-            }
-        } else {
-            this.argList = new ExpressionDefinition[0];
         }
     }
 
@@ -827,5 +840,51 @@ public class ExpressionDefinition {
         if (!TypeUtils.isInterfaceImplemented(interfaceDef, classdef)) {
             env.printError(classCtx, "class " + classdef + " does not implement " + interfaceDef);
         }
+    }
+
+    void evaluateArrayDefinition(ArrayDefinitionContext ctx) {
+        Environment env = Environment.getInstance();
+        this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
+        TypeDefinition reqType = null;
+        if (ctx.expressionList() == null) {
+            env.printError(ctx, "empty array type cannot be determined");
+            return;
+        }
+        List<ExpressionContext> exprList = ctx.expressionList().expression();
+        this.argList = new ExpressionDefinition[exprList.size()];
+        boolean haveNull = false;
+        for (int idx = 0; idx < this.argList.length; idx++) {
+            ExpressionContext ec = exprList.get(idx);
+            ExpressionDefinition arg = new ExpressionDefinition();
+            arg.evaluate(ec);
+            if (arg.type == null) {
+                return;
+            }
+            this.argList[idx] = arg;
+            if (arg.type.isNullType()) {
+                haveNull = true;
+                continue;
+            }
+            if (reqType == null) {
+                if (arg.type.isVoidType() || arg.type.equals(TypeDefinition.METHOD_TYPE)) {
+                    env.printError(ec, "type " + arg.type + " not legal array type");
+                    return;
+                }
+                reqType = arg.type;
+            } else if (!reqType.equals(arg.type)) {
+                env.printError(ec, "array type is " + reqType + ", arg type is " + arg.type);
+                return;
+            }
+        }
+        if (reqType == null) {
+            env.printError(ctx, "array type cannot be determined");
+            return;
+        }
+        if (reqType.isPrimitiveType && haveNull) {
+            env.printError(ctx, "array type is " + reqType + ", arg type is null");
+            return;
+        }
+        this.type = new TypeDefinition();
+        this.type.arrayOf = reqType;
     }
 }
