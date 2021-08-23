@@ -1,5 +1,17 @@
 # TODO
 
+* try removing unnecessary parentheses
+
+* contructor new Object(){field: value}
+
+* regular cast instead of new int(x).
+  does cast work with both interface and abstract?
+
+* define map - must use int, not short or long.
+  implied map - promote short to int.
+
+* document creators
+
 * support typecast for abstract classes
 
 * support classes with the same name in different packages

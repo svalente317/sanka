@@ -18,6 +18,7 @@ import sanka.antlr4.SankaParser.CreatorContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.ExpressionListContext;
 import sanka.antlr4.SankaParser.LiteralContext;
+import sanka.antlr4.SankaParser.MapDefinitionContext;
 import sanka.antlr4.SankaParser.MapEntryContext;
 import sanka.antlr4.SankaParser.PrimaryContext;
 
@@ -93,7 +94,7 @@ public class ExpressionDefinition {
             return;
         }
         if (ctx.mapDefinition() != null) {
-            // TODO evaluateMapDefinition(ctx.mapDefinition());
+            evaluateMapDefinition(ctx.mapDefinition());
             return;
         }
         int count = ctx.getChildCount();
@@ -886,5 +887,49 @@ public class ExpressionDefinition {
         }
         this.type = new TypeDefinition();
         this.type.arrayOf = reqType;
+    }
+
+    void evaluateMapDefinition(MapDefinitionContext ctx) {
+        Environment env = Environment.getInstance();
+        this.expressionType = ExpressionType.NEW_MAP;
+        TypeDefinition keyType = null;
+        TypeDefinition valueType = null;
+        List<MapEntryContext> entryList = ctx.mapEntry();
+        if (entryList == null || entryList.isEmpty()) {
+            env.printError(ctx, "empty map type cannot be determined");
+            return;
+        }
+        this.argList = new ExpressionDefinition[entryList.size()];
+        for (int idx = 0; idx < this.argList.length; idx++) {
+            MapEntryContext entry = entryList.get(idx);
+            ExpressionDefinition arg = new ExpressionDefinition();
+            arg.expression1 = new ExpressionDefinition();
+            arg.expression1.evaluate(entry.expression(0));
+            arg.expression2 = new ExpressionDefinition();
+            arg.expression2.evaluate(entry.expression(1));
+            if (arg.expression1.type == null || arg.expression2.type == null) {
+                return;
+            }
+            if (keyType == null) {
+                keyType = arg.expression1.type;
+                checkMapKeyType(entry.expression(0), keyType);
+            } else {
+                checkRequiredType(entry.expression(0), keyType, arg.expression1);
+            }
+            if (valueType == null) {
+                valueType = arg.expression2.type;
+                if (valueType.isVoidType() || valueType.isNullType() ||
+                        valueType.equals(TypeDefinition.METHOD_TYPE)) {
+                    env.printError(entry, "type " + valueType + " not legal array type");
+                    return;
+                }
+            } else {
+                checkRequiredType(entry, valueType, arg.expression2);
+            }
+            this.argList[idx] = arg;
+        }
+        this.type = new TypeDefinition();
+        this.type.arrayOf = valueType;
+        this.type.keyType = keyType;
     }
 }

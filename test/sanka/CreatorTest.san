@@ -1,0 +1,25 @@
+// -*- mode: Java; -*-
+package sanka.test;
+
+class CreatorTest {
+    static void main(String[] argv) {
+        for (var s : new String[]{"verbose", "syntax"}) {
+            System.println(": " + s);
+        }
+        for (var s : {"Hello", null, "world!"}) {
+            System.println(": " + s);
+        }
+        for (var i : {1, 2, 3}) {
+            System.println(": " + i);
+        }
+        for (var k, v : new String[class String]{"verbose": "t", "syntax": "x"}) {
+            System.println(":" + k + ": " + v);
+        }
+        for (var k, v : {"one": 1, "two": 2}) {
+            System.println(":" + k + ": " + v);
+        }
+        for (var k, v : {1: "one", 2: "two"}) {
+            System.println(":" + k + ": " + v);
+        }
+    }
+}
