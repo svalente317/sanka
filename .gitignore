@@ -5,11 +5,12 @@ build
 examples/sanka
 examples/*.o
 examples/channeltest
-examples/cheesefinder
+examples/copy_directory
 examples/file_to_sanka
 examples/json_format
 examples/parsenumber
 examples/processviewer
+examples/sequence_generator
 examples/sudoku
 examples/total
 examples/wordmap

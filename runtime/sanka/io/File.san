@@ -139,6 +139,14 @@ class File {
     }
 
     /**
+     * Get the name of this file in its parent directory.
+     */
+    String getName() {
+        var idx = this.pathname.lastIndexOf('/');
+        return idx < 0 ? this.pathname : this.pathname.substring(idx+1);
+    }
+
+    /**
      * Create the directory named by this abstract pathname, including any
      * missing parent directories. Note that if this operation fails, it may
      * have created some of the parent directories.

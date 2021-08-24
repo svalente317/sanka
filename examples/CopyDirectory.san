@@ -1,0 +1,69 @@
+// -*- mode: Java; -*-
+package sanka.examples;
+import sanka.io.File;
+import sanka.io.FileReader;
+import sanka.io.FileWriter;
+import sanka.io.FileStats;
+
+class CopyDirectory {
+
+    static int copyDirectory(File directory, File dstDirectory) {
+        dstDirectory.mkdirs();
+        var failureCount = 0;
+        var names = directory.list();
+        if (names == null) {
+            failureCount++;
+        } else {
+            var stats = new FileStats();
+            for (var name : names) {
+                var child = new File(directory, name);
+                var dstChild = new File(dstDirectory, name);
+                stats.isDirectory = false;
+                if (child.getStats(stats, false) != 0) {
+                    failureCount++;
+                }
+                if (stats.isDirectory) {
+                    var results = copyDirectory(child, dstChild);
+                    failureCount = failureCount + results;
+                } else {
+                    if (copyFile(child, dstChild) != 0) {
+                        failureCount++;
+                    }
+                }
+            }
+        }
+        return failureCount;
+    }
+
+    static int copyFile(File src, File dst) {
+        var reader = new FileReader();
+        var status = reader.open(src.getPath());
+        if (status != 0) {
+            return status;
+        }
+        var writer = new FileWriter();
+        status = writer.open(dst.getPath());
+        if (status != 0) {
+            reader.close();
+            return status;
+        }
+        var data = new byte[128 * 1024];
+        while (true) {
+            status = reader.read(data);
+            if (status <= 0) {
+                break;
+            }
+            data.setLength(status);
+            writer.write(data);
+        }
+        reader.close();
+        return writer.close();
+    }
+
+    static int main(String[] argv) {
+        var src = new File(argv[1]);
+        var dst = new File(argv[2]);
+        dst = new File(dst, src.getName());
+        return copyDirectory(src, dst);
+    }
+}

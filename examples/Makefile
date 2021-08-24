@@ -1,14 +1,14 @@
 PREFIX=	/opt/sanka
 
-PROGS=	channeltest cheesefinder file_to_sanka json_format parsenumber processviewer sudoku total wordmap
+PROGS=	channeltest copy_directory file_to_sanka json_format parsenumber processviewer sequence_generator sudoku total wordmap
 
 all:	$(PROGS)
 
 channeltest:	ChannelTest.san
 	sanka $^ --exe $@ --main sanka.examples.ChannelTest
 
-cheesefinder:		CheeseFinder.san Mouse.san
-	sanka $^ --exe $@ --main sanka.examples.CheeseFinder
+copy_directory:		CopyDirectory.san
+	sanka $^ --exe $@ --main sanka.examples.CopyDirectory
 
 file_to_sanka:	FileToSanka.san
 	sanka $^ --exe $@ --main sanka.examples.FileToSanka
@@ -21,6 +21,9 @@ parsenumber:	ParseNumber.san NumberMaps.san
 
 processviewer:	ProcessViewer.san
 	sanka $^ --exe $@ --main sanka.examples.ProcessViewer
+
+sequence_generator:		SequenceGenerator.san
+	sanka $^ --exe $@ --main sanka.examples.SequenceGenerator
 
 sudoku:		Sudoku.san
 	sanka $^ --exe $@ --main sanka.examples.Sudoku
