@@ -11,9 +11,7 @@ import sanka.ClassDefinition.FieldDefinition;
 import sanka.MethodDefinition.ParameterDefinition;
 import sanka.antlr4.SankaParser.AnonymousClassBodyContext;
 import sanka.antlr4.SankaParser.AnonymousClassBodyDeclarationContext;
-import sanka.antlr4.SankaParser.ArrayCreatorRestContext;
 import sanka.antlr4.SankaParser.ArrayDefinitionContext;
-import sanka.antlr4.SankaParser.ClassOrInterfaceTypeContext;
 import sanka.antlr4.SankaParser.CreatorContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.ExpressionListContext;
@@ -21,6 +19,7 @@ import sanka.antlr4.SankaParser.LiteralContext;
 import sanka.antlr4.SankaParser.MapDefinitionContext;
 import sanka.antlr4.SankaParser.MapEntryContext;
 import sanka.antlr4.SankaParser.PrimaryContext;
+import sanka.antlr4.SankaParser.ScalarTypeContext;
 
 public class ExpressionDefinition {
 
@@ -117,8 +116,8 @@ public class ExpressionDefinition {
             }
             return;
         case 4:
-            if (ctx.classOrInterfaceType() != null) {
-                evaluateTypeCast(ctx.classOrInterfaceType(), ctx.expression(0));
+            if (ctx.scalarType() != null) {
+                evaluateTypeCast(ctx.scalarType(), ctx.expression(0));
                 return;
             }
             String left_op = ((TerminalNode) ctx.getChild(1)).getSymbol().getText();
@@ -282,49 +281,43 @@ public class ExpressionDefinition {
      * Evaluate an expression like "new Class()" or "new Class[x]" or "new Class[]{...}".
      */
     void evaluateCreator(CreatorContext creator) {
+        if (creator.classType() != null) {
+            evaluateNewInstance(creator);
+            return;
+        }
+        if (creator.typeType() != null) {
+            evaluateArrayCreator(creator);
+            return;
+        }
+        if (creator.mapType() != null) {
+            evaluateMapCreator(creator);
+            return;
+        }
         if (creator.anonymousClassBody() != null) {
             evaluateAnonymousCreator(creator.anonymousClassBody());
             return;
         }
+    }
+
+    private void evaluateNewInstance(CreatorContext creator) {
         Environment env = Environment.getInstance();
+        this.expressionType = ExpressionType.NEW_INSTANCE;
         this.type = new TypeDefinition();
-        this.type.parse(creator.typeType());
-        ClassDefinition classdef = null;
-        TypeDefinition baseType = this.type;
-        while (baseType.arrayOf != null) {
-            baseType = baseType.arrayOf;
-        }
-        if (!baseType.isPrimitiveType) {
-            classdef = env.loadClassDefinition(baseType);
-            if (classdef == null) {
-                env.printError(creator, "class " + baseType + " undefined");
-                this.type = null;
-                return;
-            }
-        }
-        if (creator.arrayCreatorRest() != null) {
-            evaluateArrayCreator(creator.arrayCreatorRest());
+        this.type.parse(creator.classType());
+        if (this.type.isPrimitiveType) {
+            env.printError(creator, "cannot create new instance of primitive type " + this.type);
             return;
         }
-        if (this.type.arrayOf != null) {
-             env.printError(creator, "cannot call constructor method for array");
-             this.type = null;
-             return;
-        }
-        this.expressionType = ExpressionType.NEW_INSTANCE;
-        ExpressionListContext exprlist = creator.classCreatorRest().expressionList();
-        if (this.type.isPrimitiveType) {
-            if (!this.type.isNumericType()) {
-                env.printError(creator, "cannot create new instance of " + this.type);
-                return;
-            }
-            evaluateSingleNumericArgCreator(exprlist);
+        ClassDefinition classdef = env.loadClassDefinition(this.type);
+        if (classdef == null) {
+            env.printError(creator, "class " + this.type + " undefined");
             return;
         }
         if (classdef.isAbstract) {
             env.printError(creator, "cannot create new instance of abstract class " + this.type);
             return;
         }
+        ExpressionListContext exprlist = creator.expressionList();
         int numArgs = exprlist == null ? 0 : exprlist.expression().size();
         MethodDefinition method = classdef.getMethod(classdef.name, numArgs);
         if (method == null) {
@@ -344,26 +337,39 @@ public class ExpressionDefinition {
     /**
      * Evaluate the array part of an expression.
      */
-    void evaluateArrayCreator(ArrayCreatorRestContext ctx) {
-        // Case 1 of 3. "new type[size]".
-        // Currently, this.type is the type of the array element.
-        if (ctx.expression() != null) {
+    private void evaluateArrayCreator(CreatorContext creator) {
+        Environment env = Environment.getInstance();
+        this.type = new TypeDefinition();
+        this.type.parse(creator.typeType());
+        TypeDefinition baseType = this.type;
+        while (baseType.arrayOf != null) {
+            baseType = baseType.arrayOf;
+        }
+        if (!baseType.isPrimitiveType) {
+            ClassDefinition classdef = env.loadClassDefinition(baseType);
+            if (classdef == null) {
+                env.printError(creator, "class " + baseType + " undefined");
+                return;
+            }
+        }
+        // "new type[size]"
+        if (creator.expression() != null) {
             this.expressionType = ExpressionType.NEW_ARRAY;
             TypeDefinition arrayType = new TypeDefinition();
             arrayType.arrayOf = this.type;
             this.type = arrayType;
             this.expression1 = new ExpressionDefinition();
-            this.expression1.evaluate(ctx.expression());
-            checkIntegralType(ctx.expression(), this.expression1.type);
+            this.expression1.evaluate(creator.expression());
+            checkIntegralType(creator.expression(), this.expression1.type);
             return;
         }
-        // Case 2 of 3. "new type[]{ value, ... }".
-        if (ctx.arrayDefinition() != null) {
+        // "new type[]{ value, ... }"
+        if (creator.arrayDefinition() != null) {
             this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
             TypeDefinition arrayType = new TypeDefinition();
             arrayType.arrayOf = this.type;
             this.type = arrayType;
-            ExpressionListContext expressionList = ctx.arrayDefinition().expressionList();
+            ExpressionListContext expressionList = creator.arrayDefinition().expressionList();
             if (expressionList != null) {
                 List<ExpressionContext> exprList = expressionList.expression();
                 this.argList = new ExpressionDefinition[exprList.size()];
@@ -377,32 +383,27 @@ public class ExpressionDefinition {
             }
             return;
         }
-        // Case 3 of 3. "new type[class String]".
-        // Currently, this.type is the type of the map values.
-        if (ctx.typeType() != null) {
-            this.expressionType = ExpressionType.NEW_MAP;
-            TypeDefinition mapType = new TypeDefinition();
-            mapType.arrayOf = this.type;
-            this.type = mapType;
-            mapType.keyType = new TypeDefinition();
-            mapType.keyType.parse(ctx.typeType());
-            checkMapKeyType(ctx.typeType(), mapType.keyType);
-            if (ctx.mapDefinition() != null && ctx.mapDefinition().mapEntry() != null) {
-                List<MapEntryContext> entryList = ctx.mapDefinition().mapEntry();
-                this.argList = new ExpressionDefinition[entryList.size()];
-                for (int idx = 0; idx < this.argList.length; idx++) {
-                    MapEntryContext entry = entryList.get(idx);
-                    ExpressionDefinition arg = new ExpressionDefinition();
-                    arg.expression1 = new ExpressionDefinition();
-                    arg.expression1.evaluate(entry.expression(0));
-                    checkRequiredType(entry, this.type.keyType, arg.expression1);
-                    arg.expression2 = new ExpressionDefinition();
-                    arg.expression2.evaluate(entry.expression(1));
-                    checkRequiredType(entry, this.type.arrayOf, arg.expression2);
-                    this.argList[idx] = arg;
-                }
+    }
+
+    private void evaluateMapCreator(CreatorContext creator) {
+        this.expressionType = ExpressionType.NEW_MAP;
+        this.type = new TypeDefinition();
+        this.type.parse(creator.mapType());
+        checkMapKeyType(creator, this.type.keyType);
+        if (creator.mapDefinition() != null && creator.mapDefinition().mapEntry() != null) {
+            List<MapEntryContext> entryList = creator.mapDefinition().mapEntry();
+            this.argList = new ExpressionDefinition[entryList.size()];
+            for (int idx = 0; idx < this.argList.length; idx++) {
+                MapEntryContext entry = entryList.get(idx);
+                ExpressionDefinition arg = new ExpressionDefinition();
+                arg.expression1 = new ExpressionDefinition();
+                arg.expression1.evaluate(entry.expression(0));
+                checkRequiredType(entry, this.type.keyType, arg.expression1);
+                arg.expression2 = new ExpressionDefinition();
+                arg.expression2.evaluate(entry.expression(1));
+                checkRequiredType(entry, this.type.arrayOf, arg.expression2);
+                this.argList[idx] = arg;
             }
-            return;
         }
     }
 
@@ -438,7 +439,7 @@ public class ExpressionDefinition {
 
     void checkMapKeyType(ParserRuleContext ctx, TypeDefinition type) {
         if (type != null) {
-            if (!(type.isStringType() || type.isIntegralType())) {
+            if (!(type.isStringType() || type.equals(TypeDefinition.INT_TYPE))) {
                 Environment env = Environment.getInstance();
                 env.printError(ctx, "invalid type for map key: " + type);
             }
@@ -680,22 +681,6 @@ public class ExpressionDefinition {
         }
     }
 
-    void evaluateSingleNumericArgCreator(ExpressionListContext exprList) {
-        Environment env = Environment.getInstance();
-        int numArgs = exprList == null ? 0 : exprList.expression().size();
-        if (numArgs != 1) {
-            env.printError(exprList, "creator takes 1 argument");
-            return;
-        }
-        this.argList = new ExpressionDefinition[1];
-        this.argList[0] = new ExpressionDefinition();
-        this.argList[0].evaluate(exprList.expression(0));
-        TypeDefinition type = this.argList[0].type;
-        if (type == null || !type.isNumericType()) {
-            env.printError(exprList, "incompatible types: creator argument must be numeric");
-        }
-    }
-
     void evaluateTernaryConditional(ExpressionContext expr1, ExpressionContext expr2,
             ExpressionContext expr3) {
         this.expressionType = ExpressionType.TERNARY;
@@ -808,10 +793,22 @@ public class ExpressionDefinition {
         this.argList = valueList.toArray(new ExpressionDefinition[0]);
     }
 
-    void evaluateTypeCast(ClassOrInterfaceTypeContext classCtx, ExpressionContext ctx) {
+    void evaluateTypeCast(ScalarTypeContext classCtx, ExpressionContext ctx) {
         Environment env = Environment.getInstance();
         this.type = new TypeDefinition();
         this.type.parse(classCtx);
+        this.expressionType = ExpressionType.TYPE_CAST;
+        this.expression1 = new ExpressionDefinition();
+        this.expression1.evaluate(ctx);
+        if (this.expression1.type == null) {
+            return;
+        }
+        if (this.type.isPrimitiveType) {
+            if (!(this.type.isNumericType() && this.expression1.type.isNumericType())) {
+                env.printError(classCtx, "incompatible types: cast must be numeric");
+            }
+            return;
+        }
         ClassDefinition classdef = env.loadClassDefinition(this.type);
         if (classdef == null) {
             env.printError(classCtx, "class " + this.type + " undefined");
@@ -820,12 +817,6 @@ public class ExpressionDefinition {
         if (classdef.isInterface || classdef.isAbstract) {
             env.printError(classCtx, "cannot cast to " + this.type +
                     " because it is not concrete");
-            return;
-        }
-        this.expressionType = ExpressionType.TYPE_CAST;
-        this.expression1 = new ExpressionDefinition();
-        this.expression1.evaluate(ctx);
-        if (this.expression1.type == null) {
             return;
         }
         ClassDefinition interfaceDef = env.loadClassDefinition(this.expression1.type);

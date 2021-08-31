@@ -300,7 +300,7 @@ class JsonParser {
             }
             fval = fval * Math.pow(10.0, exp);
             if (!isFrac && !isMinusExp && fval < 2147483647) {
-                ival = new int(fval);
+                ival = (int) fval;
             } else {
                 isFrac = true;
             }

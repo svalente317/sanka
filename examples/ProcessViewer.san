@@ -228,7 +228,7 @@ class ProcessViewer {
      */
     void print(Process[] processes, String[] ignoreList, boolean allUsers) {
         var uid = System.getuid();
-        var ignore = new boolean[class String];
+        var ignore = new map[String]boolean;
         if (ignoreList != null) {
             for (var name : ignoreList) {
                 ignore[name] = true;

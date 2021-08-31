@@ -35,7 +35,7 @@ serializable class SerializableClass {
         this.s = -1000;
         this.i = 8888;
         this.lg = -2345678901;
-        this.str = "column 1" + new byte(9) + "column 2";
+        this.str = "column 1" + ((byte) 9) + "column 2";
         this.d = new Dummy();
 
         this.shortArr = new short[]{ 256, -1 };
@@ -56,7 +56,7 @@ class SerializableTest extends BaseTest {
         assert(t.s == -1000, "short");
         assert(t.i == 8888, "int");
         assert(t.lg == -2345678901, "long");
-        assert(t.str == "column 1" + new byte(9) + "column 2", "string");
+        assert(t.str == "column 1" + ((byte) 9) + "column 2", "string");
         assert(t.nullString == null, "null string");
         assert(t.shortArr.length == 2, "short array");
         assert(t.nullArr == null, "null array");

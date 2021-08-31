@@ -1,5 +1,7 @@
 # TODO
 
+* support cast and typeswitch for abstract types
+
 * try removing unnecessary parentheses
 
 * contructor new Object(){field: value}

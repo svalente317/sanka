@@ -60,7 +60,7 @@ class ParseNumber {
         return value;
     }
 
-    int parseWord(int[String] map) {
+    int parseWord(map[String]int map) {
         if (this.index >= this.words.length) {
             return 0;
         }
@@ -72,12 +72,6 @@ class ParseNumber {
     }
 
     static void main(String[] argv) {
-        var s1 = "two billion one hundred three thousand fifteen";
-        var s2 = "one hundred thirty billion fifty one million eight";
-        var s3 = "seventeen";
-        var pn = new ParseNumber();
-        System.println("s1=" + pn.parseEnglishNumber(s1));
-        System.println("s2=" + pn.parseEnglishNumber(s2));
-        System.println("s3=" + pn.parseEnglishNumber(s3));
+        System.println("-> " + new ParseNumber().parseEnglishNumber(argv[1]));
     }
 }

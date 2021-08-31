@@ -1,5 +1,5 @@
 TESTS=	InterfaceTest AbstractClassTest AnonymousClassTest \
-	SerializableTest TypeswitchTest
+	CreatorTest SerializableTest TypeswitchTest
 
 all:	$(TESTS)
 
@@ -12,6 +12,10 @@ AbstractClassTest: sanka/AbstractClassTest.san
 	./$@
 
 AnonymousClassTest: sanka/AnonymousClassTest.san
+	sanka --top bin $< --exe $@ --main sanka.test.$@
+	./$@
+
+CreatorTest: sanka/CreatorTest.san
 	sanka --top bin $< --exe $@ --main sanka.test.$@
 	./$@
 

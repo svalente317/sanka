@@ -14,7 +14,7 @@ class Integer {
     }
 
     int intValue() {
-        return new int(this.value);
+        return (int) this.value;
     }
 
     long longValue() {
@@ -42,7 +42,7 @@ class Integer {
         var str = new byte[34];
         var len = 0;
         while (i > 0) {
-            var rem = new byte(i % base);
+            var rem = (byte)(i % base);
             str[len] = (rem > 9) ? (rem-10) + 'a' : rem + '0';
             len++;
             i = i / base;

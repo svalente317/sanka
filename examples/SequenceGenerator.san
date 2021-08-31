@@ -21,7 +21,7 @@ class SequenceGenerator {
 
     String[] sequence(Dependency[] inputPairs) {
         // Put the pairs into a map for graph traversal.
-        var dependencyMap = new String[][class String];
+        var dependencyMap = new map[String]String[];
         for (var pair : inputPairs) {
             var list = dependencyMap[pair.item];
             if (list == null) {
@@ -39,15 +39,15 @@ class SequenceGenerator {
 
         // BFS the graph.
         var results = new String[0];
-        var statusMap = new int[class String];
+        var statusMap = new map[String]int;
         for (var item : dependencyMap) {
             bfs(item, statusMap, results, dependencyMap);
         }
         return results;
     }
     
-    private void bfs(String item, int[String] statusMap, String[] results,
-                     String[][String] dependencyMap) {
+    private void bfs(String item, map[String]int statusMap, String[] results,
+                     map[String]String[] dependencyMap) {
         var status = statusMap[item];
         if (status == DONE) {
             return;

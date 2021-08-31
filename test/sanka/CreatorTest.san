@@ -1,25 +1,43 @@
 // -*- mode: Java; -*-
 package sanka.test;
 
-class CreatorTest {
-    static void main(String[] argv) {
+class CreatorTest extends BaseTest {
+    void run() {
+        var results = new String[0];
         for (var s : new String[]{"verbose", "syntax"}) {
-            System.println(": " + s);
+            results.add(s);
         }
         for (var s : {"Hello", null, "world!"}) {
-            System.println(": " + s);
+            results.add("" + s);
         }
         for (var i : {1, 2, 3}) {
-            System.println(": " + i);
+            results.add("" + i);
         }
-        for (var k, v : new String[class String]{"verbose": "t", "syntax": "x"}) {
-            System.println(":" + k + ": " + v);
+        for (var k, v : new map[String]String{"one": "v1", "two": "v2"}) {
+            results.add(k + ":" + v);
         }
         for (var k, v : {"one": 1, "two": 2}) {
-            System.println(":" + k + ": " + v);
+            results.add(k + ":" + v);
         }
         for (var k, v : {1: "one", 2: "two"}) {
-            System.println(":" + k + ": " + v);
+            results.add("" + k + ":" + v);
         }
+        var expected = {
+            "verbose", "syntax",
+            "Hello", "null", "world!",
+            "1", "2", "3",
+            "one:v1", "two:v2",
+            "one:1", "two:2",
+            "1:one", "2:two"
+        };
+        for (var idx = 0; idx < expected.length; idx++) {
+            assertString(expected[idx], results[idx], "value at idx=" + idx);
+        }
+    }
+
+    static int main(String[] argv) {
+        var test = new CreatorTest();
+        test.run();
+        return test.exit();
     }
 }

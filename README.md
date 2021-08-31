@@ -110,7 +110,7 @@ without promoting it to a class like `Integer`.
 Also, Sanka supports sorted maps as a built-in type. The maps use an
 array-like syntax. For example:
 ~~~
-map = new String[class int];
+map = new map[int]String;
 map[2018] = "Hello, world!";
 ~~~
 

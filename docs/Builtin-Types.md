@@ -40,7 +40,7 @@ so the return value must be an `int`. Or you can cast the result back
 to a short. This is fine:
 ~~~
 short doArithmetic(short s1, short s2) {
-    return new short(s1 + s2);
+    return (short)(s1 + s2);
 }
 ~~~
 
@@ -75,7 +75,7 @@ characters as integer literals. For example, this statement:
 ~~~
 is equivalent to this statement:
 ~~~
-    var v = new byte(65);
+    var v = (byte) 65;
 ~~~
 
 ## Class Types
@@ -158,6 +158,12 @@ of items:
     var arr2 = new String[]{"hello", "world", thirdString()};
 ~~~
 
+As shorthand, if the compiler can determine the array's type from the initial
+elements, then you can omit `new type[]`. For example:
+~~~
+    var arr3 = {"hello", "world", thirdString()};
+~~~
+
 Arrays use square bracket notation on the left-hand-side to set an
 element, and on the right-hand-side to get an element.
 ~~~
@@ -197,16 +203,19 @@ meaningless on arrays, just as they are on user-defined classes.
 
 The builtin map class is a lot like the builtin array class. A map is
 also a mutable collection of items of a type (primitive type or class
-type). The difference is that a map is indexed by non-sequential
-integers or strings.
+type). The difference is that a map is indexed by sparse integers or
+strings.
 
-To initialize a map, use the same notation as an array, except that
-instead of a number of items, specify `class int` or `class String`:
+To initialize a map, use the phrase "new map" followed by the key in
+square brackets, followed by the item type:
 ~~~
-    var map1 = new double[class String];
-    var map2 = new String[class int];
-    var map3 = new UserDefinedClass[class int];
+    var map1 = new map[String]double;
+    var map2 = new map[int]String;
+    var map3 = new map[int]UserDefinedClass;
 ~~~
+
+Note that there are no parentheses in these "new" expressions. Maps do
+not have constructor methods, so these are not function calls.
 
 Maps use square bracket notation on the left-hand-side to set an
 element, and on the right-hand-side to get an element.
@@ -279,11 +288,11 @@ key type (int or String). So, if you access a key that is not in the
 map, then the map returns the "default" value, which is the value of
 new elements in a new array. For example:
 ~~~
-    var map1 = new int[int];
-    var value1 = map1[17];   // Now value1 == 0
+    var map1 = new map[int]String;
+    var value1 = map1[17];   // Now value1 == null
 
-    var map2 = new String[String];
-    var value2 = map["seventeen"];  // Now value2 == null
+    var map2 = new map[String]int;
+    var value2 = map["seventeen"];  // Now value2 == 0
 ~~~
 
 If you access past the end of a String, i.e. `str[1000000]`,
@@ -319,12 +328,8 @@ the first set of brackets (as it is in Java) rather then the
 last. However, consider that Sanka supports maps of arrays of maps of
 arrays of maps, etc. For example:
 ~~~
-   var x = new int[][int][][String][3];
+   var x = new map[int]int[][3];
 ~~~
 
 This reads as: "x is an array with three elements where each element
-is a map. The map has key type String and value type
-`int[][int][]`. That value type is an array where each element has
-type `int[][int]`. That value type is a map... etc."
-
-Just strip off the components from right to left.
+is a map. The map has key type String and value type `int[]`.

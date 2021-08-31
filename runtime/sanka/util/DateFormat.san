@@ -15,7 +15,7 @@ class DateFormat {
      */
     static boolean parse(String datetime, String format, DateTime results) {
         var parseCount = 0;
-        var unixTime = new long(0);
+        var unixTime = 0L;
         c__stmt "struct tm tm";
         c__stmt "tm.tm_year = tm.tm_mon = tm.tm_mday = tm.tm_hour = tm.tm_min = tm.tm_sec = 0";
         c__stmt "tm.tm_gmtoff = 0";

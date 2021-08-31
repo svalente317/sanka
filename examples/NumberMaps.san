@@ -3,14 +3,14 @@ package sanka.examples;
 
 singleton class NumberMaps {
 
-    int[String] digitMap;
-    int[String] teenMap;
-    int[String] twentyMap;
-    int[String] hundredMap;
-    int[String] thousandMap;
+    map[String]int digitMap;
+    map[String]int teenMap;
+    map[String]int twentyMap;
+    map[String]int hundredMap;
+    map[String]int thousandMap;
 
     NumberMaps() {
-        this.digitMap = new int[class String]{
+        this.digitMap = {
             "one" : 1,
             "two" : 2,
             "three" : 3,
@@ -22,7 +22,7 @@ singleton class NumberMaps {
             "nine" : 9
         };
 
-        this.teenMap = new int[class String]{
+        this.teenMap = {
             "ten" : 10,
             "eleven" : 11,
             "twelve" : 12,
@@ -35,7 +35,7 @@ singleton class NumberMaps {
             "nineteen" : 19
         };
 
-        this.twentyMap = new int[class String]{
+        this.twentyMap = {
             "twenty" : 20,
             "thirty" : 30,
             "forty" : 40,
@@ -46,11 +46,11 @@ singleton class NumberMaps {
             "ninety" : 90
         };
 
-        this.hundredMap = new int[class String]{
+        this.hundredMap = {
             "hundred" : 100
         };
 
-        this.thousandMap = new int[class String]{
+        this.thousandMap = {
             "thousand" : 1000,
             "million" : 1000000,
             "billion" : 1000000000

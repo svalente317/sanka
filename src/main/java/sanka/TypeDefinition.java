@@ -5,7 +5,9 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import sanka.antlr4.SankaParser;
+import sanka.antlr4.SankaParser.ClassTypeContext;
+import sanka.antlr4.SankaParser.MapTypeContext;
+import sanka.antlr4.SankaParser.ScalarTypeContext;
 import sanka.antlr4.SankaParser.TypeTypeContext;
 
 public class TypeDefinition implements Comparable<TypeDefinition> {
@@ -48,7 +50,7 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
     @Override
     public String toString() {
         if (this.keyType != null) {
-            return this.arrayOf.toString() + "[" + this.keyType.toString() + "]";
+            return "map[" + this.keyType.toString() + "]" + this.arrayOf.toString();
         }
         if (this.arrayOf != null) {
             return this.arrayOf.toString() + "[]";
@@ -62,29 +64,36 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
         return this.name;
     }
 
-    void parse(TypeTypeContext ctx) {
-        List<TypeTypeContext> subctx = ctx.typeType();
-        if (subctx != null && !subctx.isEmpty()) {
-            this.arrayOf = new TypeDefinition();
-            this.arrayOf.parse(subctx.get(0));
-            if (subctx.size() > 1) {
-                this.keyType = new TypeDefinition();
-                this.keyType.parse(subctx.get(1));
-            }
+    public void parse(TypeTypeContext ctx) {
+        if (ctx.scalarType() != null) {
+            parse(ctx.scalarType());
             return;
         }
+        if (ctx.typeType() != null) {
+            this.arrayOf = new TypeDefinition();
+            this.arrayOf.parse(ctx.typeType());
+            return;
+        }
+        if (ctx.mapType() != null) {
+            parse(ctx.mapType());
+            return;
+        }
+    }
+
+    public void parse(ScalarTypeContext ctx) {
         if (ctx.primitiveType() != null) {
             Token token = ctx.primitiveType().getStart();
             this.isPrimitiveType = true;
             this.name = token.getText();
             return;
         }
-        if (ctx.classOrInterfaceType() != null) {
-            parse(ctx.classOrInterfaceType());
+        if (ctx.classType() != null) {
+            parse(ctx.classType());
+            return;
         }
     }
 
-    void parse(SankaParser.ClassOrInterfaceTypeContext ctx) {
+    public void parse(ClassTypeContext ctx) {
         List<TerminalNode> ids = ctx.Identifier();
         int idCount = ids.size();
         if (idCount == 1) {
@@ -104,6 +113,19 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
         if (this.packageName == null) {
             this.packageName = env.currentPackage;
         }
+    }
+
+    public void parse(MapTypeContext ctx) {
+        Environment env = Environment.getInstance();
+        String keyword = ctx.Identifier().getText();
+        if (!keyword.equals("map")) {
+            env.printError(ctx, "syntax error at: " + keyword);
+            return;
+        }
+        this.keyType = new TypeDefinition();
+        this.keyType.parse(ctx.scalarType());
+        this.arrayOf = new TypeDefinition();
+        this.arrayOf.parse(ctx.typeType());
     }
 
     public boolean isNullType() {

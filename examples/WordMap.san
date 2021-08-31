@@ -6,10 +6,10 @@ import sanka.io.LineReader;
 
 class WordMap {
 
-    private int[String] map;
+    private map[String]int map;
 
     WordMap() {
-        this.map = new int[class String];
+        this.map = new map[String]int;
     }
 
     /**

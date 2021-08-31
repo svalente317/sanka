@@ -34,6 +34,10 @@ class VeryConcreteClass extends MiddleClass {
     void addThree() {
         Globals.RESULTS.add("3a");
     }
+
+    boolean getTrue() {
+        return true;
+    }
 }
 
 class AbstractClassTest extends BaseTest {
@@ -57,6 +61,15 @@ class AbstractClassTest extends BaseTest {
                              "value at idx=" + idx);
             }
         }
+        /*
+        var a = getVeryConcrete();
+        var t = ((VeryConcreteClass) a).getTrue();
+        assert(t);
+        */
+    }
+
+    AbstractClass getVeryConcrete() {
+        return new VeryConcreteClass();
     }
 
     static int main(String[] argv) {

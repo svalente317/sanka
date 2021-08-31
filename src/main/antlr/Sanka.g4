@@ -68,7 +68,7 @@ typeParameters
     ;
 
 extendsClass
-    :   'extends' typeType
+    :   'extends' classType
     ;
 
 interfaceDeclaration
@@ -133,14 +133,14 @@ interfaceMethodDeclaration
     ;
 
 typeType
-    :   classOrInterfaceType
-    |   primitiveType
+    :   scalarType
     |   typeType '[' ']'
-    |   typeType '[' typeType ']'
+    |   mapType
     ;
 
-classOrInterfaceType
-    :   ( Identifier '.' )* Identifier
+scalarType
+    :   primitiveType
+    |   classType
     ;
 
 primitiveType
@@ -151,6 +151,14 @@ primitiveType
     |   'long'
     |   'float'
     |   'double'
+    ;
+
+classType
+    :   ( Identifier '.' )* Identifier
+    ;
+
+mapType
+    :   Identifier '[' scalarType ']' typeType
     ;
 
 formalParameters
@@ -238,7 +246,7 @@ enhancedForControl
 
 switchLabel
     :   'case' expression ':'
-    |   'case' typeType Identifier ':'
+    |   'case' classType Identifier ':'
     |   'default' ':'
     ;
 
@@ -272,7 +280,7 @@ expression
     |   expression '||' expression
     |   expression '?' expression ':' expression
     |   'super' '.' Identifier
-    |   '(' classOrInterfaceType ')' expression
+    |   '(' scalarType ')' expression
     |   arrayDefinition
     |   mapDefinition
     ;
@@ -285,18 +293,11 @@ primary
     ;
 
 creator
-    :   typeType (arrayCreatorRest | classCreatorRest)
+    :   classType '(' expressionList? ')'
+    |   typeType '[' expression ']'
+    |   typeType '[' ']' arrayDefinition
+    |   mapType mapDefinition?
     |   anonymousClassBody
-    ;
-
-arrayCreatorRest
-    :   '[' expression ']'
-    |   '[' ']' arrayDefinition
-    |   '[' 'class' typeType ']' mapDefinition?
-    ;
-
-classCreatorRest
-    :    '(' expressionList? ')' classBody?
     ;
 
 arrayDefinition

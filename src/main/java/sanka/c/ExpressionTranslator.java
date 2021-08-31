@@ -90,10 +90,6 @@ class ExpressionTranslator extends TranslationBase {
 
     static String translateNewInstance(ExpressionDefinition expr, String variableName) {
         Environment env = Environment.getInstance();
-        if (expr.type.isNumericType()) {
-            String text = translate(expr.argList[0]);
-            return "((" + translateType(expr.type) + ")" + text + ")";
-        }
         env.addType(expr.type);
         StringBuilder builder = new StringBuilder();
         if (variableName == null) {
@@ -674,6 +670,9 @@ class ExpressionTranslator extends TranslationBase {
     static String translateTypeCast(ExpressionDefinition expr, String variableName) {
         Environment env = Environment.getInstance();
         String text = translate(expr.expression1);
+        if (expr.type.isNumericType()) {
+            return "((" + translateType(expr.type) + ")" + text + ")";
+        }
         StringBuilder builder = new StringBuilder();
         if (variableName == null) {
             builder.append(translateTypeSpace(expr.type));

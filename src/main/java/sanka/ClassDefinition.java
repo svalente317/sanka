@@ -93,7 +93,7 @@ public class ClassDefinition {
         }
         if (ctx.extendsClass() != null) {
             TypeDefinition type = new TypeDefinition();
-            type.parse(ctx.extendsClass().typeType());
+            type.parse(ctx.extendsClass().classType());
             if (!type.isPrimitiveType && type.arrayOf == null) {
                 this.superclass = env.loadClassDefinition(type);
             }
@@ -330,7 +330,7 @@ public class ClassDefinition {
         ClassDefinition halfInterface = null;
         if (ctx.extendsClass() != null) {
             TypeDefinition type = new TypeDefinition();
-            type.parse(ctx.extendsClass().typeType());
+            type.parse(ctx.extendsClass().classType());
             if (type.isPrimitiveType || type.arrayOf != null) {
                 env.printError(ctx, "interface must extend interface, not " + type);
             } else {

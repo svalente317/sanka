@@ -62,11 +62,11 @@ public class StatementDefinition {
                 if (this.expression.type != null && this.expression.value == null) {
                     env.printError(ctx, "constant expression required");
                 }
-            } else if (ctx.switchLabel().typeType() != null) {
+            } else if (ctx.switchLabel().classType() != null) {
                 this.statementType = StatementType.CASE;
                 this.expression = new ExpressionDefinition();
                 this.expression.type = new TypeDefinition();
-                this.expression.type.parse(ctx.switchLabel().typeType());
+                this.expression.type.parse(ctx.switchLabel().classType());
                 this.name = ctx.switchLabel().Identifier().getText();
                 verifyVariableNotDefined(ctx.switchLabel(), this.name);
                 env.symbolTable.put(this.name, this.expression.type);

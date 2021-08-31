@@ -238,7 +238,7 @@ class Sudoku {
             var s = "";
             for (var x = 0; x < this.size; x++) {
                 var value = this.board[current].value;
-                var ch = value == 0 ? '-' : new byte('0' + value);
+                var ch = value == 0 ? '-' : (byte)('0' + value);
                 s = s + " " + ch;
                 current++;
             }
