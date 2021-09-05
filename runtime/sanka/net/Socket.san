@@ -48,11 +48,11 @@ class Socket {
         return newsocket;
     }
 
-    int read(byte[] buffer) {
+    int read([]byte buffer) {
         c__stmt "return recv(this->fd, buffer->data, buffer->length, 0)";
     }
 
-    int write(byte[] buffer) {
+    int write([]byte buffer) {
         c__stmt "return send(this->fd, buffer->data, buffer->length, 0)";
     }
 

@@ -15,7 +15,7 @@ class ProcessViewer {
     /**
      * This is basically a terse, stupid "ps" command for Linux.
      */
-    static void main(String[] args) {
+    static void main([]String args) {
         var allUsers = false;
         var ignoreFile = null;
         var ignoreList = null;
@@ -44,14 +44,14 @@ class ProcessViewer {
     /**
      * @return array of all processes running on Linux system
      */
-    Process[] readProcesses() {
+    []Process readProcesses() {
         var procDir = new File("/proc");
         var filenames = procDir.list();
         if (filenames == null) {
             System.println("failed to read " + procDir.toString());
             return null;
         }
-        var processes = new Process[0];
+        var processes = new []Process;
         for (var name : filenames) {
             var ch = name[0];
             if (ch >= '0' && ch <= '9') {
@@ -100,21 +100,21 @@ class ProcessViewer {
     /**
      * Read Linux /proc cmdline file into a String array.
      */
-    private String[] readCmdLine(File processDir) {
+    private []String readCmdLine(File processDir) {
         var statusFile = new File(processDir, "cmdline");
         var fileReader = new FileReader();
         if (fileReader.open(statusFile.getPath()) != 0) {
             return null;
         }
-        var data = new byte[4096];
+        var data = new []byte(4096);
         var length = fileReader.read(data);
         fileReader.close();
         if (length <= 0) {
             return null;
         }
         data.setLength(length);
-        var args = new String[0];
-        var word = new byte[length];
+        var args = new []String;
+        var word = new []byte(length);
         var src = 0;
         while (src < length) {
             word.setLength(length-src);
@@ -144,7 +144,7 @@ class ProcessViewer {
     /**
      * @return main class from Java command line.
      */
-    private String getJavaMainClass(String[] cmdline) {
+    private String getJavaMainClass([]String cmdline) {
         for (var idx = 1; idx < cmdline.length; idx++) {
             var arg = cmdline[idx];
             if (arg[0] != '-') {
@@ -200,14 +200,14 @@ class ProcessViewer {
      * Read a file where each line is a process name in the first column, and
      * optionally a comment in the second column.
      */
-    private String[] readIgnoreFile(String filename) {
+    private []String readIgnoreFile(String filename) {
         var fileReader = new FileReader();
         var status = fileReader.open(filename);
         if (status != 0) {
             return null;
         }
         var reader = new LineReader(fileReader);
-        var ignoreList = new String[0];
+        var ignoreList = new []String;
         while (true) {
             var line = reader.readline();
             if (line == null) {
@@ -226,7 +226,7 @@ class ProcessViewer {
     /**
      * Print my running processes to stdout.
      */
-    void print(Process[] processes, String[] ignoreList, boolean allUsers) {
+    void print([]Process processes, []String ignoreList, boolean allUsers) {
         var uid = System.getuid();
         var ignore = new map[String]boolean;
         if (ignoreList != null) {

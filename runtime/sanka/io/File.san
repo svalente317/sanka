@@ -89,8 +89,8 @@ class File {
      *
      * (Do not return "." or "..")
      */
-    String[] list() {
-        var results = new String[0];
+    []String list() {
+        var results = new []String;
         var filename = "";
         c__stmt "struct dirent *entry";
         c__stmt "DIR *dir = opendir(this->pathname)";

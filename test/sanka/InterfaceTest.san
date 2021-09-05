@@ -10,7 +10,7 @@ interface Two extends One {
 }
 
 class ConcreteClass {
-    int[] results;
+    []int results;
 
     ConcreteClass(results);
 
@@ -31,7 +31,7 @@ class InterfaceTest extends BaseTest {
     }
 
     void testInterface() {
-        var results = new int[0];
+        var results = new []int;
         var item = new ConcreteClass(results);
         use(item);
         assertEquals(2, results.length, "length");
@@ -39,7 +39,7 @@ class InterfaceTest extends BaseTest {
         assertEquals(2, results[1], "results[1]");
     }
 
-    static int main(String[] argv) {
+    static int main([]String argv) {
         var test = new InterfaceTest();
         test.testInterface();
         return test.exit();

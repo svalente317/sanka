@@ -30,7 +30,7 @@ class StringUtils {
     }
 
     static String toLowerCase(String text) {
-        var data = new byte[text.length()];
+        var data = new []byte(text.length());
         var changed = false;
         for (var idx = 0; idx < data.length; idx++) {
             var ch = text[idx];

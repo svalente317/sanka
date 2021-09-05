@@ -26,13 +26,13 @@ class JsonMember {
  */
 class JsonObject {
     private static JsonElement NULL_ELEMENT;
-    private JsonMember[] members;
+    private []JsonMember members;
 
     JsonObject() {
         if (JsonObject.NULL_ELEMENT == null) {
             JsonObject.NULL_ELEMENT = new JsonElement();
         }
-        this.members = new JsonMember[0];
+        this.members = new []JsonMember;
     }
 
     JsonElement get(String fieldName) {
@@ -103,7 +103,7 @@ class JsonObject {
         return getElement(fieldName).getAsString();
     }
 
-    JsonElement[] getArray(String fieldName) {
+    []JsonElement getArray(String fieldName) {
         return getElement(fieldName).getAsArray();
     }
 
@@ -155,7 +155,7 @@ class JsonObject {
         set(fieldName, new JsonElement().makeString(value));
     }
 
-    void setArray(String fieldName, JsonElement[] value) {
+    void setArray(String fieldName, []JsonElement value) {
         set(fieldName, new JsonElement().makeArray(value));
     }
 
@@ -168,7 +168,7 @@ class JsonObject {
      * This is the actual data. If you modify it, then you modify
      * the JsonObject.
      */
-    JsonMember[] getMembers() {
+    []JsonMember getMembers() {
         return this.members;
     }
 

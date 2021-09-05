@@ -46,7 +46,7 @@ singleton class JsonFormatter {
         }
     }
 
-    void printArray(JsonElement[] arr, String indent) {
+    void printArray([]JsonElement arr, String indent) {
         for (var idx = 0; idx < arr.length; idx++) {
             var value = arr[idx];
             var suffix = (idx + 1 < arr.length) ? "," : "";
@@ -54,7 +54,7 @@ singleton class JsonFormatter {
         }
     }
 
-    static void main(String[] argv) {
+    static void main([]String argv) {
         var data = IOUtils.readStream(StandardInputReader.get());
         var text = new String(data);
         var element = JsonElement.parse(text);

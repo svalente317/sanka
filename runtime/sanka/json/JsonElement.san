@@ -63,7 +63,7 @@ class JsonElement {
         return this;
     }
 
-    JsonElement makeArray(JsonElement[] value) {
+    JsonElement makeArray([]JsonElement value) {
         this.type = (value == null ? NULL_TYPE : ARRAY_TYPE);
         c__stmt "this->data.arr = value";
         return this;
@@ -124,7 +124,7 @@ class JsonElement {
         c__stmt "return this->data.s";
     }
 
-    JsonElement[] getAsArray() {
+    []JsonElement getAsArray() {
         if (this.type != ARRAY_TYPE) {
             return null;
         }

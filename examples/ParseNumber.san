@@ -2,12 +2,12 @@
 package sanka.examples;
 
 class ParseNumber {
-    private String[] words;
+    private []String words;
     private int index;
     
     long parseEnglishNumber(String text) {
         // Break up text into words.
-        this.words = new String[0];
+        this.words = new []String;
         while (true) {
             var space = text.indexOf(' ');
             if (space > 0) {
@@ -71,7 +71,7 @@ class ParseNumber {
         return value;
     }
 
-    static void main(String[] argv) {
+    static void main([]String argv) {
         System.println("-> " + new ParseNumber().parseEnglishNumber(argv[1]));
     }
 }

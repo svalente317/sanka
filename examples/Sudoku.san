@@ -7,10 +7,10 @@ package sanka.examples;
  */
 class Block {
     int value;
-    int[] candidates;
+    []int candidates;
 
     Block(int size) {
-        this.candidates = new int[size];
+        this.candidates = new []int(size);
         for (var x = 0; x < size; x++) {
             this.candidates[x] = x+1;
         }
@@ -51,27 +51,27 @@ class StackItem {
  */
 class Sudoku {
     int size;
-    Block[] board;
-    StackItem[] stack;
-    int[][] sequences;
+    []Block board;
+    []StackItem stack;
+    [][]int sequences;
     int totalDefined;
     boolean failed;
     boolean isGuess;
 
     Sudoku(int size) {
         this.size = size;
-        this.board = new Block[size * size];
+        this.board = new []Block(size * size);
         for (var i = 0; i < this.board.length; i++) {
             this.board[i] = new Block(size);
         }
-        this.stack = new StackItem[0];
-        this.sequences = new int[][0];
+        this.stack = new []StackItem;
+        this.sequences = new [][]int;
 
         // Add horizontal sequences.
         var current = 0;
         var x;
         for (x = 0; x < size; x++) {
-            var sequence = new int[size];
+            var sequence = new []int(size);
             for (var y = 0; y < size; y++) {
                 sequence[y] = current;
                 current++;
@@ -81,7 +81,7 @@ class Sudoku {
 
         // Add vertical sequences.
         for (x = 0; x < size; x++) {
-            var sequence = new int[size];
+            var sequence = new []int(size);
             current = x;
             for (var y = 0; y < size; y++) {
                 sequence[y] = current;
@@ -94,7 +94,7 @@ class Sudoku {
         var sqrt = (size == 16 ? 4 : (size == 9 ? 3 : (size == 4 ? 2 : 0)));
         for (x = 0; x < sqrt; x++) {
             for (var y = 0; y < sqrt; y++) {
-                var sequence = new int[size];
+                var sequence = new []int(size);
                 current = x * sqrt + y * sqrt * size;
                 for (var z = 0; z < size; z++) {
                     sequence[z] = current;
@@ -178,7 +178,7 @@ class Sudoku {
      * indexing or (the obvious choice) simply generate the sequences
      * for the location, rather then searching for them.
      */
-    boolean contains(int[] sequence, int location) {
+    boolean contains([]int sequence, int location) {
         for (var value : sequence) {
             if (value == location) {
                 return true;
@@ -204,8 +204,8 @@ class Sudoku {
      * In this sequence, is there some number which is only a legal candidate
      * in one block in the sequence?
      */
-    void checkCandidates(int[] sequence) {
-        var candidateToLocation = new int[this.size+1];
+    void checkCandidates([]int sequence) {
+        var candidateToLocation = new []int(this.size+1);
         for (var x = 0; x < candidateToLocation.length; x++) {
             candidateToLocation[x] = -1;
         }
@@ -253,7 +253,7 @@ class Sudoku {
      *
      * For example: 3----19------7-4--1--42----531----7--49---------6------9---2-572-----------19--8- 
      */
-    static void main(String[] argv) {
+    static void main([]String argv) {
         var game = new Sudoku(9);
         var state = argv[1];
         for (var location = 0; location < state.length(); location++) {

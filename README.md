@@ -42,7 +42,7 @@ is a Sanka program which looks like a Java program:
 
 ~~~
 class Hello {
-    static void main(String[] argv) {
+    static void main([]String argv) {
         System.println("Hello, world!");
     }
 }
@@ -99,7 +99,7 @@ In Sanka, you can change the size of an array after you create it.  So
 you can use an array where Java would force you to use a `List` class.
 For example:
 ~~~
-arr = new int[]{17, 34};
+arr = {17, 34};
 arr.add(51);
 ~~~
 

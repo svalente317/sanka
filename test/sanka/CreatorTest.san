@@ -3,8 +3,8 @@ package sanka.test;
 
 class CreatorTest extends BaseTest {
     void run() {
-        var results = new String[0];
-        for (var s : new String[]{"verbose", "syntax"}) {
+        var results = new []String;
+        for (var s : new []String{"verbose", "syntax"}) {
             results.add(s);
         }
         for (var s : {"Hello", null, "world!"}) {
@@ -35,7 +35,7 @@ class CreatorTest extends BaseTest {
         }
     }
 
-    static int main(String[] argv) {
+    static int main([]String argv) {
         var test = new CreatorTest();
         test.run();
         return test.exit();

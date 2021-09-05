@@ -42,7 +42,7 @@ class Random {
      * @return random UUID
      */
     static String randomUuid() {
-        var result = new byte[36];
+        var result = new []byte(36);
         var length = 0;
         for (var x = 0; x < 5; x++) {
             var id = randomInt();

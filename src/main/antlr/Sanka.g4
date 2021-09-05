@@ -134,7 +134,7 @@ interfaceMethodDeclaration
 
 typeType
     :   scalarType
-    |   typeType '[' ']'
+    |   arrayType
     |   mapType
     ;
 
@@ -155,6 +155,10 @@ primitiveType
 
 classType
     :   ( Identifier '.' )* Identifier
+    ;
+
+arrayType
+    :   '[' ']' typeType
     ;
 
 mapType
@@ -294,8 +298,8 @@ primary
 
 creator
     :   classType '(' expressionList? ')'
-    |   typeType '[' expression ']'
-    |   typeType '[' ']' arrayDefinition
+    |   arrayType '(' expression ')'
+    |   arrayType arrayDefinition?
     |   mapType mapDefinition?
     |   anonymousClassBody
     ;

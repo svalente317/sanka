@@ -285,7 +285,7 @@ public class ExpressionDefinition {
             evaluateNewInstance(creator);
             return;
         }
-        if (creator.typeType() != null) {
+        if (creator.arrayType() != null) {
             evaluateArrayCreator(creator);
             return;
         }
@@ -304,10 +304,6 @@ public class ExpressionDefinition {
         this.expressionType = ExpressionType.NEW_INSTANCE;
         this.type = new TypeDefinition();
         this.type.parse(creator.classType());
-        if (this.type.isPrimitiveType) {
-            env.printError(creator, "cannot create new instance of primitive type " + this.type);
-            return;
-        }
         ClassDefinition classdef = env.loadClassDefinition(this.type);
         if (classdef == null) {
             env.printError(creator, "class " + this.type + " undefined");
@@ -340,7 +336,7 @@ public class ExpressionDefinition {
     private void evaluateArrayCreator(CreatorContext creator) {
         Environment env = Environment.getInstance();
         this.type = new TypeDefinition();
-        this.type.parse(creator.typeType());
+        this.type.parse(creator.arrayType());
         TypeDefinition baseType = this.type;
         while (baseType.arrayOf != null) {
             baseType = baseType.arrayOf;
@@ -355,33 +351,27 @@ public class ExpressionDefinition {
         // "new type[size]"
         if (creator.expression() != null) {
             this.expressionType = ExpressionType.NEW_ARRAY;
-            TypeDefinition arrayType = new TypeDefinition();
-            arrayType.arrayOf = this.type;
-            this.type = arrayType;
             this.expression1 = new ExpressionDefinition();
             this.expression1.evaluate(creator.expression());
             checkIntegralType(creator.expression(), this.expression1.type);
             return;
         }
         // "new type[]{ value, ... }"
+        this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
+        ExpressionListContext expressionList = null;
         if (creator.arrayDefinition() != null) {
-            this.expressionType = ExpressionType.NEW_ARRAY_WITH_VALUES;
-            TypeDefinition arrayType = new TypeDefinition();
-            arrayType.arrayOf = this.type;
-            this.type = arrayType;
-            ExpressionListContext expressionList = creator.arrayDefinition().expressionList();
-            if (expressionList != null) {
-                List<ExpressionContext> exprList = expressionList.expression();
-                this.argList = new ExpressionDefinition[exprList.size()];
-                for (int idx = 0; idx < this.argList.length; idx++) {
-                    this.argList[idx] = new ExpressionDefinition();
-                    this.argList[idx].evaluate(exprList.get(idx));
-                    checkRequiredType(exprList.get(idx), this.type.arrayOf, this.argList[idx]);
-                }
-            } else {
-                this.argList = new ExpressionDefinition[0];
-            }
+            expressionList = creator.arrayDefinition().expressionList();
+        }
+        if (expressionList == null) {
+            this.argList = new ExpressionDefinition[0];
             return;
+        }
+        List<ExpressionContext> exprList = expressionList.expression();
+        this.argList = new ExpressionDefinition[exprList.size()];
+        for (int idx = 0; idx < this.argList.length; idx++) {
+            this.argList[idx] = new ExpressionDefinition();
+            this.argList[idx].evaluate(exprList.get(idx));
+            checkRequiredType(exprList.get(idx), this.type.arrayOf, this.argList[idx]);
         }
     }
 
@@ -903,6 +893,10 @@ public class ExpressionDefinition {
             }
             if (keyType == null) {
                 keyType = arg.expression1.type;
+                if (keyType.equals(TypeDefinition.BYTE_TYPE) ||
+                        keyType.equals(TypeDefinition.SHORT_TYPE)) {
+                    keyType = TypeDefinition.INT_TYPE;
+                }
                 checkMapKeyType(entry.expression(0), keyType);
             } else {
                 checkRequiredType(entry.expression(0), keyType, arg.expression1);

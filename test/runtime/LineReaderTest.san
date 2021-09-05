@@ -4,11 +4,11 @@ import sanka.io.LineReader;
 
 class FunnyReader {
 
-    private String[] testData;
+    private []String testData;
     private int readCount;
 
     FunnyReader() {
-        this.testData = new String[]{
+        this.testData = {
             "first test\r\n",
             "sec",
             "ond test\r\nthird\r\nfou",
@@ -20,7 +20,7 @@ class FunnyReader {
         };
     }
 
-    int read(byte[] buffer) {
+    int read([]byte buffer) {
         if (this.readCount >= this.testData.length) {
             return 0;
         }
@@ -40,8 +40,8 @@ class FunnyReader {
 
 class Main {
 
-    static int main(String[] argv) {
-        var expectedLines = new String[]{
+    static int main([]String argv) {
+        var expectedLines = {
             "first test",
             "second test",
             "third",

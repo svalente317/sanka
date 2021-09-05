@@ -2,10 +2,10 @@
 package sanka.json;
 
 singleton class StringEncoder {
-    private byte[] map;
+    private []byte map;
 
     StringEncoder() {
-        this.map = new byte[128];
+        this.map = new []byte(128);
         this.map['\\'] = '\\';
         this.map['\"'] = '"';
         this.map['\b'] = 'b';
@@ -16,7 +16,7 @@ singleton class StringEncoder {
     }
 
     String encode(String str) {
-        var out = new byte[str.length()*2];
+        var out = new []byte(str.length()*2);
         var idx = 0;
         var escapes = 0;
         for (var ch : str) {

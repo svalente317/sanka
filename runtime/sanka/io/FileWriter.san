@@ -13,7 +13,7 @@ class FileWriter {
         c__stmt "return this->fp != NULL ? 0 : errno";
     }
 
-    int write(byte[] buffer) {
+    int write([]byte buffer) {
         c__stmt "return fwrite(buffer->data, 1, buffer->length, this->fp)";
     }
 

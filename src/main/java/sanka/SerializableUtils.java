@@ -185,7 +185,7 @@ class SerializableUtils {
             if (field.type.arrayOf != null) {
                 TypeDefinition type = field.type.arrayOf;
                 builder.append("if (" + fn + " != null) {");
-                builder.append("var arr = new sanka.json.JsonElement[" + fn + ".length];");
+                builder.append("var arr = new []sanka.json.JsonElement(" + fn + ".length);");
                 builder.append("for (var i=0; i < " + fn + ".length; i++) {");
                 if (type.isStringType() || type.isPrimitiveType) {
                     builder.append("arr[i] = new sanka.json.JsonElement()");
@@ -287,7 +287,7 @@ class SerializableUtils {
                 }
                 builder.append(tmparr + " = " + obj + ".getArray(\"" + field.name + "\");");
                 builder.append("if (" + tmparr + " != null) { ");
-                builder.append(fn + " = new " + type + "[" + tmparr + ".length];");
+                builder.append(fn + " = new []" + type + "(" + tmparr + ".length);");
                 builder.append("for (var i=0; i < " + tmparr + ".length; i++) {");
                 if (type.isStringType() || type.isPrimitiveType) {
                     builder.append(fn + "[i] = " + tmparr + "[i].");
