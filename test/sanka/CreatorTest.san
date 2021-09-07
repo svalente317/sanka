@@ -1,6 +1,11 @@
 // -*- mode: Java; -*-
 package sanka.test;
 
+class PlainObject {
+    String s;
+    int i;
+}
+
 class CreatorTest extends BaseTest {
     void run() {
         var results = new []String;
@@ -33,6 +38,13 @@ class CreatorTest extends BaseTest {
         for (var idx = 0; idx < expected.length; idx++) {
             assertString(expected[idx], results[idx], "value at idx=" + idx);
         }
+
+        var obj = new PlainObject(){s: "hello", i: 17};
+        assertString("hello", obj.s, "creator string");
+        assertEquals(17, obj.i, "creator int");
+
+        // It's all a single expression.
+        assertEquals(99, new PlainObject(){i: 99}.i, "creator expr");
     }
 
     static int main([]String argv) {

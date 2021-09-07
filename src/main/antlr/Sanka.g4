@@ -297,7 +297,7 @@ primary
     ;
 
 creator
-    :   classType '(' expressionList? ')'
+    :   classType '(' expressionList? ')' fieldValues?
     |   arrayType '(' expression ')'
     |   arrayType arrayDefinition?
     |   mapType mapDefinition?
@@ -333,6 +333,15 @@ anonymousClassBody
 anonymousClassBodyDeclaration
     :   Identifier ':' expression ';'
     |   classBodyDeclaration
+    ;
+
+fieldValues
+    :    '{' '}'
+    |    '{' fieldValue (',' fieldValue)* '}'
+    ;
+
+fieldValue
+    :    Identifier ':' expression
     ;
 
 // LEXER

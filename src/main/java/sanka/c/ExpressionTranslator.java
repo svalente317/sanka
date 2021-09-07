@@ -142,6 +142,12 @@ class ExpressionTranslator extends TranslationBase {
                 env.print(builder.toString());
             }
         }
+        // Write the initial public field values either for the anonymous object
+        // or for the instance object.
+        if (expr.expression2 != null) {
+            // This is the case for the instance object.
+            expr = expr.expression2;
+        }
         if (expr.fieldList != null) {
             for (int idx = 0; idx < expr.fieldList.length; idx++) {
                 String value = translate(expr.argList[idx]);

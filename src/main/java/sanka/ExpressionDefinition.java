@@ -15,6 +15,7 @@ import sanka.antlr4.SankaParser.ArrayDefinitionContext;
 import sanka.antlr4.SankaParser.CreatorContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
 import sanka.antlr4.SankaParser.ExpressionListContext;
+import sanka.antlr4.SankaParser.FieldValueContext;
 import sanka.antlr4.SankaParser.LiteralContext;
 import sanka.antlr4.SankaParser.MapDefinitionContext;
 import sanka.antlr4.SankaParser.MapEntryContext;
@@ -325,9 +326,38 @@ public class ExpressionDefinition {
                 env.printError(creator, "class " + this.type +
                         " does not have no argument constructor");
             }
+        } else {
+            evaluateFunctionArguments(creator, method, exprlist);
+        }
+        if (creator.fieldValues() == null) {
             return;
         }
-        evaluateFunctionArguments(creator, method, exprlist);
+        List<FieldValueContext> contexts = creator.fieldValues().fieldValue();
+        if (contexts.isEmpty()) {
+            return;
+        }
+        ExpressionDefinition ex = new ExpressionDefinition();
+        ex.fieldList = new String[contexts.size()];
+        ex.argList = new ExpressionDefinition[ex.fieldList.length];
+        for (int idx = 0; idx < ex.fieldList.length; idx++) {
+            FieldValueContext fvc = contexts.get(idx);
+            String name = fvc.Identifier().getText();
+            ex.fieldList[idx] = name;
+            ExpressionDefinition value = new ExpressionDefinition();
+            value.evaluate(fvc.expression());
+            ex.argList[idx] = value;
+            FieldDefinition fd = classdef.getField(name);
+            if (fd == null || fd.isPrivate || fd.isStatic || fd.isConst) {
+                env.printError(fvc, "class " + this.expression1.type + " field " + name +
+                        " invalid initialization");
+                continue;
+            }
+            if (value.type != null && !TypeUtils.isCompatible(fd.type, value)) {
+                env.printError(fvc, "incompatible types: " + value.type +
+                        " cannot be converted to " + fd.type);
+            }
+        }
+        this.expression2 = ex;
     }
 
     /**
