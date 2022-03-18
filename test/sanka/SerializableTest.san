@@ -25,11 +25,11 @@ serializable class SerializableClass {
     Dummy  d;
     Dummy  nullDummy;
 
-    []short  shortArr;
-    []int    nullArr;
-    []long   longArr;
-    []String stringArr;
-    []Dummy  dummyArr;
+    short[]  shortArr;
+    int[]    nullArr;
+    long[]   longArr;
+    String[] stringArr;
+    Dummy[]  dummyArr;
 
     void setup() {
         this.s = -1000;
@@ -38,7 +38,7 @@ serializable class SerializableClass {
         this.str = "column 1" + ((byte) 9) + "column 2";
         this.d = new Dummy();
 
-        this.shortArr = new []short{ 256, -1 };
+        this.shortArr = new short[]{ 256, -1 };
         this.longArr = { 54321098765, 17L };
         this.stringArr = { "x", "y", "z" };
         this.dummyArr = { new Dummy(), null, new Dummy() };
@@ -79,7 +79,7 @@ class SerializableTest extends BaseTest {
 
         text = "{\"dummyArr\":[{\"key\":\"v1\"},null,{\"key\":\"v2\"}]}";
         jo = JsonObject.parse(text);
-        t.nullArr = new []int(1);
+        t.nullArr = new int[](1);
         t.fromJsonObject(jo);
         assert(t.nullArr == null, "j null array");
         assert(t.dummyArr.length == 3, "j array");
@@ -97,7 +97,7 @@ class SerializableTest extends BaseTest {
         assert(s.key == null, "null Integer");
     }
 
-    static int main([]String argv) {
+    static int main(String[] argv) {
         var test = new SerializableTest();
         test.testSerializableClass();
         return test.exit();

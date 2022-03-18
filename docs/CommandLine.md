@@ -55,7 +55,7 @@ here is hello_world.san:
 package sanka.examples;
 
 class HelloWorld {
-    static int main([]String argv) {
+    static int main(String[] argv) {
         System.println("Hello, world!");
         return 0;
     }

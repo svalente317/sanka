@@ -39,7 +39,7 @@ class Integer {
             i = -i;
             negative = true;
         }
-        var str = new []byte(34);
+        var str = new byte[](34);
         var len = 0;
         while (i > 0) {
             var rem = (byte)(i % base);

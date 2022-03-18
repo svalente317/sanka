@@ -3,13 +3,13 @@ package sanka.lang;
 
 class String {
 
-    String([]byte arr) {
+    String(byte[] arr) {
         // To initialize a String, the translator generates a call to
         // NEW_STRING(). So this method is never called.
     }
 
-    []byte toByteArray() {
-        var bytes = new []byte(length());
+    byte[] toByteArray() {
+        var bytes = new byte[](length());
         c__stmt "memcpy(bytes->data, this, bytes->length)";
         return bytes;
     }

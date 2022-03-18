@@ -10,7 +10,7 @@ class AnonymousMaker {
         return x + " " + y;
     }
 
-    Runnable makeRunnable([]String results) {
+    Runnable makeRunnable(String[] results) {
         return new {
             // In these assignments, the RHS is evaluated in the current
             // context. So they can access "this", instance methods,
@@ -38,7 +38,7 @@ class AnonymousClassTest extends BaseTest {
      * is used and then discarded. When this function returns, that object
      * may be garbage collected, but the new Runnable object remain live.
      */
-    Runnable makeRunnableOnly([]String results) {
+    Runnable makeRunnableOnly(String[] results) {
         var parent = new AnonymousMaker();
         parent.firstName = "John";
         parent.lastName = "Doe";
@@ -46,13 +46,13 @@ class AnonymousClassTest extends BaseTest {
     }
 
     void testAnonymousClass() {
-        var results = new []String;
+        var results = new String[];
         var runnable = makeRunnableOnly(results);
         runnable.run();
         assertString("John Doe", results[0], "runnable results");
     }
 
-    static int main([]String argv) {
+    static int main(String[] argv) {
         var test = new AnonymousClassTest();
         test.testAnonymousClass();
         return test.exit();

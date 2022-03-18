@@ -21,7 +21,7 @@ import sanka.io.IOUtils;
  */
 class FileToSanka {
     
-    static int main([]String args) {
+    static int main(String[] args) {
         var className = null;
         var constName = null;
         var dirName = null;
@@ -65,7 +65,7 @@ class FileToSanka {
         var data = reader.readFile();
         reader.close();
 
-        var legal = new []boolean(256);
+        var legal = new boolean[](256);
         for (var x = 'a'; x <= 'z'; x++) {
             legal[x] = true;
         }
@@ -78,7 +78,7 @@ class FileToSanka {
         for (var ch : " ~!@#$%^&*()-=_+[]{}|;:,./<>?") {
             legal[ch] = true;
         }
-        var encoded = new []byte;
+        var encoded = new byte[];
         for (var i : data) {
             if (legal[i]) {
                 encoded.add(i);

@@ -2,7 +2,7 @@
 package sanka.test;
 
 class Globals {
-    static []String RESULTS;
+    static String[] RESULTS;
 }
 
 abstract class AbstractClass {
@@ -42,7 +42,7 @@ class VeryConcreteClass extends MiddleClass {
 
 class AbstractClassTest extends BaseTest {
     void testAbstractClass() {
-        Globals.RESULTS = new []String;
+        Globals.RESULTS = new String[];
 
         var o = new ConcreteClass();
         o.addOne();
@@ -72,7 +72,7 @@ class AbstractClassTest extends BaseTest {
         return new VeryConcreteClass();
     }
 
-    static int main([]String argv) {
+    static int main(String[] argv) {
         var test = new AbstractClassTest();
         test.testAbstractClass();
         return test.exit();

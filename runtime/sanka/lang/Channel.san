@@ -10,7 +10,7 @@ class Channel {
     private inline Mutex mutex;
     private inline Condition fullCond;
     private inline Condition emptyCond;
-    private inline []Object data;
+    private inline Object[] data;
     private int size;
     private int current;
     private boolean closed;
@@ -27,7 +27,7 @@ class Channel {
         this.mutex = new Mutex();
         this.fullCond = new Condition();
         this.emptyCond = new Condition();
-        this.data = new []Object(maxSize);
+        this.data = new Object[](maxSize);
         this.size = 0;
         this.current = 0;
         this.closed = false;

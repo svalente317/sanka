@@ -5,10 +5,10 @@ class IOUtils {
     /**
      * Read entire contents of stream into memory.
      */
-    static []byte readStream(Reader reader) {
-        var chain = new [][]byte;
+    static byte[] readStream(Reader reader) {
+        var chain = new byte[][];
         while (true) {
-            var data = new []byte(4096);
+            var data = new byte[](4096);
             var status = reader.read(data);
             if (status <= 0) {
                 break;
@@ -25,7 +25,7 @@ class IOUtils {
         for (var data : chain) {
             size = size + data.length;
         }
-        var results = new []byte(size);
+        var results = new byte[](size);
         results.setLength(0);
         for (var data : chain) {
             results.addAll(data);
@@ -36,7 +36,7 @@ class IOUtils {
     /**
      * Open the file, read the contents, and close the stream.
      */
-    static []byte readFile(String filename) {
+    static byte[] readFile(String filename) {
         var reader = new FileReader();
         if (reader.open(filename) != 0) {
             return null;

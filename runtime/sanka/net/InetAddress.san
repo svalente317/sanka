@@ -10,7 +10,7 @@ class InetAddress {
     c__include "arpa/inet.h";
     c__include "netdb.h";
 
-    []byte numbers;
+    byte[] numbers;
     int family;
 
     /**
@@ -23,7 +23,7 @@ class InetAddress {
         var size = 0;
         c__stmt "size = sizeof(addr.s_addr)";
         var obj = new InetAddress();
-        obj.numbers = new []byte(size);
+        obj.numbers = new byte[](size);
         c__stmt "memcpy(obj->numbers->data, &addr.s_addr, size)";
         c__stmt "obj->family = AF_INET";
         return obj;
@@ -38,7 +38,7 @@ class InetAddress {
         var size = 0;
         c__stmt "size = hp->h_length";
         var obj = new InetAddress();
-        obj.numbers = new []byte(size);
+        obj.numbers = new byte[](size);
         c__stmt "memcpy(obj->numbers->data, hp->h_addr, size)";
         c__stmt "obj->family = hp->h_addrtype";
         return obj;

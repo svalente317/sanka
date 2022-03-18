@@ -42,7 +42,7 @@ is a Sanka program which looks like a Java program:
 
 ~~~
 class Hello {
-    static void main([]String argv) {
+    static void main(String[] argv) {
         System.println("Hello, world!");
     }
 }

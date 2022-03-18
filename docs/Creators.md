@@ -31,12 +31,12 @@ stats.length = 128;
 
 ## Arrays
 
-1. To create an empty array, call `new`, followed by `[]` which
-indicates that it's an array, followed by the name of the class. In
-this case, do not use parentheses, since this is not a function
-call. For example, this creates an empty String array:
+1. To create an empty array, call `new`, followed by the name of the
+class, followed by `[]` which indicates that it's an array, In this
+case, do not use parentheses, since this is not a function call. For
+example, this creates an empty String array:
 ~~~
-var arr = new []String;
+var arr = new String[];
 ~~~
 Then you can add a String to it:
 ~~~
@@ -47,7 +47,7 @@ arr.add("hello");
 of the array, and then the initial size of the array in parentheses.
 For example, this creates a String array with five slots:
 ~~~
-var arr = new []String(5);
+var arr = new String[](5);
 ~~~
 Here, `arr.length == 5`. You can read and write the values as
 `arr[i]`, as well as calling `arr.add()`, etc.
@@ -56,7 +56,7 @@ Here, `arr.length == 5`. You can read and write the values as
 type of the array, and then curly braces containing the elements. For
 example:
 ~~~
-var arr = new []String{"hello", "world"};
+var arr = new String[]{"hello", "world"};
 ~~~
 Here, `arr.length == 2` and `arr[0] == "hello"`.
 
@@ -64,9 +64,9 @@ Here, `arr.length == 2` and `arr[0] == "hello"`.
 each other. They all create the exact same zero-element array, which
 can be accessed and modified like any other zero-element array:
 ~~~
-arr = new []String;
-arr = new []String(0);
-arr = new []String{};
+arr = new String[];
+arr = new String[](0);
+arr = new String[]{};
 ~~~
 The first way is preferred to create an empty array.
 
@@ -75,7 +75,7 @@ initial element has the exact desired type of the array values, then
 as shorthand, you can omit specifying the array type. For example, the
 following two expressions are equivalent to each other:
 ~~~
-arr = new []String{"hello", "world"};
+arr = new String[]{"hello", "world"};
 arr = {"hello", "world"};
 ~~~
 

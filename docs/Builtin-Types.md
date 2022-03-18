@@ -106,7 +106,7 @@ a backslash followed by the three digits of the byte in octal.  Or,
 use an array of bytes. For example, here `s1` and `s2` are the same
 three-byte String:
 ~~~
-    var s1 = new String(new []byte{1, 2, 3});
+    var s1 = new String(new byte[]{1, 2, 3});
     var s2 = "\001\002\003";
 ~~~
 
@@ -135,7 +135,7 @@ The `String` class has these methods:
 * `boolean endsWith(String s)` Return true if this string ends with `s`
 * `String substring(int beginIndex, int endIndex)` Return a substring
 * `String substring(int beginIndex)` Return a suffix
-* `[]byte toByteArray()` Return a copy of the bytes in the String
+* `byte[] toByteArray()` Return a copy of the bytes in the String
 * `String toString()` Return this
 
 ## Array
@@ -146,12 +146,12 @@ arrays support primitive types, and builtin and user-defined classes.
 An array can be initialized as empty, or with a given size, or with a
 sequence of items:
 ~~~
-    arr = new []String;
-    arr = new []String(1);
-    arr = new []String{"hello", "world", thirdString()};
+    arr = new String[];
+    arr = new String[](1);
+    arr = new String[]{"hello", "world", thirdString()};
 ~~~
 
-When an array is initialized with a given size like `new []String(1)`,
+When an array is initialized with a given size like `new String[](1)`,
 the array elements are initialzed to zero/false for scalar types, and
 null for class types.
 
@@ -177,7 +177,7 @@ The array class has a `length` field, and these methods:
 * `T pop()` Delete the last item from the array, and return it.
 * `void setLength(int n)` If the array is shorter then n, then add items
   with the default value. If the array is longer then n, then truncate it.
-* `void addAll([]T arr)` Add the items in arr to the end of this.
+* `void addAll(T[] arr)` Add the items in arr to the end of this.
 
 Initially, an array is allocated with the exact amount of memory that
 you specify. But all of the array methods may allocate a little extra
@@ -271,7 +271,7 @@ Exception.
 If you access past the end of an array, then it will die with an Out
 Of Bounds Exception. For example:
 ~~~
-    var arr = new []int(2); // valid indexes are [0] and [1]
+    var arr = new int[](2); // valid indexes are [0] and [1]
     var value = arr[2];   // Dies at runtime.
     var value2 = arr[-1]; // Also dies at runtime.
 ~~~
@@ -311,23 +311,17 @@ String implementation.
 Sanka does not support creating two-dimensional arrays (matrices) as a
 single contiguous block of memory. Instead, create an array of arrays.
 ~~~
-    var matrix = new [][]int(3);
-    matrix[0] = new []int(7);
-    matrix[1] = new []int(7);
-    matrix[2] = new []int(7);
+    var matrix = new int[][](3);
+    matrix[0] = new int[](7);
+    matrix[1] = new int[](8);
+    matrix[2] = new int[](9);
 ~~~
 
 The first line reads as: "matrix is an array with three elements where
-each element has type `[]int`."
+each element has type `int[]`."
 
-If you are familiar with Java (or C), then this syntax probably seems
-backwards to you. Why is the `[]` before the type? Why is the initial
-size of the array outside of the brackets? Because Sanka supports maps
-of arrays of maps of arrays of maps, etc. For example:
+TODO. Sanka supports maps of arrays of maps of arrays of maps, etc. For example:
 ~~~
-var x = new []map[int][]int(3);
+var x = new (map[int]int[])[](3);
 ~~~
-
-This reads as: "x is an array where the elements are maps. The map is
-from key=`String` to value=`[]int`. Initialize the array with three
-slots for these maps".
+Define and document this.

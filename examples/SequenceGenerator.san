@@ -19,26 +19,26 @@ class SequenceGenerator {
     const IN_PROGRESS = 1;
     const DONE = 2;
 
-    []String sequence([]Dependency inputPairs) {
+    String[] sequence(Dependency[] inputPairs) {
         // Put the pairs into a map for graph traversal.
-        var dependencyMap = new map[String][]String;
+        var dependencyMap = new map[String]String[];
         for (var pair : inputPairs) {
             var list = dependencyMap[pair.item];
             if (list == null) {
-                list = new []String;
+                list = new String[];
                 dependencyMap[pair.item] = list;
             }
             list.add(pair.dependsOn);
 
             list = dependencyMap[pair.dependsOn];
             if (list == null) {
-                list = new []String;
+                list = new String[];
                 dependencyMap[pair.dependsOn] = list;
             }
         }
 
         // BFS the graph.
-        var results = new []String;
+        var results = new String[];
         var statusMap = new map[String]int;
         for (var item : dependencyMap) {
             bfs(item, statusMap, results, dependencyMap);
@@ -46,8 +46,8 @@ class SequenceGenerator {
         return results;
     }
     
-    private void bfs(String item, map[String]int statusMap, []String results,
-                     map[String][]String dependencyMap) {
+    private void bfs(String item, map[String]int statusMap, String[] results,
+                     map[String]String[] dependencyMap) {
         var status = statusMap[item];
         if (status == DONE) {
             return;
@@ -64,7 +64,7 @@ class SequenceGenerator {
         statusMap[item] = DONE;
     }
 
-    static void main([]String argv) {
+    static void main(String[] argv) {
         var pairs = {
             new Dependency("A", "B"),
             new Dependency("A", "C"),

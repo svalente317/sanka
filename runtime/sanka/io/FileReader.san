@@ -18,7 +18,7 @@ class FileReader {
     /**
      * See Reader.read().
      */
-    int read([]byte buffer) {
+    int read(byte[] buffer) {
         c__stmt "return fread(buffer->data, 1, buffer->length, this->fp)";
     }
 
@@ -31,12 +31,12 @@ class FileReader {
     /**
      * Read the entire file contents into memory and close the stream.
      */
-    []byte readFile() {
+    byte[] readFile() {
         var stats = new FileStats();
         if (new File(this.filename).getStats(stats, true) != 0) {
             return null;
         }
-        var body = new []byte(stats.length);
+        var body = new byte[](stats.length);
         read(body);
         close();
         return body;

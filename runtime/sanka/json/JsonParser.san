@@ -106,7 +106,7 @@ class JsonParser {
             this.errorIdx = idx;
             return -1;
         }
-        var array = new []JsonElement;
+        var array = new JsonElement[];
         idx++;
         idx = skipSpace(idx);
         if (idx < this.length && this.text[idx] == ']') {
@@ -142,7 +142,7 @@ class JsonParser {
             this.errorIdx = idx;
             return -1;
         }
-        var bytes = new []byte;
+        var bytes = new byte[];
         idx++;
         while (idx < this.length) {
             var ch = this.text[idx];

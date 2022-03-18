@@ -158,7 +158,8 @@ classType
     ;
 
 arrayType
-    :   '[' ']' typeType
+    :    scalarType '[' ']'
+    |   arrayType '[' ']'
     ;
 
 mapType

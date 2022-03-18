@@ -7,7 +7,7 @@ interface Writer {
      *
      * @return the number of bytes written, or -1.
      */
-    int write([]byte buffer);
+    int write(byte[] buffer);
 
     int close();
 }

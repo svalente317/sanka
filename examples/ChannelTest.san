@@ -11,14 +11,14 @@ import sanka.lang.Thread;
  * second. When the channel is empty, the Consumers wait.
  */
 class ChannelTest {
-    static void main([]String args) {
+    static void main(String[] args) {
         new ChannelTest().run();
     }
 
     void run() {
         var channel = new Channel(50);
 
-        var threads = new []Thread(4);
+        var threads = new Thread[](4);
         var i;
         for (i = 0; i < threads.length; i++) {
             threads[i] = new Thread(new Consumer(i, channel));

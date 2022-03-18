@@ -86,8 +86,7 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
             return true;
         }
         if (ctx.classType() != null) {
-            parse(ctx.classType());
-            return true;
+            return parse(ctx.classType());
         }
         return false;
     }
@@ -116,8 +115,10 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
 
     public boolean parse(ArrayTypeContext ctx) {
         this.arrayOf = new TypeDefinition();
-        this.arrayOf.parse(ctx.typeType());
-        return true;
+        if (ctx.arrayType() != null) {
+            return this.arrayOf.parse(ctx.arrayType());
+        }
+        return this.arrayOf.parse(ctx.scalarType());
     }
 
     public boolean parse(MapTypeContext ctx) {

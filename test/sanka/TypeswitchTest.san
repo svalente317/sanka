@@ -3,7 +3,7 @@ package sanka.test;
 import sanka.lang.Object;
 
 class Globals {
-    static []int RESULTS;
+    static int[] RESULTS;
 }
 
 abstract class EmptyBase {}
@@ -59,7 +59,7 @@ class TypeswitchTest extends BaseTest {
     */
 
     void testInterfaceTypeswitch() {
-        Globals.RESULTS = new []int;
+        Globals.RESULTS = new int[];
         use(new Adder(100), 17);
         use(new Subtracter(200), 17);
         use(this, 17);
@@ -69,7 +69,7 @@ class TypeswitchTest extends BaseTest {
         assertEquals( 17, Globals.RESULTS[2], "default");
     }
 
-    static int main([]String argv) {
+    static int main(String[] argv) {
         var test = new TypeswitchTest();
         test.testInterfaceTypeswitch();
         return test.exit();

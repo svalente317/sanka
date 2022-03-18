@@ -9,7 +9,7 @@
 PREFIX=/opt/sanka
 
 all:
-	@echo use \'./gradlew\' to build and \'make install\' to install
+	./gradlew
 
 clean:
 	./gradlew clean

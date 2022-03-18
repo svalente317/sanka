@@ -47,7 +47,7 @@ class CopyDirectory {
             reader.close();
             return status;
         }
-        var data = new []byte(128 * 1024);
+        var data = new byte[](128 * 1024);
         while (true) {
             status = reader.read(data);
             if (status <= 0) {
@@ -60,7 +60,7 @@ class CopyDirectory {
         return writer.close();
     }
 
-    static int main([]String argv) {
+    static int main(String[] argv) {
         var src = new File(argv[1]);
         var dst = new File(argv[2]);
         dst = new File(dst, src.getName());

@@ -46,7 +46,7 @@ class System {
         c__stmt "return (int) strtol(text, NULL, 0)";
     }
 
-    static void sort([]String arr) {
+    static void sort(String[] arr) {
         c__stmt "qsort(arr->data, arr->length, sizeof(char*), STRING_QSORT_CMP)";
     }
 

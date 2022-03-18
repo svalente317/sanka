@@ -8,8 +8,8 @@ class PlainObject {
 
 class CreatorTest extends BaseTest {
     void run() {
-        var results = new []String;
-        for (var s : new []String{"verbose", "syntax"}) {
+        var results = new String[];
+        for (var s : new String[]{"verbose", "syntax"}) {
             results.add(s);
         }
         for (var s : {"Hello", null, "world!"}) {
@@ -47,7 +47,7 @@ class CreatorTest extends BaseTest {
         assertEquals(99, new PlainObject(){i: 99}.i, "creator expr");
     }
 
-    static int main([]String argv) {
+    static int main(String[] argv) {
         var test = new CreatorTest();
         test.run();
         return test.exit();

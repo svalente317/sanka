@@ -4,25 +4,25 @@ package sanka.util;
 singleton class Base64 {
 
     private String encodeMap;
-    private []byte decodeMap;
+    private byte[] decodeMap;
 
     Base64() {
         this.encodeMap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
             "abcdefghijklmnopqrstuvwxyz0123456789+/";
-        this.decodeMap = new []byte(128);
+        this.decodeMap = new byte[](128);
         for (var idx = 0; idx < 64; idx++) {
             var ch = this.encodeMap[idx];
             this.decodeMap[ch] = (byte) idx;
         }
     }
 
-    []byte decode(String in) {
+    byte[] decode(String in) {
         var iLen = in.length();
         while (iLen > 0 && in[iLen-1] == '=') {
             iLen--;
         }
         var oLen = (iLen*3) / 4;
-        var out = new []byte(oLen);
+        var out = new byte[](oLen);
         var ip = 0;
         var op = 0;
         while (ip < iLen) {

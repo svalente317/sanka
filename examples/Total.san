@@ -7,7 +7,7 @@ import sanka.io.StandardInputReader;
 // for benchmarks
 
 class Total {
-    static void main([]String argv) {
+    static void main(String[] argv) {
         var reader = new LineReader(StandardInputReader.get());
         var sum = 0L;
         while (true) {
