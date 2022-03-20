@@ -6,17 +6,17 @@ import sanka.ClassDefinition.FieldDefinition;
 import sanka.MethodDefinition.ParameterDefinition;
 
 /**
- * ArrayUtils supports built-in methods on arrays in both the evaluate pass and the
- * translate pass. For example:
+ * ArrayUtils supports built-in methods on arrays in both the "evaluate" pass and the
+ * "translate" pass. For example:
  *
  * var arr = new String[0];
  * arr.add("Hello");
  * arr.add("World");
  *
- * For the evaluate pass, specify that String[] has a method named "add"
+ * For the "evaluate" pass, specify that String[] has a method named "add"
  * that takes one parameter of type String.
  *
- * For the translate pass, specify that add() calls the C function
+ * For the "translate" pass, specify that add() calls the C function
  * GROW_ARRAY() and then it does `arr[arr->length-1] = value`.
  */
 public class ArrayUtils {

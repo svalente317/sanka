@@ -71,8 +71,8 @@ Here are the Java constructs that Sanka does not provide:
   runtime. I can declare variables of type `Foo`, but there is no `Foo.class`
   object accessable at runtime.
 * Exceptions cannot be thrown or caught.
-* Runtime exceptions (null pointer, division by zero, array out of bounds,
-  etc.) kill the application.
+* Runtime exceptions (division by zero, array out of bounds, etc.)
+  kill the application. TODO: Is this still true?
 * There is no reflection.
 * There is no base Object class.
 * There are no base methods like wait(), notify(), hashCode(), etc. Types
@@ -116,6 +116,12 @@ map[2018] = "Hello, world!";
 
 For more information on all Sanka types, including arrays and maps,
 see [docs/Builtin-Types.md](docs/Builtin-Types.md).
+
+**Null Protection**
+
+In Sanka, it is impossible to dereference a null pointer. The compiler
+knows which variables and fields may be null. And it ensures that they
+are accessed safely. See [docs/Null-Protection.md](docs/Null-Protection.md).
 
 **inline keyword**
 

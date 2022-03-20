@@ -171,7 +171,7 @@ public class ExpressionDefinition {
         String text = primary.getText();
         if (primary.literal() != null) {
             this.value = text;
-            // Parse all of the complex literals, such as:
+            // Parse all the complex literals, such as:
             // * integers in binary, octal, hex
             // * floating points in hex and/or exp mode
             // * characters in octal mode
@@ -525,6 +525,10 @@ public class ExpressionDefinition {
         } else {
             classdef = ArrayUtils.mapClassDefinition(this.expression1.type.keyType);
         }
+        if (this.expression1.type.nullable) {
+            env.printError(expr, "class " + classdef.name + " may be null");
+            return;
+        }
         FieldDefinition fielddef = classdef.getField(this.name);
         boolean isPrivate;
         if (fielddef == null) {
@@ -640,7 +644,7 @@ public class ExpressionDefinition {
             this.type = TypeDefinition.BYTE_TYPE;
             return;
         }
-        if (this.expression1.type.arrayOf == null) {
+        if (this.expression1.type.arrayOf == null || this.expression1.type.nullable) {
             env.printError(expr, "array required, but " + this.expression1.type + " found");
             return;
         }

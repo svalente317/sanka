@@ -141,6 +141,7 @@ typeType
 scalarType
     :   primitiveType
     |   classType
+    |   classType '?'
     ;
 
 primitiveType

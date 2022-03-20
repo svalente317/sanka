@@ -45,9 +45,9 @@ arr.add("hello");
 
 2. To create an array containing some null elements, specify the type
 of the array, and then the initial size of the array in parentheses.
-For example, this creates a String array with five slots:
+For example, this creates a nullable String array with five slots:
 ~~~
-var arr = new String[](5);
+var arr = new String?[](5);
 ~~~
 Here, `arr.length == 5`. You can read and write the values as
 `arr[i]`, as well as calling `arr.add()`, etc.
@@ -64,9 +64,9 @@ Here, `arr.length == 2` and `arr[0] == "hello"`.
 each other. They all create the exact same zero-element array, which
 can be accessed and modified like any other zero-element array:
 ~~~
-arr = new String[];
-arr = new String[](0);
-arr = new String[]{};
+arr = new int[];
+arr = new int[](0);
+arr = new int[]{};
 ~~~
 The first way is preferred to create an empty array.
 
@@ -83,7 +83,7 @@ The shorthand way is preferred whenever possible. (Note that
 sometimes, you must use the verbose syntax. For example, when you want
 to create an array of type T where T is an interface that the elements
 implement. And certain similar cases involving abstract classes, and
-shorts/ints/longs, etc.)
+shorts/ints/longs, nullable types, etc.)
 
 ## Maps
 

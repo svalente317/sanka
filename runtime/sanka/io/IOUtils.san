@@ -19,7 +19,7 @@ class IOUtils {
             chain.add(data);
         }
         if (chain.length == 0) {
-            return null;
+            return new byte[];
         }
         var size = 0;
         for (var data : chain) {

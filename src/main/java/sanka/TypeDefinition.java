@@ -28,6 +28,7 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
     public boolean isPrimitiveType;
     public String packageName;
     public String name;
+    public boolean nullable;
     public TypeDefinition arrayOf;
     public TypeDefinition keyType;
 
@@ -59,10 +60,14 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
         if (this.name == null) {
             return "null";
         }
+        String fullName = this.name;
         if (this.packageName != null) {
-            return this.packageName + "." + this.name;
+            fullName = this.packageName + "." + this.name;
         }
-        return this.name;
+        if (this.nullable) {
+            fullName = fullName + "?";
+        }
+        return fullName;
     }
 
     public boolean parse(TypeTypeContext ctx) {
@@ -86,7 +91,9 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
             return true;
         }
         if (ctx.classType() != null) {
-            return parse(ctx.classType());
+            boolean result = parse(ctx.classType());
+            this.nullable = (ctx.getChildCount() == 2);
+            return result;
         }
         return false;
     }
@@ -179,7 +186,11 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
 
     @Override
     public int compareTo(TypeDefinition that) {
-        int value = compareObjects(this.packageName, that.packageName);
+        int value = Boolean.compare(this.nullable, that.nullable);
+        if (value != 0) {
+            return value;
+        }
+        value = compareObjects(this.packageName, that.packageName);
         if (value != 0) {
             return value;
         }

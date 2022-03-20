@@ -1,12 +1,7 @@
 package sanka;
 
 import java.io.Writer;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -91,8 +86,7 @@ public class Environment {
     }
 
     boolean isCurrentPackage(ClassDefinition classdef) {
-        return (this.currentPackage == null ? classdef.packageName == null :
-                this.currentPackage.equals(classdef.packageName));
+        return Objects.equals(this.currentPackage, classdef.packageName);
     }
 
     public void printError(ParserRuleContext ctx, String error) {
@@ -110,8 +104,7 @@ public class Environment {
             return null;
         }
         for (ClassDefinition classdef : this.classList) {
-            boolean samePackage = classdef.packageName == null ?
-                    packageName == null : classdef.packageName.equals(packageName);
+            boolean samePackage = Objects.equals(classdef.packageName, packageName);
             if (samePackage && classdef.name.equals(name)) {
                 return classdef;
             }
