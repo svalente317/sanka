@@ -10,7 +10,7 @@ class LineReader {
 
     private int maxLineLength;
     private Reader reader;
-    private byte[] prefix;
+    private byte[]? prefix;
 
     LineReader(Reader reader) {
         this.maxLineLength = MAX_LINE_LENGTH;

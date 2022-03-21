@@ -93,7 +93,7 @@ public class StatementDefinition {
         switch (lexerType) {
         case SankaLexer.WHILE:
             this.statementType = StatementType.WHILE;
-            evaluateBooleanExpression(ctx.parExpression().expression());
+            evaluateBooleanExpression(ctx.expression());
             this.block = new BlockDefinition();
             this.block.evaluate(ctx.block());
             return;
@@ -301,16 +301,60 @@ public class StatementDefinition {
      */
     void evaluateIf(IfStatementContext ictx) {
         this.statementType = StatementType.IF;
-        evaluateBooleanExpression(ictx.parExpression().expression());
+        this.expression = new ExpressionDefinition();
+        this.expression.evaluate(ictx.expression());
+        if (this.expression.type != null && !this.expression.type.isBooleanType() &&
+            !this.expression.type.nullable) {
+            Environment env = Environment.getInstance();
+            env.printError(ictx, "incompatible types: " + this.expression.type +
+                    " cannot be converted to boolean");
+        }
         this.block = new BlockDefinition();
-        this.block.evaluate(ictx.block());
+        this.block.evaluate(ictx.block(), getIfFrame(this.expression));
         if (ictx.elseStatement() != null) {
             this.elseBlock = new BlockDefinition();
             if (ictx.elseStatement().block() != null) {
+                // TODO else block frame
                 this.elseBlock.evaluate(ictx.elseStatement().block());
             } else {
                 this.elseBlock.evaluate(ictx.elseStatement().ifStatement());
             }
+        }
+        updateSymbolTableAfterIf();
+    }
+
+    SymbolTable.Frame getIfFrame(ExpressionDefinition expr) {
+        if (expr.type == null) {
+            return null;
+        }
+        if (expr.type.nullable && expr.expressionType == ExpressionType.IDENTIFIER) {
+            SymbolTable.Frame frame = new SymbolTable.Frame();
+            frame.put(expr.name, expr.type.makeConcrete());
+            return frame;
+        }
+        if (expr.expressionType == ExpressionType.BINARY &&
+                expr.expression1.expressionType == ExpressionType.IDENTIFIER &&
+                expr.operator.equals("!=") &&
+                expr.expression2.type.isNullType()) {
+            SymbolTable.Frame frame = new SymbolTable.Frame();
+            frame.put(expr.expression1.name, expr.expression1.type.makeConcrete());
+            return frame;
+        }
+        return null;
+    }
+
+    void updateSymbolTableAfterIf() {
+        ExpressionDefinition expr = this.expression;
+        StatementDefinition lastStatement = this.block.lastStatement();
+        if (expr.expressionType == ExpressionType.BINARY &&
+                expr.expression1.expressionType == ExpressionType.IDENTIFIER &&
+                expr.operator.equals("==") &&
+                expr.expression2.type != null &&
+                expr.expression2.type.isNullType() &&
+                lastStatement != null &&
+                lastStatement.statementType == StatementType.RETURN) {
+            // TODO
+            // frame.put(expr.expression1.name, expr.expression1.type.makeConcrete());
         }
     }
 
@@ -407,7 +451,7 @@ public class StatementDefinition {
         Environment env = Environment.getInstance();
         this.statementType = StatementType.SWITCH;
         this.expression = new ExpressionDefinition();
-        this.expression.evaluate(ctx.parExpression().expression());
+        this.expression.evaluate(ctx.expression());
         TypeDefinition type = this.expression.type;
         if (type != null && !(type.isIntegralType() || type.isStringType())) {
             env.printError(ctx, "incompatible types: switch statement must use " +
@@ -423,7 +467,7 @@ public class StatementDefinition {
         Environment env = Environment.getInstance();
         this.statementType = StatementType.TYPESWITCH;
         this.expression = new ExpressionDefinition();
-        this.expression.evaluate(ctx.parExpression().expression());
+        this.expression.evaluate(ctx.expression());
         TypeDefinition type = this.expression.type;
         if (type == null) {
             return;

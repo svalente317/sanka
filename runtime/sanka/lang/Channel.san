@@ -66,7 +66,7 @@ class Channel {
      * Remove and return the item from the front of the queue. If the queue
      * is empty, then block until some other thread calls push().
      */
-    Object pop() {
+    Object? pop() {
         this.mutex.lock();
         while (this.size == 0) {
             if (this.closed) {

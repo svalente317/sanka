@@ -2,7 +2,7 @@
 
 - StatementDefinition
 - fix new type[size]
-- fix commends in evaluateArrayCreator
+- fix comments in evaluateArrayCreator
 - fix evaluateMapCreator
 - unary op: Allow '!' nullable
 - fix evaluateArrayDefinition

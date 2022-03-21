@@ -5,10 +5,8 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import sanka.antlr4.SankaParser.ArrayTypeContext;
 import sanka.antlr4.SankaParser.ClassTypeContext;
 import sanka.antlr4.SankaParser.MapTypeContext;
-import sanka.antlr4.SankaParser.ScalarTypeContext;
 import sanka.antlr4.SankaParser.TypeTypeContext;
 
 public class TypeDefinition implements Comparable<TypeDefinition> {
@@ -51,39 +49,26 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
 
     @Override
     public String toString() {
+        String s = null;
         if (this.keyType != null) {
-            return "map[" + this.keyType.toString() + "]" + this.arrayOf.toString();
+            s = "map[" + this.keyType.toString() + "]" + this.arrayOf.toString();
         }
-        if (this.arrayOf != null) {
-            return this.arrayOf.toString() + "[]";
+        else if (this.arrayOf != null) {
+            s = this.arrayOf.toString() + "[]";
         }
-        if (this.name == null) {
-            return "null";
+        else if (this.packageName != null) {
+            s = this.packageName + "." + this.name;
         }
-        String fullName = this.name;
-        if (this.packageName != null) {
-            fullName = this.packageName + "." + this.name;
+        else {
+            s = this.name;
         }
-        if (this.nullable) {
-            fullName = fullName + "?";
+        if (s != null && this.nullable) {
+            s = s + "?";
         }
-        return fullName;
+        return s;
     }
 
     public boolean parse(TypeTypeContext ctx) {
-        if (ctx.scalarType() != null) {
-            return parse(ctx.scalarType());
-        }
-        if (ctx.arrayType() != null) {
-            return parse(ctx.arrayType());
-        }
-        if (ctx.mapType() != null) {
-            return parse(ctx.mapType());
-        }
-        return false;
-    }
-
-    public boolean parse(ScalarTypeContext ctx) {
         if (ctx.primitiveType() != null) {
             Token token = ctx.primitiveType().getStart();
             this.isPrimitiveType = true;
@@ -91,9 +76,21 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
             return true;
         }
         if (ctx.classType() != null) {
-            boolean result = parse(ctx.classType());
-            this.nullable = (ctx.getChildCount() == 2);
-            return result;
+            return parse(ctx.classType());
+        }
+        if (ctx.typeType() != null && ctx.getChildCount() == 3) {
+            return parseArray(ctx.typeType());
+        }
+        if (ctx.mapType() != null) {
+            return parse(ctx.mapType());
+        }
+        if (ctx.typeType() != null && ctx.getChildCount() == 2) {
+            boolean result = parse(ctx.typeType());
+            if (!result || this.isPrimitiveType || this.nullable) {
+                return false;
+            }
+            this.nullable = true;
+            return true;
         }
         return false;
     }
@@ -120,12 +117,9 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
         return this.name != null;
     }
 
-    public boolean parse(ArrayTypeContext ctx) {
+    public boolean parseArray(TypeTypeContext ctx) {
         this.arrayOf = new TypeDefinition();
-        if (ctx.arrayType() != null) {
-            return this.arrayOf.parse(ctx.arrayType());
-        }
-        return this.arrayOf.parse(ctx.scalarType());
+        return this.arrayOf.parse(ctx);
     }
 
     public boolean parse(MapTypeContext ctx) {
@@ -136,7 +130,7 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
             return false;
         }
         this.keyType = new TypeDefinition();
-        this.keyType.parse(ctx.scalarType());
+        this.keyType.parse(ctx.typeType());
         this.arrayOf = new TypeDefinition();
         this.arrayOf.parse(ctx.typeType());
         return true;
@@ -212,5 +206,14 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
 
     TypeDefinition baseType() {
         return this.arrayOf == null ? this : this.arrayOf.baseType();
+    }
+
+    public TypeDefinition makeConcrete() {
+        TypeDefinition that = new TypeDefinition();
+        that.packageName = this.packageName;
+        that.name = this.name;
+        that.arrayOf = this.arrayOf;
+        that.keyType = this.keyType;
+        return that;
     }
 }

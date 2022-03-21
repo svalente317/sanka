@@ -20,7 +20,7 @@ import sanka.antlr4.SankaParser.LiteralContext;
 import sanka.antlr4.SankaParser.MapDefinitionContext;
 import sanka.antlr4.SankaParser.MapEntryContext;
 import sanka.antlr4.SankaParser.PrimaryContext;
-import sanka.antlr4.SankaParser.ScalarTypeContext;
+import sanka.antlr4.SankaParser.TypeTypeContext;
 
 public class ExpressionDefinition {
 
@@ -117,8 +117,8 @@ public class ExpressionDefinition {
             }
             return;
         case 4:
-            if (ctx.scalarType() != null) {
-                evaluateTypeCast(ctx.scalarType(), ctx.expression(0));
+            if (ctx.typeType() != null) {
+                evaluateTypeCast(ctx.typeType(), ctx.expression(0));
                 return;
             }
             String left_op = ((TerminalNode) ctx.getChild(1)).getSymbol().getText();
@@ -163,8 +163,8 @@ public class ExpressionDefinition {
      */
     void evaluatePrimary(PrimaryContext primary) {
         Environment env = Environment.getInstance();
-        if (primary.parExpression() != null) {
-            this.evaluate(primary.parExpression().expression());
+        if (primary.expression() != null) {
+            this.evaluate(primary.expression());
             return;
         }
         this.expressionType = ExpressionType.LITERAL;
@@ -286,7 +286,7 @@ public class ExpressionDefinition {
             evaluateNewInstance(creator);
             return;
         }
-        if (creator.arrayType() != null) {
+        if (creator.typeType() != null) {
             evaluateArrayCreator(creator);
             return;
         }
@@ -366,7 +366,7 @@ public class ExpressionDefinition {
     private void evaluateArrayCreator(CreatorContext creator) {
         Environment env = Environment.getInstance();
         this.type = new TypeDefinition();
-        this.type.parse(creator.arrayType());
+        this.type.parseArray(creator.typeType());
         TypeDefinition baseType = this.type;
         while (baseType.arrayOf != null) {
             baseType = baseType.arrayOf;
@@ -817,7 +817,7 @@ public class ExpressionDefinition {
         this.argList = valueList.toArray(new ExpressionDefinition[0]);
     }
 
-    void evaluateTypeCast(ScalarTypeContext classCtx, ExpressionContext ctx) {
+    void evaluateTypeCast(TypeTypeContext classCtx, ExpressionContext ctx) {
         Environment env = Environment.getInstance();
         this.type = new TypeDefinition();
         this.type.parse(classCtx);

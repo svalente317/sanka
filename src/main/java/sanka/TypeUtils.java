@@ -38,13 +38,10 @@ public class TypeUtils {
             // Match null and non-primitive classes and arrays and maps.
             return type.isNullType() || type.nullable;
         }
-        boolean match = expr.type.equals(type);
-        if (!match && type.nullable && !expr.type.nullable) {
-            type.nullable = false;
-            match = expr.type.equals(type);
-            type.nullable = true;
+        if (expr.type.equals(type)) {
+            return true;
         }
-        if (match) {
+        if (type.nullable && !expr.type.nullable && expr.type.equals(type.makeConcrete())) {
             return true;
         }
         if (expr.type.arrayOf != null || type.arrayOf != null) {

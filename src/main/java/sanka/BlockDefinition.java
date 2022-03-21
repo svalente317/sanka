@@ -34,4 +34,11 @@ public class BlockDefinition {
         this.block[0].evaluateIf(ictx);
         this.frame = env.symbolTable.pop();
     }
+
+    StatementDefinition lastStatement() {
+        if (this.block.length == 0) {
+            return null;
+        }
+        return this.block[this.block.length-1];
+    }
 }

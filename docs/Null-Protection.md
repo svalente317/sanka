@@ -172,4 +172,24 @@ var arr = new Circle?[](size);
 
 ## Maps
 
-TODO
+If a map is defined to store concrete objects, then the return type of
+the map's `get` operator is a nullable type.
+
+For example, consider the following two maps:
+~~~
+var m1 = new map[int]Circle?;
+var m2 = new map[int]Circle;
+~~~
+These are not the exact same type of map. `m1` stores nullable
+objects, and `m2` stores concrete objects. So, for example, it is
+legal to say `m1[17] = null`, but it is not legal to say `m2[17] =
+null`.
+
+Dispite this difference, both `m1` and `m2` provide an operator that
+returns values of type `Circle?`. For example:
+~~~
+var c1 = m1[100];
+var c2 = m2[100];
+~~~
+In this example, both `c1` and `c2` have type `Circle?`. Both of them
+must be validated (i.e. `if c2`) before they can be dereferenced.

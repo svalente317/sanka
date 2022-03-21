@@ -133,15 +133,11 @@ interfaceMethodDeclaration
     ;
 
 typeType
-    :   scalarType
-    |   arrayType
-    |   mapType
-    ;
-
-scalarType
     :   primitiveType
     |   classType
-    |   classType '?'
+    |   typeType '[' ']'
+    |   mapType
+    |   typeType '?'
     ;
 
 primitiveType
@@ -158,13 +154,8 @@ classType
     :   ( Identifier '.' )* Identifier
     ;
 
-arrayType
-    :    scalarType '[' ']'
-    |   arrayType '[' ']'
-    ;
-
 mapType
-    :   Identifier '[' scalarType ']' typeType
+    :   Identifier '[' ( primitiveType | classType ) ']' typeType
     ;
 
 formalParameters
@@ -195,9 +186,9 @@ statement
     |   variableAssignment ';'
     |   ifStatement
     |   'for' '(' forControl ')' block
-    |   'while' parExpression block
-    |   'switch' parExpression block
-    |   'typeswitch' parExpression block
+    |   'while' expression block
+    |   'switch' expression block
+    |   'typeswitch' expression block
     |   switchLabel
     |   'return' expression? ';'
     |   'break' ';'
@@ -222,7 +213,7 @@ assignable
     ;
 
 ifStatement
-    :   'if' parExpression block ('else' elseStatement)?
+    :   'if' expression block ('else' elseStatement)?
     ;
 
 elseStatement
@@ -258,10 +249,6 @@ switchLabel
 
 // EXPRESSIONS
 
-parExpression
-    :   '(' expression ')'
-    ;
-
 expressionList
     :   expression (',' expression)*
     ;
@@ -286,13 +273,13 @@ expression
     |   expression '||' expression
     |   expression '?' expression ':' expression
     |   'super' '.' Identifier
-    |   '(' scalarType ')' expression
+    |   '(' typeType ')' expression
     |   arrayDefinition
     |   mapDefinition
     ;
 
 primary
-    :   parExpression
+    :   '(' expression ')'
     |   'this'
     |   literal
     |   Identifier
@@ -300,8 +287,8 @@ primary
 
 creator
     :   classType '(' expressionList? ')' fieldValues?
-    |   arrayType '(' expression ')'
-    |   arrayType arrayDefinition?
+    |   typeType '[' ']' '(' expression ')'
+    |   typeType '[' ']' arrayDefinition?
     |   mapType mapDefinition?
     |   anonymousClassBody
     ;

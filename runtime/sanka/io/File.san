@@ -113,7 +113,7 @@ class File {
      *
      * This can be fooled by symbolic links and hard links including ".."
      */
-    File getParent() {
+    File? getParent() {
         var strip = this.pathname;
         var done = false;
         while (!done) {

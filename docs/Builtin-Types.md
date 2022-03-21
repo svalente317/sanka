@@ -245,9 +245,7 @@ sorted keys.
 
 ## Errors
 
-* What happens if you access past the end of an array?
-* What happens if you access `arr[-1]`?
-* What happens if you access a key that's not in a map?
+* What happens if you access past the end of an array or `arr[-1]`?
 * What happens if you access `str[2147483647]`?
 
 Currently, String is implemented using C strings, so:

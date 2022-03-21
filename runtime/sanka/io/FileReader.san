@@ -31,7 +31,7 @@ class FileReader {
     /**
      * Read the entire file contents into memory and close the stream.
      */
-    byte[] readFile() {
+    byte[]? readFile() {
         var stats = new FileStats();
         if (new File(this.filename).getStats(stats, true) != 0) {
             return null;
