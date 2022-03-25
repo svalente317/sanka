@@ -353,8 +353,11 @@ public class StatementDefinition {
                 expr.expression2.type.isNullType() &&
                 lastStatement != null &&
                 lastStatement.statementType == StatementType.RETURN) {
-            // TODO
-            // frame.put(expr.expression1.name, expr.expression1.type.makeConcrete());
+            // This seems dangerous. We're changing the type of this local variable in
+            // the whole block, including the statements before this "if" statement.
+            // But so far, so good.
+            Environment env = Environment.getInstance();
+            env.symbolTable.put(expr.expression1.name, expr.expression1.type.makeConcrete());
         }
     }
 

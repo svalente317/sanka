@@ -53,21 +53,21 @@ class SerializableTest extends BaseTest {
 
         var t = new SerializableClass();
         t.fromJson(new JsonElement().makeObject(jo));
-        assert(t.s == -1000, "short");
-        assert(t.i == 8888, "int");
-        assert(t.lg == -2345678901, "long");
-        assert(t.str == "column 1" + ((byte) 9) + "column 2", "string");
-        assert(t.nullString == null, "null string");
-        assert(t.shortArr.length == 2, "short array");
-        assert(t.nullArr == null, "null array");
-        assert(t.longArr.length == 2, "long array");
-        assert(t.stringArr.length == 3, "string array");
-        assert(t.longArr[0] == 54321098765, "long array contents");
-        assert(t.d.key == "value", "class");
-        assert(t.nullDummy == null,  "null class");
-        assert(t.dummyArr.length == 3, "class array");
-        assert(t.dummyArr[1] == null, "class array null");
-        assert(t.dummyArr[2].key == "value", "class array item");
+        assertTrue(t.s == -1000, "short");
+        assertTrue(t.i == 8888, "int");
+        assertTrue(t.lg == -2345678901, "long");
+        assertTrue(t.str == "column 1" + ((byte) 9) + "column 2", "string");
+        assertTrue(t.nullString == null, "null string");
+        assertTrue(t.shortArr.length == 2, "short array");
+        assertTrue(t.nullArr == null, "null array");
+        assertTrue(t.longArr.length == 2, "long array");
+        assertTrue(t.stringArr.length == 3, "string array");
+        assertTrue(t.longArr[0] == 54321098765, "long array contents");
+        assertTrue(t.d.key == "value", "class");
+        assertTrue(t.nullDummy == null,  "null class");
+        assertTrue(t.dummyArr.length == 3, "class array");
+        assertTrue(t.dummyArr[1] == null, "class array null");
+        assertTrue(t.dummyArr[2].key == "value", "class array item");
 
         var text = "{\"s\":\"string\", \"xxx\":17, \"STR\":0, " +
             "\"i\":5, \"lg\":null, \"shortArr\":[\"a\", 1.1, null], " +
@@ -75,26 +75,26 @@ class SerializableTest extends BaseTest {
         jo = JsonObject.parse(text);
         t = new SerializableClass();
         t.fromJsonObject(jo);
-        assert(t.i == 5, "json to class");
+        assertTrue(t.i == 5, "json to class");
 
         text = "{\"dummyArr\":[{\"key\":\"v1\"},null,{\"key\":\"v2\"}]}";
         jo = JsonObject.parse(text);
         t.nullArr = new int[](1);
         t.fromJsonObject(jo);
-        assert(t.nullArr == null, "j null array");
-        assert(t.dummyArr.length == 3, "j array");
-        assert(t.dummyArr[0].key == "v1", "j array 0");
-        assert(t.dummyArr[1] == null, "j array 1");
-        assert(t.dummyArr[2].key == "v2", "j array 2");
+        assertTrue(t.nullArr == null, "j null array");
+        assertTrue(t.dummyArr.length == 3, "j array");
+        assertTrue(t.dummyArr[0].key == "v1", "j array 0");
+        assertTrue(t.dummyArr[1] == null, "j array 1");
+        assertTrue(t.dummyArr[2].key == "v2", "j array 2");
 
         var s = new ScalarTest();
         text = "{\"key\": 17}";
         jo = JsonObject.parse(text);
         s.fromJsonObject(jo);
-        assert(s.key.intValue() == 17, "Integer");
+        assertTrue(s.key.intValue() == 17, "Integer");
         jo = JsonObject.parse("{}");
         s.fromJsonObject(jo);
-        assert(s.key == null, "null Integer");
+        assertTrue(s.key == null, "null Integer");
     }
 
     static int main(String[] argv) {

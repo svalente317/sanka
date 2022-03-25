@@ -58,7 +58,7 @@ abstract class TranslationBase {
             }
             return type.name;
         }
-        if (type.isStringType()) {
+        if (type.isStringType() || type.nullable && type.makeConcrete().isStringType()) {
             return "const char *";
         }
         return "struct " + type.name + " *";

@@ -64,7 +64,7 @@ class AbstractClassTest extends BaseTest {
         /*
         var a = getVeryConcrete();
         var t = ((VeryConcreteClass) a).getTrue();
-        assert(t);
+        assertTrue(t);
         */
     }
 

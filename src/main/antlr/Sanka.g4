@@ -276,6 +276,7 @@ expression
     |   '(' typeType ')' expression
     |   arrayDefinition
     |   mapDefinition
+    |   'assert' expression
     ;
 
 primary
@@ -337,6 +338,7 @@ fieldValue
 
 // 3.9 Keywords
 
+ASSERT        : 'assert';
 BOOLEAN       : 'boolean';
 BREAK         : 'break';
 BYTE          : 'byte';

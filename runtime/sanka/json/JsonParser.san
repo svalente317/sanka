@@ -66,9 +66,9 @@ class JsonParser {
             elem.makeObject(object);
             return idx;
         }
-        var key = new JsonElement();
+        var keyElem = new JsonElement();
         while (true) {
-            idx = parseString(idx, key);
+            idx = parseString(idx, keyElem);
             if (idx < 0) {
                 return idx;
             }
@@ -84,7 +84,10 @@ class JsonParser {
             if (idx < 0) {
                 return idx;
             }
-            object.set(key.getAsString(), value);
+            var key = keyElem.getAsString();
+            if key != null {
+                object.set(key, value);
+            }
             idx = skipSpace(idx);
             if (idx == this.length || this.text[idx] != ',') {
                 break;
@@ -324,14 +327,17 @@ class JsonParser {
      *
      * @return the parsed JSON element or null
      */
-    static JsonElement parse(String text) {
+    static JsonElement? parse(String text) {
         var parser = new JsonParser(text);
         var elem = new JsonElement();
         var idx = parser.parseElement(0, elem);
         if (idx > 0) {
             idx = parser.skipSpace(idx);
         }
-        return idx == parser.length ? elem: null;
+        if idx < parser.length {
+            return null;
+        }
+        return elem;
     }
 
     /**
@@ -339,8 +345,11 @@ class JsonParser {
      *
      * @return the parsed JSON element or null
      */
-    static JsonElement parseFile(String filename) {
+    static JsonElement? parseFile(String filename) {
         var body = IOUtils.readFileAsString(filename);
-        return body == null ? null : JsonParser.parse(body);
+        if body == null {
+            return null;
+        }
+        return JsonParser.parse(body);
     }
 }

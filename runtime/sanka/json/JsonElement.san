@@ -54,23 +54,19 @@ class JsonElement {
     }
 
     JsonElement makeString(String value) {
-        if (value == null) {
-            this.type = NULL_TYPE;
-        } else {
-            this.type = STRING_TYPE;
-            c__stmt "this->data.s = value";
-        }
+        this.type = STRING_TYPE;
+        c__stmt "this->data.s = value";
         return this;
     }
 
     JsonElement makeArray(JsonElement[] value) {
-        this.type = (value == null ? NULL_TYPE : ARRAY_TYPE);
+        this.type = ARRAY_TYPE;
         c__stmt "this->data.arr = value";
         return this;
     }
 
     JsonElement makeObject(JsonObject value) {
-        this.type = (value == null ? NULL_TYPE : OBJECT_TYPE);
+        this.type = OBJECT_TYPE;
         c__stmt "this->data.obj = value";
         return this;
     }
@@ -117,21 +113,21 @@ class JsonElement {
         c__stmt "return this->data.d";
     }
 
-    String getAsString() {
+    String? getAsString() {
         if (this.type != STRING_TYPE) {
             return null;
         }
         c__stmt "return this->data.s";
     }
 
-    JsonElement[] getAsArray() {
+    JsonElement[]? getAsArray() {
         if (this.type != ARRAY_TYPE) {
             return null;
         }
         c__stmt "return this->data.arr";
     }
 
-    JsonObject getAsObject() {
+    JsonObject? getAsObject() {
         if (this.type != OBJECT_TYPE) {
             return null;
         }
@@ -149,10 +145,10 @@ class JsonElement {
         case DOUBLE_TYPE:
             return "" + getAsDouble();
         case STRING_TYPE:
-            var text = getAsString();
+            var text = assert getAsString();
             return StringEncoder.get().encodeAndQuote(text);
         case ARRAY_TYPE:
-            var arr = getAsArray();
+            var arr = assert getAsArray();
             if (arr.length == 0) {
                 return "[]";
             }
@@ -162,12 +158,13 @@ class JsonElement {
             }
             return "[" + s + "]";
         case OBJECT_TYPE:
-            return getAsObject().toString();
+            var obj = assert getAsObject();
+            return obj.toString();
         }
-        return null;
+        return "";
     }
 
-    static JsonElement parse(String text) {
+    static JsonElement? parse(String text) {
         return JsonParser.parse(text);
     }
 

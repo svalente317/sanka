@@ -27,7 +27,7 @@ public class ExpressionDefinition {
     public enum ExpressionType {
         LITERAL, IDENTIFIER, CLASS_IDENTIFIER, NEW_INSTANCE, NEW_ARRAY_WITH_VALUES,
         NEW_ARRAY, NEW_MAP, UNARY, FIELD_ACCESS, BINARY, ARRAY_ACCESS, FUNCTION_CALL,
-        TERNARY, SUPERCLASS, SUPER_DOT_METHOD, TYPE_CAST
+        TERNARY, SUPERCLASS, SUPER_DOT_METHOD, TYPE_CAST, ASSERT
     }
 
     public ExpressionType expressionType;
@@ -101,7 +101,11 @@ public class ExpressionDefinition {
         switch (count) {
         case 2:
             this.operator = ((TerminalNode) ctx.getChild(0)).getSymbol().getText();
-            evaluateUnaryOp(ctx.expression(0));
+            if (this.operator.equals("assert")) {
+                evaluateAssert(ctx.expression(0));
+            } else {
+                evaluateUnaryOp(ctx.expression(0));
+            }
             return;
         case 3:
             String middle = ((TerminalNode) ctx.getChild(1)).getSymbol().getText();
@@ -126,8 +130,7 @@ public class ExpressionDefinition {
             if (left_op.equals("[") && right_op.equals("]")) {
                 evaluateArrayAccess(ctx.expression(0), ctx.expression(1));
                 return;
-            }
-            else if (left_op.equals("(") && right_op.equals(")")) {
+            } else if (left_op.equals("(") && right_op.equals(")")) {
                 evaluateFunctionCall(ctx.expression(0), ctx.expressionList());
                 return;
             }
@@ -479,7 +482,7 @@ public class ExpressionDefinition {
      */
     private TypeDefinition promoteNumericType(ExpressionDefinition expr1, ExpressionDefinition expr2) {
         if (TypeUtils.isCompatibleNumeric(expr1.type, expr2) ||
-            TypeUtils.isCompatibleNumeric(expr2.type, expr1)) {
+                TypeUtils.isCompatibleNumeric(expr2.type, expr1)) {
             return expr1.type;
         }
         return null;
@@ -532,15 +535,15 @@ public class ExpressionDefinition {
         FieldDefinition fielddef = classdef.getField(this.name);
         boolean isPrivate;
         if (fielddef == null) {
-             this.method = classdef.getMethod(this.name, null);
-             if (this.method == null) {
-                 env.printError(expr, "class " + classdef.name +
-                         " does not have field " + this.name);
-                 return;
-             }
-             this.type = TypeDefinition.METHOD_TYPE;
-             this.isStatic = this.method.isStatic;
-             isPrivate = this.method.isPrivate;
+            this.method = classdef.getMethod(this.name, null);
+            if (this.method == null) {
+                env.printError(expr, "class " + classdef.name +
+                        " does not have field " + this.name);
+                return;
+            }
+            this.type = TypeDefinition.METHOD_TYPE;
+            this.isStatic = this.method.isStatic;
+            isPrivate = this.method.isPrivate;
         } else {
             if (classdef != env.currentClass) {
                 classdef.evaluateConstants();
@@ -579,46 +582,41 @@ public class ExpressionDefinition {
                 if (!(this.expression2.type.isStringType() ||
                         this.expression2.type.isPrimitiveType)) {
                     env.printError(rhs, "incompatible types: " + this.expression2.type +
-                         " cannot be converted to " + this.expression1.type);
+                            " cannot be converted to " + this.expression1.type);
                 }
                 this.type = TypeDefinition.STRING_TYPE;
-            }
-            else if (this.operator.equals("*") || this.operator.equals("/") ||
+            } else if (this.operator.equals("*") || this.operator.equals("/") ||
                     this.operator.equals("+") || this.operator.equals("-")) {
                 checkNumericType(lhs, this.expression1.type);
                 checkNumericType(rhs, this.expression2.type);
                 this.type = promoteNumericType(this.expression1, this.expression2);
-            }
-            else if (this.operator.equals("<=") || this.operator.equals(">=") ||
+            } else if (this.operator.equals("<=") || this.operator.equals(">=") ||
                     this.operator.equals("<") || this.operator.equals(">")) {
                 if (this.expression1.type.isStringType()) {
                     if (!this.expression2.type.isStringType()) {
                         env.printError(rhs, "incompatible types: " + this.expression2.type +
-                             " cannot be converted to " + this.expression1.type);
+                                " cannot be converted to " + this.expression1.type);
                     }
                 } else {
                     checkNumericType(lhs, this.expression1.type);
                     checkNumericType(rhs, this.expression2.type);
                 }
                 this.type = TypeDefinition.BOOLEAN_TYPE;
-            }
-            else if (this.operator.equals("%") || this.operator.equals("<<") ||
+            } else if (this.operator.equals("%") || this.operator.equals("<<") ||
                     this.operator.equals(">>") || this.operator.equals("&") ||
                     this.operator.equals("^") || this.operator.equals("|")) {
                 checkIntegralType(lhs, this.expression1.type);
                 checkIntegralType(rhs, this.expression2.type);
                 this.type = promoteNumericType(this.expression1, this.expression2);
-            }
-            else if (this.operator.equals("&&") || this.operator.equals("||")) {
+            } else if (this.operator.equals("&&") || this.operator.equals("||")) {
                 checkBooleanType(lhs, this.expression1.type);
                 checkBooleanType(rhs, this.expression2.type);
                 this.type = this.expression1.type;
-            }
-            else if (this.operator.equals("==") || this.operator.equals("!=")) {
+            } else if (this.operator.equals("==") || this.operator.equals("!=")) {
                 if (!(TypeUtils.isCompatibleRO(this.expression1.type, this.expression2) ||
-                      TypeUtils.isCompatibleRO(this.expression2.type, this.expression1))) {
+                        TypeUtils.isCompatibleRO(this.expression2.type, this.expression1))) {
                     if (!(TypeUtils.isInterface(this.expression1.type) &&
-                          TypeUtils.isInterface(this.expression2.type))) {
+                            TypeUtils.isInterface(this.expression2.type))) {
                         env.printError(rhs, "incompatible types: " + this.expression1.type +
                                 " cannot be compared to " + this.expression2.type);
                     }
@@ -682,7 +680,7 @@ public class ExpressionDefinition {
     }
 
     void evaluateFunctionArguments(ParserRuleContext expr, MethodDefinition method,
-            ExpressionListContext exprList) {
+                                   ExpressionListContext exprList) {
         Environment env = Environment.getInstance();
         if (exprList != null) {
             this.argList = new ExpressionDefinition[exprList.expression().size()];
@@ -706,7 +704,7 @@ public class ExpressionDefinition {
     }
 
     void evaluateTernaryConditional(ExpressionContext expr1, ExpressionContext expr2,
-            ExpressionContext expr3) {
+                                    ExpressionContext expr3) {
         this.expressionType = ExpressionType.TERNARY;
         ExpressionDefinition exprdef1 = new ExpressionDefinition();
         exprdef1.evaluate(expr1);
@@ -719,14 +717,12 @@ public class ExpressionDefinition {
             return;
         }
         this.expression1 = exprdef1;
-        this.argList = new ExpressionDefinition[] { exprdef2, exprdef3 };
+        this.argList = new ExpressionDefinition[]{exprdef2, exprdef3};
         if (TypeUtils.isCompatible(exprdef2.type, exprdef3)) {
             this.type = exprdef2.type;
-        }
-        else if (TypeUtils.isCompatible(exprdef3.type, exprdef2)) {
+        } else if (TypeUtils.isCompatible(exprdef3.type, exprdef2)) {
             this.type = exprdef3.type;
-        }
-        else {
+        } else {
             Environment env = Environment.getInstance();
             env.printError(expr2, "incompatible types: " + exprdef2.type + " and " +
                     exprdef3.type);
@@ -950,5 +946,22 @@ public class ExpressionDefinition {
         this.type = new TypeDefinition();
         this.type.arrayOf = valueType;
         this.type.keyType = keyType;
+    }
+
+    void evaluateAssert(ExpressionContext ctx) {
+        this.expressionType = ExpressionType.ASSERT;
+        this.expression1 = new ExpressionDefinition();
+        this.expression1.evaluate(ctx);
+        TypeDefinition etype = this.expression1.type;
+        if (etype != null) {
+            if (etype.nullable) {
+                this.type = etype.makeConcrete();
+            } else if (etype.isBooleanType()) {
+                this.type = etype;
+            } else {
+                Environment env = Environment.getInstance();
+                env.printError(ctx, "assertion must be nullable or boolean");
+            }
+        }
     }
 }

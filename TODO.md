@@ -1,5 +1,7 @@
 # TODO
 
+- generate code for assert
+- allow tertiary "x ? c : null"
 - StatementDefinition
 - fix new type[size]
 - fix comments in evaluateArrayCreator
@@ -20,6 +22,7 @@
 - "super" is irrelevant
 - anonymous creation is irrelevant
 - SerializableUtils
+- allow tertiary "c == null" / "c != null"
 
 * support cast and typeswitch for abstract types
 

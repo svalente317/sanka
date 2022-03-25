@@ -54,6 +54,8 @@ class ExpressionTranslator extends TranslationBase {
             return translateSuperDotMethod(expr);
         case TYPE_CAST:
             return translateTypeCast(expr, variableName);
+        case ASSERT:
+            return translateAssert(expr, variableName);
         }
         return null;
     }
@@ -67,7 +69,7 @@ class ExpressionTranslator extends TranslationBase {
             return expr.value;
         }
         if (expr.type == TypeDefinition.SHORT_TYPE ||
-            expr.type == TypeDefinition.INT_TYPE) {
+                expr.type == TypeDefinition.INT_TYPE) {
             return expr.value;
         }
         if (expr.type == TypeDefinition.LONG_TYPE) {
@@ -115,10 +117,10 @@ class ExpressionTranslator extends TranslationBase {
             builder.append("(");
             builder.append(variableName);
             if (expr.argList != null) {
-               for (ExpressionDefinition arg : expr.argList) {
-                   builder.append(", ");
-                   builder.append(translate(arg));
-               }
+                for (ExpressionDefinition arg : expr.argList) {
+                    builder.append(", ");
+                    builder.append(translate(arg));
+                }
             }
             builder.append(");");
             env.print(builder.toString());
@@ -130,7 +132,7 @@ class ExpressionTranslator extends TranslationBase {
             String text = baseClass.isInterface ? baseExpr + "->base" : variableName + "->object";
             env.print(variableName + "->base = " + text + ";");
             text = baseClass.isInterface ? baseExpr + "->baseType" :
-                "\"" + expr.expression1.type.toString() + "\"";
+                    "\"" + expr.expression1.type.toString() + "\"";
             env.print(variableName + "->baseType = " + text + ";");
             String typeName = expr.expression1.type.name;
             for (MethodDefinition method : classdef.methodList) {
@@ -196,7 +198,7 @@ class ExpressionTranslator extends TranslationBase {
         for (int idx = 0; idx < expr.argList.length; idx++) {
             // Promote RHS numeric type / interface type?
             env.print("ARRCAST(" + variableName + ", " + translateType(expr.type.arrayOf) +
-                      ")[" + idx + "] = " + translate(expr.argList[idx], null) + ";");
+                    ")[" + idx + "] = " + translate(expr.argList[idx], null) + ";");
         }
         return variableName;
     }
@@ -206,7 +208,7 @@ class ExpressionTranslator extends TranslationBase {
     }
 
     static String translateNewArrayWithCount(ExpressionDefinition expr, String variableName,
-            String count) {
+                                             String count) {
         Environment env = Environment.getInstance();
         StringBuilder builder = new StringBuilder();
         if (variableName == null) {
@@ -267,7 +269,7 @@ class ExpressionTranslator extends TranslationBase {
                 return null;
             }
             String className = isClassAccess ? expr.expression1.identifiedClass.name :
-                expr.expression1.type.name;
+                    expr.expression1.type.name;
             if (expr.method == null) {
                 return translateStaticField(className, expr.name);
             }
@@ -348,7 +350,7 @@ class ExpressionTranslator extends TranslationBase {
     }
 
     static String translateStringComparison(ExpressionDefinition expr, String text1, String text2,
-            String operator) {
+                                            String operator) {
         if (operator.equals("==")) {
             return "STRING_EQUALS(" + text1 + ", " + text2 + ")";
         }
@@ -356,7 +358,7 @@ class ExpressionTranslator extends TranslationBase {
             return "(!STRING_EQUALS(" + text1 + ", " + text2 + "))";
         }
         if (operator.equals("<") || operator.equals("<=") ||
-            operator.equals(">") || operator.equals(">=")) {
+                operator.equals(">") || operator.equals(">=")) {
             Environment env = Environment.getInstance();
             env.print("NULLCHECK(" + text1 + ");");
             env.print("NULLCHECK(" + text2 + ");");
@@ -412,7 +414,7 @@ class ExpressionTranslator extends TranslationBase {
 
     static String translateFunctionCall(ExpressionDefinition expr, String variableName) {
         if (expr.expression1.expressionType == ExpressionType.FIELD_ACCESS &&
-            expr.expression1.expression1.type.arrayOf != null) {
+                expr.expression1.expression1.type.arrayOf != null) {
             return translateArrayFunctionCall(expr, variableName);
         }
         Environment env = Environment.getInstance();
@@ -463,21 +465,21 @@ class ExpressionTranslator extends TranslationBase {
             index = arrayName + "->length-1";
             value = translate(expr.argList[0]);
             env.print("ARRCAST(" + arrayName + ", " + typeName + ")[" + index + "] = " +
-                      value + ";");
+                    value + ";");
             return null;
         case "insert":
             index = translate(expr.argList[0]);
             env.print("GROW_AND_MOVE_ARRAY(" + arrayName + ", " + index +
-                      ", sizeof(" + typeName + "));");
+                    ", sizeof(" + typeName + "));");
             value = translate(expr.argList[1]);
             env.print("ARRCAST(" + arrayName + ", " + typeName + ")[" + index + "] = " +
-                      value + ";");
+                    value + ";");
             return null;
         case "delete":
             env.print("SHRINK_ARRAY(" + arrayName + ", " +
-                      translate(expr.argList[0]) + ", " +
-                      translate(expr.argList[1]) + ", " +
-                      "sizeof(" + typeName + "));");
+                    translate(expr.argList[0]) + ", " +
+                    translate(expr.argList[1]) + ", " +
+                    "sizeof(" + typeName + "));");
             return null;
         case "pop":
             env.print("BOUNDSCHECK(" + arrayName + ", 0);");
@@ -494,12 +496,12 @@ class ExpressionTranslator extends TranslationBase {
         case "setLength":
             index = translate(expr.argList[0]);
             env.print("SET_ARRAY_LENGTH(" + arrayName + ", " + index +
-                      ", sizeof(" + typeName + "));");
+                    ", sizeof(" + typeName + "));");
             return null;
         case "addAll":
             value = translate(expr.argList[0]);
             env.print("ADD_ALL_ARRAY(" + arrayName + ", " + value +
-                      ", sizeof(" + typeName + "));");
+                    ", sizeof(" + typeName + "));");
             return null;
         }
         env.printError(null, "array method not implemented: " + methodName);
@@ -536,7 +538,7 @@ class ExpressionTranslator extends TranslationBase {
             String valueName = env.getTmpVariable();
             env.print("union rb_value " + valueName + ";");
             env.print(decl + variableName + " = " + function + "(" + arrayName +
-                      ", (union rb_key) " + keyName + ", &" + valueName + ");");
+                    ", (union rb_key) " + keyName + ", &" + valueName + ");");
             return variableName;
         case "clear":
             env.print("NULLCHECK(" + arrayName + ");");
@@ -698,5 +700,10 @@ class ExpressionTranslator extends TranslationBase {
         builder.append("->object : NULL;");
         env.print(builder.toString());
         return variableName;
+    }
+
+    static String translateAssert(ExpressionDefinition expr, String variableName) {
+        // TODO actual assertion
+        return translate(expr.expression1, variableName);
     }
 }

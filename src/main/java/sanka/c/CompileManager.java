@@ -112,7 +112,7 @@ public class CompileManager {
             }
             builder.append(arg);
         }
-        System.out.println(builder.toString());
+        System.out.println(builder);
     }
 
     private String generateMainFile(ClassDefinition classdef) throws Exception {
