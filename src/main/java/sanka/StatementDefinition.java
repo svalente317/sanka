@@ -142,6 +142,9 @@ public class StatementDefinition {
             this.expression = new ExpressionDefinition();
             this.expression.type = env.currentClass.toTypeDefinition();
             return;
+        case SankaLexer.Identifier:
+            evaluateIsNotNull(ctx);
+            return;
         }
         if (ctx.block() != null) {
             this.statementType = StatementType.BLOCK;
@@ -253,6 +256,9 @@ public class StatementDefinition {
             }
             if (this.statementType == StatementType.ASSIGNMENT && lhsType.isNullType()) {
                 lhsType = this.expression.type;
+                if (!(lhsType.isPrimitiveType && lhsType.packageName == null)) {
+                    lhsType = lhsType.makeNullable();
+                }
                 env.symbolTable.promote(this.name, lhsType);
             }
         }
@@ -569,5 +575,21 @@ public class StatementDefinition {
             return;
         }
         // TODO verify type extends classdef
+    }
+
+    private void evaluateIsNotNull(StatementContext ctx) {
+        this.statementType = StatementType.SEMI;
+        Environment env = Environment.getInstance();
+        String vname = ctx.Identifier().getText();
+        TypeDefinition type = env.symbolTable.get(vname);
+        if (type == null) {
+            env.printError(ctx, "variable " + name + " not defined");
+            return;
+        }
+        if (!type.nullable) {
+            env.printError(ctx, "variable " + name + " not nullable");
+            return;
+        }
+        env.symbolTable.put(vname, type.makeConcrete());
     }
 }

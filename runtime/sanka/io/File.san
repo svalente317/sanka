@@ -89,7 +89,7 @@ class File {
      *
      * (Do not return "." or "..")
      */
-    String[] list() {
+    String[]? list() {
         var results = new String[];
         var filename = "";
         c__stmt "struct dirent *entry";

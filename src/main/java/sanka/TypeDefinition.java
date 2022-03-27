@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import sanka.antlr4.SankaParser.ClassTypeContext;
 import sanka.antlr4.SankaParser.MapTypeContext;
+import sanka.antlr4.SankaParser.PrimitiveTypeContext;
 import sanka.antlr4.SankaParser.TypeTypeContext;
 
 public class TypeDefinition implements Comparable<TypeDefinition> {
@@ -70,10 +71,7 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
 
     public boolean parse(TypeTypeContext ctx) {
         if (ctx.primitiveType() != null) {
-            Token token = ctx.primitiveType().getStart();
-            this.isPrimitiveType = true;
-            this.name = token.getText();
-            return true;
+            return parse(ctx.primitiveType());
         }
         if (ctx.classType() != null) {
             return parse(ctx.classType());
@@ -93,6 +91,13 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
             return true;
         }
         return false;
+    }
+
+    private boolean parse(PrimitiveTypeContext ctx) {
+        Token token = ctx.getStart();
+        this.isPrimitiveType = true;
+        this.name = token.getText();
+        return true;
     }
 
     public boolean parse(ClassTypeContext ctx) {
@@ -129,11 +134,18 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
             env.printError(ctx, "syntax error at: " + keyword);
             return false;
         }
+        boolean result = false;
         this.keyType = new TypeDefinition();
-        this.keyType.parse(ctx.typeType());
+        if (ctx.primitiveType() != null) {
+            result = this.keyType.parse(ctx.primitiveType());
+        } else if (ctx.classType() != null) {
+            result = this.keyType.parse(ctx.classType());
+        }
+        if (!result) {
+            return false;
+        }
         this.arrayOf = new TypeDefinition();
-        this.arrayOf.parse(ctx.typeType());
-        return true;
+        return this.arrayOf.parse(ctx.typeType());
     }
 
     public boolean isNullType() {
@@ -214,6 +226,12 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
         that.name = this.name;
         that.arrayOf = this.arrayOf;
         that.keyType = this.keyType;
+        return that;
+    }
+
+    public TypeDefinition makeNullable() {
+        TypeDefinition that = makeConcrete();
+        that.nullable = true;
         return that;
     }
 }

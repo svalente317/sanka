@@ -14,10 +14,10 @@ singleton class JsonFormatter {
 
     void printElement(JsonElement value, String prefix, String suffix,
                       String indent) {
-        switch (value.type) {
+        switch value.type {
         case JsonElement.ARRAY_TYPE:
-            var arr = value.getAsArray();
-            if (arr.length == 0) {
+            var arr = assert value.getAsArray();
+            if arr.length == 0 {
                 System.println(prefix + "[]" + suffix);
             } else {
                 System.println(prefix + "[");
@@ -26,8 +26,9 @@ singleton class JsonFormatter {
             }
             break;
         case JsonElement.OBJECT_TYPE:
+            var obj = assert value.getAsObject();
             System.println(prefix + "{");
-            printObject(value.getAsObject(), indent + "    ");
+            printObject(obj, indent + "    ");
             System.println(indent + "}" + suffix);
             break;
         default:
@@ -58,7 +59,7 @@ singleton class JsonFormatter {
         var data = IOUtils.readStream(StandardInputReader.get());
         var text = new String(data);
         var element = JsonElement.parse(text);
-        if (element == null) {
+        if element == null {
             System.println("json parse failed");
             return;
         }

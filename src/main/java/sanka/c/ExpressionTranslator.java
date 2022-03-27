@@ -29,7 +29,7 @@ class ExpressionTranslator extends TranslationBase {
         case CLASS_IDENTIFIER:
             return expr.name;
         case NEW_INSTANCE:
-            return translateNewInstance(expr, variableName);
+            return translateNewInstance(expr);
         case NEW_ARRAY_WITH_VALUES:
             return translateNewArrayWithValues(expr, variableName);
         case NEW_ARRAY:
@@ -90,14 +90,12 @@ class ExpressionTranslator extends TranslationBase {
         return "error";
     }
 
-    static String translateNewInstance(ExpressionDefinition expr, String variableName) {
+    static String translateNewInstance(ExpressionDefinition expr) {
         Environment env = Environment.getInstance();
         env.addType(expr.type);
         StringBuilder builder = new StringBuilder();
-        if (variableName == null) {
-            builder.append(translateTypeSpace(expr.type));
-            variableName = env.getTmpVariable();
-        }
+        String variableName = env.getTmpVariable();
+        builder.append(translateTypeSpace(expr.type));
         builder.append(variableName);
         if (expr.type.isStringType()) {
             finishTranslateNewString(expr, builder);

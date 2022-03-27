@@ -196,6 +196,7 @@ statement
     |   expression ';'
     |   'c__stmt' StringLiteral ';'
     |   ';'
+    |   Identifier 'is' 'not' 'null'
     ;
 
 variableDeclaration
