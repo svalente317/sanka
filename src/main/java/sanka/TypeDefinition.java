@@ -5,9 +5,10 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import sanka.antlr4.SankaParser.ArrayTypeContext;
 import sanka.antlr4.SankaParser.ClassTypeContext;
 import sanka.antlr4.SankaParser.MapTypeContext;
-import sanka.antlr4.SankaParser.PrimitiveTypeContext;
+import sanka.antlr4.SankaParser.ScalarTypeContext;
 import sanka.antlr4.SankaParser.TypeTypeContext;
 
 public class TypeDefinition implements Comparable<TypeDefinition> {
@@ -27,7 +28,6 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
     public boolean isPrimitiveType;
     public String packageName;
     public String name;
-    public boolean nullable;
     public TypeDefinition arrayOf;
     public TypeDefinition keyType;
 
@@ -50,54 +50,45 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
 
     @Override
     public String toString() {
-        String s = null;
         if (this.keyType != null) {
-            s = "map[" + this.keyType.toString() + "]" + this.arrayOf.toString();
+            return "map[" + this.keyType.toString() + "]" + this.arrayOf.toString();
         }
-        else if (this.arrayOf != null) {
-            s = this.arrayOf.toString() + "[]";
+        if (this.arrayOf != null) {
+            return this.arrayOf.toString() + "[]";
         }
-        else if (this.packageName != null) {
-            s = this.packageName + "." + this.name;
+        if (this.name == null) {
+            return "null";
         }
-        else {
-            s = this.name;
+        if (this.packageName != null) {
+            return this.packageName + "." + this.name;
         }
-        if (s != null && this.nullable) {
-            s = s + "?";
-        }
-        return s;
+        return this.name;
     }
 
     public boolean parse(TypeTypeContext ctx) {
-        if (ctx.primitiveType() != null) {
-            return parse(ctx.primitiveType());
+        if (ctx.scalarType() != null) {
+            return parse(ctx.scalarType());
         }
-        if (ctx.classType() != null) {
-            return parse(ctx.classType());
-        }
-        if (ctx.typeType() != null && ctx.getChildCount() == 3) {
-            return parseArray(ctx.typeType());
+        if (ctx.arrayType() != null) {
+            return parse(ctx.arrayType());
         }
         if (ctx.mapType() != null) {
             return parse(ctx.mapType());
         }
-        if (ctx.typeType() != null && ctx.getChildCount() == 2) {
-            boolean result = parse(ctx.typeType());
-            if (!result || this.isPrimitiveType || this.nullable) {
-                return false;
-            }
-            this.nullable = true;
-            return true;
-        }
         return false;
     }
 
-    private boolean parse(PrimitiveTypeContext ctx) {
-        Token token = ctx.getStart();
-        this.isPrimitiveType = true;
-        this.name = token.getText();
-        return true;
+    public boolean parse(ScalarTypeContext ctx) {
+        if (ctx.primitiveType() != null) {
+            Token token = ctx.primitiveType().getStart();
+            this.isPrimitiveType = true;
+            this.name = token.getText();
+            return true;
+        }
+        if (ctx.classType() != null) {
+            return parse(ctx.classType());
+        }
+        return false;
     }
 
     public boolean parse(ClassTypeContext ctx) {
@@ -122,9 +113,12 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
         return this.name != null;
     }
 
-    public boolean parseArray(TypeTypeContext ctx) {
+    public boolean parse(ArrayTypeContext ctx) {
         this.arrayOf = new TypeDefinition();
-        return this.arrayOf.parse(ctx);
+        if (ctx.arrayType() != null) {
+            return this.arrayOf.parse(ctx.arrayType());
+        }
+        return this.arrayOf.parse(ctx.scalarType());
     }
 
     public boolean parse(MapTypeContext ctx) {
@@ -134,18 +128,11 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
             env.printError(ctx, "syntax error at: " + keyword);
             return false;
         }
-        boolean result = false;
         this.keyType = new TypeDefinition();
-        if (ctx.primitiveType() != null) {
-            result = this.keyType.parse(ctx.primitiveType());
-        } else if (ctx.classType() != null) {
-            result = this.keyType.parse(ctx.classType());
-        }
-        if (!result) {
-            return false;
-        }
+        this.keyType.parse(ctx.scalarType());
         this.arrayOf = new TypeDefinition();
-        return this.arrayOf.parse(ctx.typeType());
+        this.arrayOf.parse(ctx.typeType());
+        return true;
     }
 
     public boolean isNullType() {
@@ -192,11 +179,7 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
 
     @Override
     public int compareTo(TypeDefinition that) {
-        int value = Boolean.compare(this.nullable, that.nullable);
-        if (value != 0) {
-            return value;
-        }
-        value = compareObjects(this.packageName, that.packageName);
+        int value = compareObjects(this.packageName, that.packageName);
         if (value != 0) {
             return value;
         }
@@ -218,20 +201,5 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
 
     TypeDefinition baseType() {
         return this.arrayOf == null ? this : this.arrayOf.baseType();
-    }
-
-    public TypeDefinition makeConcrete() {
-        TypeDefinition that = new TypeDefinition();
-        that.packageName = this.packageName;
-        that.name = this.name;
-        that.arrayOf = this.arrayOf;
-        that.keyType = this.keyType;
-        return that;
-    }
-
-    public TypeDefinition makeNullable() {
-        TypeDefinition that = makeConcrete();
-        that.nullable = true;
-        return that;
     }
 }

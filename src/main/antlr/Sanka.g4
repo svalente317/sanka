@@ -133,11 +133,14 @@ interfaceMethodDeclaration
     ;
 
 typeType
+    :   scalarType
+    |   arrayType
+    |   mapType
+    ;
+
+scalarType
     :   primitiveType
     |   classType
-    |   typeType '[' ']'
-    |   mapType
-    |   typeType '?'
     ;
 
 primitiveType
@@ -154,8 +157,13 @@ classType
     :   ( Identifier '.' )* Identifier
     ;
 
+arrayType
+    :    scalarType '[' ']'
+    |   arrayType '[' ']'
+    ;
+
 mapType
-    :   Identifier '[' ( primitiveType | classType ) ']' typeType
+    :   Identifier '[' scalarType ']' typeType
     ;
 
 formalParameters
@@ -186,9 +194,9 @@ statement
     |   variableAssignment ';'
     |   ifStatement
     |   'for' '(' forControl ')' block
-    |   'while' expression block
-    |   'switch' expression block
-    |   'typeswitch' expression block
+    |   'while' parExpression block
+    |   'switch' parExpression block
+    |   'typeswitch' parExpression block
     |   switchLabel
     |   'return' expression? ';'
     |   'break' ';'
@@ -196,7 +204,6 @@ statement
     |   expression ';'
     |   'c__stmt' StringLiteral ';'
     |   ';'
-    |   Identifier 'is' 'not' 'null'
     ;
 
 variableDeclaration
@@ -214,7 +221,7 @@ assignable
     ;
 
 ifStatement
-    :   'if' expression block ('else' elseStatement)?
+    :   'if' parExpression block ('else' elseStatement)?
     ;
 
 elseStatement
@@ -250,6 +257,10 @@ switchLabel
 
 // EXPRESSIONS
 
+parExpression
+    :   '(' expression ')'
+    ;
+
 expressionList
     :   expression (',' expression)*
     ;
@@ -274,14 +285,13 @@ expression
     |   expression '||' expression
     |   expression '?' expression ':' expression
     |   'super' '.' Identifier
-    |   '(' typeType ')' expression
+    |   '(' scalarType ')' expression
     |   arrayDefinition
     |   mapDefinition
-    |   'assert' expression
     ;
 
 primary
-    :   '(' expression ')'
+    :   parExpression
     |   'this'
     |   literal
     |   Identifier
@@ -289,8 +299,8 @@ primary
 
 creator
     :   classType '(' expressionList? ')' fieldValues?
-    |   typeType '[' ']' '(' expression ')'
-    |   typeType '[' ']' arrayDefinition?
+    |   arrayType '(' expression ')'
+    |   arrayType arrayDefinition?
     |   mapType mapDefinition?
     |   anonymousClassBody
     ;
@@ -339,7 +349,6 @@ fieldValue
 
 // 3.9 Keywords
 
-ASSERT        : 'assert';
 BOOLEAN       : 'boolean';
 BREAK         : 'break';
 BYTE          : 'byte';

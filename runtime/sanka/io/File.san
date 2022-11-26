@@ -89,7 +89,7 @@ class File {
      *
      * (Do not return "." or "..")
      */
-    String[]? list() {
+    String[] list() {
         var results = new String[];
         var filename = "";
         c__stmt "struct dirent *entry";
@@ -113,7 +113,7 @@ class File {
      *
      * This can be fooled by symbolic links and hard links including ".."
      */
-    File? getParent() {
+    File getParent() {
         var strip = this.pathname;
         var done = false;
         while (!done) {

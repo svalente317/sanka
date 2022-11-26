@@ -25,14 +25,17 @@ class JsonMember {
  * (false for boolean, 0 for int, null for string, etc.)
  */
 class JsonObject {
-    private static JsonElement? NULL_ELEMENT;
+    private static JsonElement NULL_ELEMENT;
     private JsonMember[] members;
 
     JsonObject() {
+        if (JsonObject.NULL_ELEMENT == null) {
+            JsonObject.NULL_ELEMENT = new JsonElement();
+        }
         this.members = new JsonMember[];
     }
 
-    JsonElement? get(String fieldName) {
+    JsonElement get(String fieldName) {
         for (var member : this.members) {
             if (member.key == fieldName) {
                 return member.value;
@@ -69,13 +72,7 @@ class JsonObject {
      */
     private JsonElement getElement(String fieldName) {
         var value = get(fieldName);
-        if value == null {
-            if NULL_ELEMENT == null {
-                NULL_ELEMENT = new JsonElement();
-            }
-            return assert NULL_ELEMENT;
-        }
-        return value;
+        return value == null ? JsonObject.NULL_ELEMENT: value;
     }
 
     boolean getBoolean(String fieldName) {
@@ -102,15 +99,15 @@ class JsonObject {
         return getElement(fieldName).getAsDouble();
     }
 
-    String? getString(String fieldName) {
+    String getString(String fieldName) {
         return getElement(fieldName).getAsString();
     }
 
-    JsonElement[]? getArray(String fieldName) {
+    JsonElement[] getArray(String fieldName) {
         return getElement(fieldName).getAsArray();
     }
 
-    JsonObject? getObject(String fieldName) {
+    JsonObject getObject(String fieldName) {
         return getElement(fieldName).getAsObject();
     }
 
@@ -125,12 +122,9 @@ class JsonObject {
         return "{" + s + "}";
     }
 
-    static JsonObject? parse(String text) {
+    static JsonObject parse(String text) {
         var elem = JsonParser.parse(text);
-        if elem == null {
-            return null;
-        }
-        return elem.getAsObject();
+        return elem == null ? null : elem.getAsObject();
     }
 
     void setBoolean(String fieldName, boolean value) {

@@ -45,7 +45,6 @@ public class SingletonUtils {
         field = new FieldDefinition();
         field.name = INSTANCE_NAME;
         field.type = classdef.toTypeDefinition();
-        field.type.nullable = true;
         field.isStatic = true;
         classdef.fieldList.add(field);
     }
@@ -59,12 +58,12 @@ public class SingletonUtils {
             }
         }
         StringBuilder builder = new StringBuilder();
-        builder.append("{var q = " + INSTANCE_NAME + "; if q != null {return q;}");
+        builder.append("{if (" + INSTANCE_NAME + " == null) {");
         builder.append("c__stmt\"" + LOCK_CLASS + "\";");
-        builder.append("if " + INSTANCE_NAME + " == null {");
+        builder.append("if (" + INSTANCE_NAME + " == null) {");
         builder.append(INSTANCE_NAME + " = new " + classdef.qualifiedName() + "();}");
-        builder.append("c__stmt\"" + UNLOCK_CLASS + "\";");
-        builder.append("return assert " + INSTANCE_NAME + ";}");
+        builder.append("c__stmt\"" + UNLOCK_CLASS + "\";}");
+        builder.append("return " + INSTANCE_NAME + ";}");
         return builder.toString();
     }
 }

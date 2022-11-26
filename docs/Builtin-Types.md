@@ -85,7 +85,7 @@ line between "language features" and "class-library features". All
 three act like user-defined classes:
 
 * The classes have public fields and methods
-* Variables of these types can be made "nullable"
+* Variables of these types can be `null`
 
 However, all three are partially built into the language. (There is
 special code in the translator for them.) Thus, these classes have
@@ -146,14 +146,14 @@ arrays support primitive types, and builtin and user-defined classes.
 An array can be initialized as empty, or with a given size, or with a
 sequence of items:
 ~~~
-    arr = new int[];
-    arr = new int[](1);
+    arr = new String[];
+    arr = new String[](1);
     arr = new String[]{"hello", "world", thirdString()};
 ~~~
 
-When an array is initialized with a given size like `new int[](1)`,
+When an array is initialized with a given size like `new String[](1)`,
 the array elements are initialzed to zero/false for scalar types, and
-null for nullable types.
+null for class types.
 
 When an array is initialized with a sequence of items, if the compiler
 can determine the array's type, you can omit `new type[]`. For example:
@@ -245,14 +245,62 @@ sorted keys.
 
 ## Errors
 
-* What happens if you access past the end of an array or `arr[-1]`?
-* What happens if you access `str[2147483647]`?
+When you try to access a field of any object that is null, whether the
+object's type is a String or an array or a user-defined type or etc.,
+the program dies with a Null Pointer Exception. For example:
+~~~
+    var s = "hello";   // "s" is of type String
+    s = null;          // Valid assignment for type String
+    System.println(s.length());   // Compiler accepts this. Dies at runtime.
+~~~
 
-Currently, String is implemented using C strings, so:
-1. a string cannot contain a zero byte
-2. the `length()` function runs in linear time rather then constant time.
+If you have two strings that may or may not be null, then you can
+compare them for equality. Obviously, `null` equals `null`, and `null`
+does not equal any non-null string, including the empty string.
+However, the less-then and greater-then operators are undefined for
+`null`. For example, consider this function:
+~~~
+boolean compareStrings(String s1, String s2) {
+    return s1 < s2;
+}
+~~~
 
-These restrictions may be lifted in a future implementation.
+The call `compareStrings("hello", null)` will die with a Null Pointer
+Exception.
+
+If you access past the end of an array, then it will die with an Out
+Of Bounds Exception. For example:
+~~~
+    var arr = new int[](2); // valid indexes are [0] and [1]
+    var value = arr[2];   // Dies at runtime.
+    var value2 = arr[-1]; // Also dies at runtime.
+~~~
+
+If you define a map with String as the key type, and you add a key of
+null, then it will die with a Null Pointer Exception, since the map
+must be able to compare the key to the other keys.
+
+However, other then `null`, a map is spans the entire domain of its
+key type (int or String). So, if you access a key that is not in the
+map, then the map returns the "default" value, which is the value of
+new elements in a new array. For example:
+~~~
+    var map1 = new map[int]String;
+    var value1 = map1[17];   // Now value1 == null
+
+    var map2 = new map[String]int;
+    var value2 = map["seventeen"];  // Now value2 == 0
+~~~
+
+If you access past the end of a String, i.e. `str[1000000]`,
+then it may die with an Out Of Bounds Exception. The language is
+allowed to either raise an exception or else return random data, so
+don't access past the end of a string.
+
+Currently, String is implemente using C strings, which means that
+(a) a string cannot contain a zero, and (b) the `length()` function
+runs in linear time rather then constant time. These restrictions may
+be lifted in a future implementation.
 
 As a special-case sentinel, it is legal to call `str[str.length()]`.
 By definition, this must return zero, regardless of the underlying

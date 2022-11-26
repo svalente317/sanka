@@ -49,15 +49,12 @@ class FileToSanka {
                 break;
             }
         }
-        if error || className == null || constName == null ||
-           filename == null {
+        if (error || className == null || constName == null ||
+            filename == null) {
             System.println("Usage: file_to_sanka --class a.b.c.Class " +
                            "--const CONST_NAME filename");
             return -1;
         }
-        filename is not null;
-        className is not null;
-        constName is not null;
 
         var reader = new FileReader();
         var status = reader.open(filename);

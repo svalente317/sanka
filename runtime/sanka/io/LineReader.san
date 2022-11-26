@@ -15,7 +15,7 @@ class LineReader {
     LineReader(Reader reader) {
         this.maxLineLength = MAX_LINE_LENGTH;
         this.reader = reader;
-        this.prefix = new byte[];
+        this.prefix = null;
     }
 
     void setMaxLineLength(int value) {
@@ -41,55 +41,60 @@ class LineReader {
      *
      * @return the next line from the stream
      */
-    String? readline() {
+    String readline() {
         var eol = -1;
-        eol = findByte(this.prefix, '\n');
-        if eol >= 0 {
-            var line = this.prefix;
-            this.prefix = arraySuffix(this.prefix, eol+1);
-            if eol > 0 && line[eol-1] == '\r' {
-                eol--;
-            }
-            line.setLength(eol);
-            return new String(line);
-        }
-        var buffer = new byte[](1024);
-        var next = 0;
-        while true {
-            var len = this.reader.read(buffer);
-            if len <= 0 {
-                if this.prefix.length == 0 {
-                    return null;
+        if (this.prefix != null) {
+            eol = findByte(this.prefix, '\n');
+            if (eol >= 0) {
+                var line = this.prefix;
+                this.prefix = arraySuffix(this.prefix, eol+1);
+                if (eol > 0 && line[eol-1] == '\r') {
+                    eol--;
                 }
-                var line = new String(this.prefix);
-                this.prefix.setLength(0);
-                return line;
+                line.setLength(eol);
+                return new String(line);
+            }
+        }
+        var buffer = null;
+        var next = 0;
+        while (true) {
+            buffer = new byte[](1024);
+            var len = this.reader.read(buffer);
+            if (len <= 0) {
+                buffer = this.prefix;
+                this.prefix = null;
+                return buffer == null ? null : new String(buffer);
             }
             buffer.setLength(len);
             eol = findByte(buffer, '\n');
-            if eol >= 0 {
+            if (eol >= 0) {
                 next = eol+1;
                 break;
             }
+            if (this.prefix == null) {
+                this.prefix = buffer;
+                continue;
+            }
             next = this.maxLineLength - this.prefix.length;
-            if next >= 0 && next < len {
+            if (next >= 0 && next < len) {
                 break;
             }
             this.prefix.addAll(buffer);
-            buffer.setLength(1024);
         }
-        var line = this.prefix;
-        this.prefix = arraySuffix(buffer, next);
+        var newPrefix = arraySuffix(buffer, next);
         buffer.setLength(next);
-        line.addAll(buffer);
-
-        if line.length > 0 && line[line.length-1] == '\n' {
-            line.setLength(line.length-1);
-            if line.length > 0 && line[line.length-1] == '\r' {
-                line.setLength(line.length-1);
+        if (this.prefix != null) {
+            this.prefix.addAll(buffer);
+            buffer = this.prefix;
+        }
+        this.prefix = newPrefix;
+        if (buffer.length > 0 && buffer[buffer.length-1] == '\n') {
+            buffer.setLength(buffer.length-1);
+            if (buffer.length > 0 && buffer[buffer.length-1] == '\r') {
+                buffer.setLength(buffer.length-1);
             }
         }
-        return new String(line);
+        return new String(buffer);
     }
 
     private int findByte(byte[] arr, byte target) {
@@ -102,8 +107,8 @@ class LineReader {
     }
 
     private byte[] arraySuffix(byte[] arr, int start) {
-        if arr.length == start {
-            return new byte[];
+        if (arr.length == start) {
+            return null;
         }
         var suffix = new byte[](arr.length - start);
         for (var idx = 0; idx < suffix.length; idx++) {
@@ -124,34 +129,34 @@ class LineReader {
         var idx = 0;
         var data = null;
         var dlen = 0;
-        var readBuffer = new byte[];
-        while idx < buffer.length {
-            if this.prefix.length > 0 {
+        var readBuffer = null;
+        while (idx < buffer.length) {
+            if (this.prefix != null) {
                 data = this.prefix;
-                dlen = this.prefix.length;
-                this.prefix = new byte[];
+                dlen = data.length;
+                this.prefix = null;
             } else {
-                readBuffer.setLength(1024);
-                dlen = this.reader.read(readBuffer);
-                if dlen <= 0 {
+                if (readBuffer == null) {
+                    readBuffer = new byte[](1024);
+                    data = readBuffer;
+                }
+                dlen = this.reader.read(data);
+                if (dlen <= 0) {
                     return idx;
                 }
-                data = readBuffer;
             }
-            data is not null;
             var count = buffer.length - idx;
-            if count > dlen {
+            if (count > dlen) {
                 count = dlen;
             }
             for (var i = 0; i < count; i++) {
                 buffer[idx] = data[i];
                 idx++;
             }
-            if dlen > count {
+            if (dlen > count) {
                 data.setLength(dlen);
                 data.delete(0, count);
                 this.prefix = data;
-                break;
             }
         }
         return idx;

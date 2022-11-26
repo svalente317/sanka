@@ -5,7 +5,7 @@ abstract class BaseTest {
 
     private int failureCount;
 
-    void assertTrue(boolean value, String text) {
+    void assert(boolean value, String text) {
         if (!value) {
             System.println("FAIL: " + text);
             this.failureCount++;

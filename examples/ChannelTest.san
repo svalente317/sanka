@@ -63,7 +63,7 @@ class Consumer {
     void run() {
         var start = System.currentTimeMillis();
         while (true) {
-            var item = (String?) this.channel.pop();
+            var item = (String) this.channel.pop();
             if (item == null) {
                 return;
             }

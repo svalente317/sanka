@@ -16,7 +16,7 @@ class InetAddress {
     /**
      * Parse numeric representation like 127.0.0.1.
      */
-    static InetAddress? parse(String text) {
+    static InetAddress parse(String text) {
         c__stmt "struct in_addr addr";
         c__stmt "int status = inet_aton(text, &addr)";
         c__stmt "if (status == 0) return NULL";
@@ -32,7 +32,7 @@ class InetAddress {
     /**
      * Lookup the given hostname in DNS.
      */
-    static InetAddress? lookup(String hostname) {
+    static InetAddress lookup(String hostname) {
 	c__stmt "struct hostent *hp = gethostbyname(hostname)";
 	c__stmt "if (hp == NULL) return NULL";
         var size = 0;
@@ -47,18 +47,15 @@ class InetAddress {
     /**
      * Parse or lookup the given name as an IP address or hostname.
      */
-    static InetAddress? get(String hostname) {
+    static InetAddress get(String hostname) {
         var address = InetAddress.parse(hostname);
-        if (address != null) {
-            return address;
-        }
-        return InetAddress.lookup(hostname);
+        return address != null ? address : InetAddress.lookup(hostname);
     }
 
     /**
      * Returns the loopback address, which in IPv4 is 127.0.0.1.
      */
-    static InetAddress? getLoopbackAddress() {
+    static InetAddress getLoopbackAddress() {
         return parse("127.0.0.1");
     }
 }

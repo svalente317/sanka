@@ -27,8 +27,8 @@ public class TypeUtils {
         return isCompatibleExt(type, expr, true);
     }
 
-    private static boolean isCompatibleExt(TypeDefinition type, ExpressionDefinition expr,
-                                           boolean isReadOnly) {
+    static boolean isCompatibleExt(TypeDefinition type, ExpressionDefinition expr,
+                                   boolean isReadOnly) {
         if (expr.type == null) {
             // We've already printed an error. We won't continue to the next pass.
             // Finish this pass.
@@ -36,12 +36,9 @@ public class TypeUtils {
         }
         if (expr.type.isNullType()) {
             // Match null and non-primitive classes and arrays and maps.
-            return type.isNullType() || type.nullable;
+            return type.isNullType() || !type.isPrimitiveType;
         }
         if (expr.type.equals(type)) {
-            return true;
-        }
-        if (type.nullable && !expr.type.nullable && expr.type.equals(type.makeConcrete())) {
             return true;
         }
         if (expr.type.arrayOf != null || type.arrayOf != null) {
@@ -55,9 +52,6 @@ public class TypeUtils {
             return type.isNumericType() && isCompatibleNumeric(type, expr);
         }
         if (expr.type.isPrimitiveType || type.isPrimitiveType) {
-            return false;
-        }
-        if (!type.nullable && expr.type.nullable) {
             return false;
         }
         Environment env = Environment.getInstance();

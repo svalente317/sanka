@@ -56,7 +56,7 @@ class Main {
         for (var expected : expectedLines) {
             var line = lineReader.readline();
             if (expected != line) {
-                System.println("expected:" + expected + " received:" + assert line);
+                System.println("expected:" + expected + " received:" + line);
                 return -1;
             }
         }

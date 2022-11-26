@@ -35,7 +35,7 @@ class Socket {
         c__stmt "return x == 0 ? 0 : errno";
     }
 
-    Socket? accept() {
+    Socket accept() {
         var new_fd = 0;
         c__stmt "struct sockaddr_in sa";
         c__stmt "socklen_t len = sizeof(sa)";

@@ -9,8 +9,6 @@ class Process {
     String name;
     int pid;
     int uid;
-
-    Process(name, pid, uid);
 }
 
 class ProcessViewer {
@@ -34,10 +32,10 @@ class ProcessViewer {
         }
         var viewer = new ProcessViewer();
         var processes = viewer.readProcesses();
-        if processes == null {
+        if (processes == null) {
             return;
         }
-        if ignoreFile != null {
+        if (ignoreFile != null) {
             ignoreList = viewer.readIgnoreFile(ignoreFile);
         }
         viewer.print(processes, ignoreList, allUsers);
@@ -46,7 +44,7 @@ class ProcessViewer {
     /**
      * @return array of all processes running on Linux system
      */
-    Process[]? readProcesses() {
+    Process[] readProcesses() {
         var procDir = new File("/proc");
         var filenames = procDir.list();
         if (filenames == null) {
@@ -58,7 +56,7 @@ class ProcessViewer {
             var ch = name[0];
             if (ch >= '0' && ch <= '9') {
                 var process = readProcess(procDir, name);
-                if process != null {
+                if (process != null) {
                     processes.add(process);
                 }
             }
@@ -71,16 +69,17 @@ class ProcessViewer {
      *
      * If process name is "java" then attempt to return main class as process name.
      */
-    Process? readProcess(File procDir, String name) {
+    Process readProcess(File procDir, String name) {
         var processDir = new File(procDir, name);
         var stats = new FileStats();
         if (processDir.getStats(stats, true) != 0) {
             return null;
         }
-        var pid = System.parseInt(name);
-        var uid = stats.uid;
+        var process = new Process();
+        process.pid = System.parseInt(name);
+        process.uid = stats.uid;
         var cmdline = readCmdLine(processDir);
-        if cmdline != null {
+        if (cmdline != null && cmdline.length > 0) {
             name = cmdline[0];
             name = basename(name, '/');
             name = split(name, ':');
@@ -91,17 +90,17 @@ class ProcessViewer {
                     name = classname;
                 }
             }
+            process.name = name;
         } else {
-            var sname = readNameFromStatusFile(processDir);
-            name = assert (sname == null ? "[]" : sname);
+            process.name = readNameFromStatusFile(processDir);
         }
-        return new Process(name, pid, uid);
+        return process;
     }
 
     /**
      * Read Linux /proc cmdline file into a String array.
      */
-    private String[]? readCmdLine(File processDir) {
+    private String[] readCmdLine(File processDir) {
         var statusFile = new File(processDir, "cmdline");
         var fileReader = new FileReader();
         if (fileReader.open(statusFile.getPath()) != 0) {
@@ -145,7 +144,7 @@ class ProcessViewer {
     /**
      * @return main class from Java command line.
      */
-    private String? getJavaMainClass(String[] cmdline) {
+    private String getJavaMainClass(String[] cmdline) {
         for (var idx = 1; idx < cmdline.length; idx++) {
             var arg = cmdline[idx];
             if (arg[0] != '-') {
@@ -165,7 +164,7 @@ class ProcessViewer {
      * Read Linux /proc status file. Currently we only care about the Name field,
      * but we could easily record any other fields that are interesting.
      */
-    private String? readNameFromStatusFile(File processDir) {
+    private String readNameFromStatusFile(File processDir) {
         var statusFile = new File(processDir, "status");
         var fileReader = new FileReader();
         var status = fileReader.open(statusFile.getPath());
@@ -176,10 +175,9 @@ class ProcessViewer {
         var name = null;
         while (name == null) {
             var line = reader.readline();
-            if line == null {
+            if (line == null) {
                 break;
             }
-            line is not null;
             var idx = line.indexOf(':');
             if (idx <= 0) {
                 continue;
@@ -202,7 +200,7 @@ class ProcessViewer {
      * Read a file where each line is a process name in the first column, and
      * optionally a comment in the second column.
      */
-    private String[]? readIgnoreFile(String filename) {
+    private String[] readIgnoreFile(String filename) {
         var fileReader = new FileReader();
         var status = fileReader.open(filename);
         if (status != 0) {
@@ -215,7 +213,6 @@ class ProcessViewer {
             if (line == null) {
                 break;
             }
-            line is not null;
             line = split(line, ' ');
             line = split(line, '\t');
             if (line != "") {
@@ -229,22 +226,22 @@ class ProcessViewer {
     /**
      * Print my running processes to stdout.
      */
-    void print(Process[] processes, String[]? ignoreList, boolean allUsers) {
+    void print(Process[] processes, String[] ignoreList, boolean allUsers) {
         var uid = System.getuid();
         var ignore = new map[String]boolean;
-        if ignoreList != null {
+        if (ignoreList != null) {
             for (var name : ignoreList) {
                 ignore[name] = true;
             }
         }
         for (var process : processes) {
-            if !allUsers && process.uid != uid {
+            if (!allUsers && process.uid != uid) {
                 continue;
             }
-            if ignore[process.name] {
+            if (ignore[process.name]) {
                 continue;
             }
-            if allUsers {
+            if (allUsers) {
                 System.println("" + process.pid + "\t" + process.uid + "\t" + process.name);
             } else {
                 System.println("" + process.pid + "\t" + process.name);
