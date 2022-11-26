@@ -93,7 +93,7 @@ public class StatementDefinition {
         switch (lexerType) {
         case SankaLexer.WHILE:
             this.statementType = StatementType.WHILE;
-            evaluateBooleanExpression(ctx.parExpression().expression());
+            evaluateBooleanExpression(ctx.expression());
             this.block = new BlockDefinition();
             this.block.evaluate(ctx.block());
             return;
@@ -263,13 +263,11 @@ public class StatementDefinition {
             if (!TypeUtils.isCompatible(lhsType, this.expression)) {
                 env.printError(assignment, "incompatible types: " + this.expression.type +
                         " cannot be converted to " + lhsType);
-                return;
             }
         } else {
             if (!lhsType.isIntegralType()) {
                 env.printError(assignment, "incompatible types: " + lhsType +
                         " cannot be incremented");
-                return;
             }
         }
     }
@@ -301,7 +299,7 @@ public class StatementDefinition {
      */
     void evaluateIf(IfStatementContext ictx) {
         this.statementType = StatementType.IF;
-        evaluateBooleanExpression(ictx.parExpression().expression());
+        evaluateBooleanExpression(ictx.expression());
         this.block = new BlockDefinition();
         this.block.evaluate(ictx.block());
         if (ictx.elseStatement() != null) {
@@ -407,7 +405,7 @@ public class StatementDefinition {
         Environment env = Environment.getInstance();
         this.statementType = StatementType.SWITCH;
         this.expression = new ExpressionDefinition();
-        this.expression.evaluate(ctx.parExpression().expression());
+        this.expression.evaluate(ctx.expression());
         TypeDefinition type = this.expression.type;
         if (type != null && !(type.isIntegralType() || type.isStringType())) {
             env.printError(ctx, "incompatible types: switch statement must use " +
@@ -423,7 +421,7 @@ public class StatementDefinition {
         Environment env = Environment.getInstance();
         this.statementType = StatementType.TYPESWITCH;
         this.expression = new ExpressionDefinition();
-        this.expression.evaluate(ctx.parExpression().expression());
+        this.expression.evaluate(ctx.expression());
         TypeDefinition type = this.expression.type;
         if (type == null) {
             return;

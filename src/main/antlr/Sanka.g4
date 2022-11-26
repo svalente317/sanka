@@ -194,9 +194,10 @@ statement
     |   variableAssignment ';'
     |   ifStatement
     |   'for' '(' forControl ')' block
-    |   'while' parExpression block
-    |   'switch' parExpression block
-    |   'typeswitch' parExpression block
+    |   'for' forControl block
+    |   'while' expression block
+    |   'switch' expression block
+    |   'typeswitch' expression block
     |   switchLabel
     |   'return' expression? ';'
     |   'break' ';'
@@ -221,7 +222,7 @@ assignable
     ;
 
 ifStatement
-    :   'if' parExpression block ('else' elseStatement)?
+    :   'if' expression block ('else' elseStatement)?
     ;
 
 elseStatement
@@ -257,10 +258,6 @@ switchLabel
 
 // EXPRESSIONS
 
-parExpression
-    :   '(' expression ')'
-    ;
-
 expressionList
     :   expression (',' expression)*
     ;
@@ -291,7 +288,7 @@ expression
     ;
 
 primary
-    :   parExpression
+    :   '(' expression ')'
     |   'this'
     |   literal
     |   Identifier

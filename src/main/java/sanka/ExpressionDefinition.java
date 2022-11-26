@@ -163,8 +163,8 @@ public class ExpressionDefinition {
      */
     void evaluatePrimary(PrimaryContext primary) {
         Environment env = Environment.getInstance();
-        if (primary.parExpression() != null) {
-            this.evaluate(primary.parExpression().expression());
+        if (primary.expression() != null) {
+            this.evaluate(primary.expression());
             return;
         }
         this.expressionType = ExpressionType.LITERAL;
