@@ -121,7 +121,3 @@ example:
 var names = {"one": 1, "seventeen": 17};
 ~~~
 The shorthand is preferred whenever possible.
-
-## Anonymous Classes
-
-TODO document anonymous classes

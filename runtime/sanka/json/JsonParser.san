@@ -170,8 +170,17 @@ class JsonParser {
                 case 't':
                     ch = '\t';
                     break;
+                case 'u':
+                    if (idx + 5 > this.length) {
+                        break;
+                    }
+                    idx++;
+                    bytes.add(hexToByte(this.text[idx], this.text[idx+1]));
+                    idx = idx + 2;
+                    bytes.add(hexToByte(this.text[idx], this.text[idx+1]));
+                    idx = idx + 2;
+                    continue;
                 default:
-                    // TODO Support \u[hhhh].
                     ch = 0;
                     break;
                 }
@@ -317,6 +326,24 @@ class JsonParser {
             elem.makeLong(ival);
         }
         return idx;
+    }
+
+    static byte hexToByte(byte b1, byte b2) {
+        var value = (hexToNibble(b1) << 4) | hexToNibble(b2);
+        return (byte) value;
+    }
+
+    static int hexToNibble(byte ch) {
+        if (ch >= '0' && ch <= '9') {
+            return ch - '0';
+        }
+        if (ch >= 'A' && ch <= 'F') {
+            return ch - 'A';
+        }
+        if (ch >= 'a' && ch <= 'f') {
+            return ch - 'a';
+        }
+        return 0;
     }
 
     /**

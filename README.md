@@ -117,50 +117,6 @@ map[2018] = "Hello, world!";
 For more information on all Sanka types, including arrays and maps,
 see [docs/Builtin-Types.md](docs/Builtin-Types.md).
 
-**inline keyword**
-
-Unlike Java, Sanka allows you to create an object as a local variable
-on the stack rather then on the heap. To do this, use the `inline`
-keyword. For example, if `Point` is a class with two integer fields,
-then this code puts a structure with two integer fields on the stack:
-~~~
-inline var point = new Point(0, 0);
-~~~
-
-After the object has been created, Sanka tries to hide the fact that
-it's on the stack. You access it just like you would access a
-non-inline variable. You can access its fields and methods, pass it as
-an argument in a function call, etc. There is no need for operators
-like `&` and `->`.
-
-Inline local variables have the same pros and cons in Sanka as they do
-in C. The benefit is that the variable is easily cleaned up when the
-program exits the stack frame, with no memory fragmentation. The
-drawback is that if you store a reference to the variable (in a
-non-inline structure or array), and then you try to access the
-variable after you have left its stack frame, then the program
-dies. The drawback is considerable.
-
-Similarly --
-
-When you define a class, you can define "inline" fields. In other
-words, you can define a field such that the class allocates space for
-the object, rather then for a reference to the object. For example,
-this code defines a class such that the size of the class is the size
-of two integers, rather then the size of a single reference:
-~~~
-class Window {
-    inline Point size;
-}
-~~~
-
-Again, the benefit is that this avoids memory fragmentation.
-
-And finally, you can also inline objects in an array, just like you
-can inline objects in a class. For a full discussion of the `inline`
-keyword -- the syntax, the limitations, etc. -- see
-[docs/Inline.md](docs/Inline.md).
-
 **export keyword**
 
 The `export` keyword is syntactic sugar to get around the fact that a
@@ -224,7 +180,3 @@ They are documented in [docs/Other-Features.md](docs/Other-Features.md).
 Since Sanka is intended for server-side development, the first Sanka
 project is an infrastructure for creating micro web services:
 [Restful Sanka](https://github.com/svalente317/restful-sanka)
-
-## Open Questions
-
-* Support parameterized types?

@@ -1,12 +1,6 @@
 # TODO
 
-* contructor new Object(){field: value}
-
-* document creators.
-
 * support cast and typeswitch for abstract types
-
-* try removing unnecessary parentheses
 
 * check result of TypeDefinition.parse()
 
@@ -20,4 +14,4 @@
 
 * support parameterized types?
 
-* json library: unicode (\u) characters parsing and unparsing strings
+* json string encoder: encode control characters
