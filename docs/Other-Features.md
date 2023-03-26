@@ -20,6 +20,43 @@ explicitly specify types. But in the common case, Sanka support quick
 and easy (terse) creation of objects, arrays, and maps with
 values. See [Creators.md](Creators.md).
 
+### The "export" keyword
+
+In Sanka, a class cannot extend (superclass) a non-abstract class. The
+`export` keyword is intended to work around this limitation.  `export`
+provides the illusion that a class extends one (or more) of its
+fields. When you export a field, the compiler adds copies of all of
+the field's public methods to the parent class. For example, say that
+the class `Person` has a method with the signature:
+~~~
+public String getName();
+~~~
+Then you can define a class `Doctor`:
+~~~
+class Doctor {
+    private Person person;
+    export person;
+}
+~~~
+The `export` line tells the compiler to add this method:
+~~~
+public String getName() {
+    return this.person.getName();
+}
+~~~
+
+This is just syntactic sugar. At runtime, there's no difference
+between a method was added by the compiler and one that was explicit
+in the source code. Note, for example, that the `Person` object does
+not have access to the `Doctor` object, so if `person.getName()` calls
+`this.helper()`, then it calls the `Person` helper function,
+regardless of whether there exists a `Doctor` helper function.
+
+You can export multiple fields, but if there are any public method
+name conflicts, then it is a compile-time error.
+
+Also, you can export specific methods, like `export person.getName`.
+
 ### Anonymous Classes
 
 To create an object of an anonymous class, use the syntax `new {}`.

@@ -59,6 +59,7 @@ Sanka has the following things in common with Java:
 * Fields can be public or private, and classes can be public or private.
 * Many keywords work as they do in Java, such as `if`, `for`, `while`,
   `break`, `continue`, `case`.
+* The `var` keyword defines local variables, as introduced in Java 10.
 * Objects and arrays are mutable.
 * Support for interfaces and abstract classes.
 
@@ -117,58 +118,11 @@ map[2018] = "Hello, world!";
 For more information on all Sanka types, including arrays and maps,
 see [docs/Builtin-Types.md](docs/Builtin-Types.md).
 
-**export keyword**
-
-The `export` keyword is syntactic sugar to get around the fact that a
-Sanka class cannot extend another non-abtract class. `export` provides
-the illusion that a class extends one (or more) of its fields. When
-you export a field, the compiler adds copies of all of the field's
-public methods to the parent class. For example, say that the class
-`Person` has a method with the signature:
-~~~
-public String getName();
-~~~
-Then you can define a class `Doctor`:
-~~~
-class Doctor {
-    private Person person;
-    export person;
-}
-~~~
-The `export` line tells the compiler to add this method:
-~~~
-public String getName() {
-    return this.person.getName();
-}
-~~~
-
-This is just syntactic sugar. At runtime, there's no difference
-between a method was added by the compiler and one that was explicit
-in the source code. Note, for example, that the `Person` object does
-not have access to the `Doctor` object, so if `person.getName()` calls
-`this.helper()`, then it calls the `Person` helper function,
-regardless of whether there exists a `Doctor` helper function.
-
-You can export multiple fields, but if there are any public method
-name conflicts, then it is a compile-time error.
-
-Also, you can export specific methods, like `export person.getName`.
-
 **Implicit Interfaces**
 
 When you declare a class, you do not need to explicitly specify what
 interfaces it implements. The compiler determines whether a class
 implements an interface.
-
-**Less Stuttering**
-
-When you declare a local variables, you do not need to explicitly
-specify its type. Use the keyword `var` to declare a local
-variable. The first time that the compiler sees an assignment to that
-variable, where the RHS is any value or expression other then `null`,
-the compiler evaluates the type of the RHS, and that is the type of
-`x`.  Then, it is a compile error for `x` to be used as any other
-type.
 
 **Other Features**
 
