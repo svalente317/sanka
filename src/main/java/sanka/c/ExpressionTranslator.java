@@ -91,6 +91,9 @@ class ExpressionTranslator extends TranslationBase {
     static String translateNewInstance(ExpressionDefinition expr, String variableName) {
         Environment env = Environment.getInstance();
         env.addType(expr.type);
+        ClassDefinition classdef = getClassDefinition(expr.type);
+        int numArgs = expr.argList == null ? 0 : expr.argList.length;
+        MethodDefinition constructor = classdef.getMethod(classdef.name, numArgs);
         StringBuilder builder = new StringBuilder();
         if (variableName == null) {
             builder.append(translateTypeSpace(expr.type));
@@ -101,13 +104,31 @@ class ExpressionTranslator extends TranslationBase {
             finishTranslateNewString(expr, builder);
             return variableName;
         }
+        if (classdef.c_repr != null) {
+            if (constructor == null) {
+                env.printError(null, "class " + classdef.name + " with c__repr requires constructor");
+            }
+            builder.append(" = ");
+            builder.append(translateMethodName(classdef.name, constructor));
+            builder.append("(");
+            if (expr.argList != null) {
+                boolean comma = false;
+                for (ExpressionDefinition arg : expr.argList) {
+                    if (comma) {
+                        builder.append(", ");
+                    }
+                    builder.append(translate(arg));
+                    comma = true;
+                }
+            }
+            builder.append(");");
+            env.print(builder.toString());
+            return variableName;
+        }
         builder.append(" = GC_MALLOC(sizeof(");
         builder.append(translateTypeDeref(expr.type));
         builder.append("));");
         env.print(builder.toString());
-        ClassDefinition classdef = getClassDefinition(expr.type);
-        int numArgs = expr.argList == null ? 0 : expr.argList.length;
-        MethodDefinition constructor = classdef.getMethod(classdef.name, numArgs);
         translateSuperclasses(classdef, variableName);
         if (constructor != null) {
             builder = new StringBuilder();

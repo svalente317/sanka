@@ -31,16 +31,22 @@ class MethodTranslator extends TranslationBase {
         if (isBase) {
             name = getBaseTranslatedName(name);
         }
+        boolean isStatic = method.isStatic;
         StringBuilder builder = new StringBuilder();
         if (method.isPrivate) {
             builder.append("/* private */ ");
         }
         env.addType(method.returnType);
-        builder.append(translateTypeSpace(method.returnType));
+        if (classdef.c_repr != null && classdef.name.equals(method.name)) {
+            isStatic = true;
+            builder.append(classdef.c_repr + " ");
+        } else {
+            builder.append(translateTypeSpace(method.returnType));
+        }
         builder.append(name);
         builder.append("(");
         boolean needComma = false;
-        if (!method.isStatic) {
+        if (!isStatic) {
             builder.append(translateTypeSpace(classdef.toTypeDefinition()) + "this");
             needComma = true;
         }

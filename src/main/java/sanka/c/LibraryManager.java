@@ -32,7 +32,7 @@ public class LibraryManager {
      * Should the library contain a Manifest file? It would be nice, but it's not immediately
      * necessary.
      */
-    public void createLibrary(String filename) throws Exception {
+    public void createLibrary(String filename, CompileManager compileManager) throws Exception {
         Environment env = Environment.getInstance();
         File tmpfile = File.createTempFile("san", ".tmp");
         tmpfile.delete();
@@ -45,7 +45,7 @@ public class LibraryManager {
                 continue;
             }
             File cfile = ClassTranslator.getClassFilename(classdef, false);
-            CompileManager.getInstance().compileFile(cfile.getPath(), arCommand);
+            compileManager.compileFile(cfile.getPath(), arCommand);
         }
         if (env.errorCount > 0) {
             return;
@@ -53,7 +53,7 @@ public class LibraryManager {
 
         // Create the lib.a file containing the .o files.
         // This will be used by gcc to link executables using this library.
-        int status = CompileManager.getInstance().executeCommand(arCommand);
+        int status = compileManager.executeCommand(arCommand);
         if (status != 0) {
             env.printError(null, "ar command exited with status " + status);
         }
@@ -104,7 +104,7 @@ public class LibraryManager {
     /**
      * Unpack library so we can compile Sanka and C files.
      */
-    public void unpackLibrary(String filename) throws IOException {
+    public void unpackLibrary(String filename, CompileManager compileManager) throws IOException {
         Environment env = Environment.getInstance();
         File library = findLibrary(filename);
         File tmpdir = Files.createTempDirectory("sanka").toFile();
@@ -127,7 +127,7 @@ public class LibraryManager {
 
         env.addImportPath(tmpdir.toString());
         File olib = new File(tmpdir, C_LIB_NAME);
-        env.addLibrary(olib.toString());
+        compileManager.addCLibrary(olib.toString());
     }
 
     private File findLibrary(String filename) {
@@ -159,14 +159,5 @@ public class LibraryManager {
             }
         }
         return directory.delete();
-    }
-
-    private static LibraryManager instance = null;
-
-    public static LibraryManager getInstance() {
-        if (instance == null) {
-            instance = new LibraryManager();
-        }
-        return instance;
     }
 }

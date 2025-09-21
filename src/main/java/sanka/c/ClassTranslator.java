@@ -211,6 +211,12 @@ public class ClassTranslator extends TranslationBase {
             env.print("static pthread_mutex_t " + name + " = PTHREAD_MUTEX_INITIALIZER;");
             printedSomething = true;
         }
+        if (classdef.c_stmts != null) {
+            for (String stmt : classdef.c_stmts) {
+                env.print(stmt);
+                printedSomething = true;
+            }
+        }
         for (MethodDefinition method : classdef.methodList) {
             if (printedSomething) {
                 env.print("");

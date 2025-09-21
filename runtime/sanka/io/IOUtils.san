@@ -42,7 +42,6 @@ class IOUtils {
             return null;
         }
         var contents = reader.readFile();
-        reader.close();
         return contents;
     }
 

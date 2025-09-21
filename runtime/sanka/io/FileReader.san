@@ -23,6 +23,7 @@ class FileReader {
     }
 
     int close() {
+        c__stmt "if (this->fp == NULL) return 0";
         c__stmt "int status = fclose(this->fp)";
         c__stmt "this->fp = NULL";
         c__stmt "return status == 0 ? 0 : errno";

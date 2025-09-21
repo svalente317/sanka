@@ -29,11 +29,14 @@ public class SankaCompiler {
 
     public static void main(String[] argv) throws Exception {
         Environment env = Environment.getInstance();
+        CompileManager compileManager = new CompileManager();
+        LibraryManager libraryManager = new LibraryManager();
         SankaCompiler compiler = new SankaCompiler();
         String mainClass = null;
         String exeName = null;
         String libName = null;
         List<String> libraryList = new ArrayList<>();
+        List<String> pkgList = new ArrayList<>();
         List<String> sankaList = new ArrayList<>();
         for (int idx = 0; idx < argv.length; idx++) {
             String arg = argv[idx];
@@ -76,8 +79,13 @@ public class SankaCompiler {
                 libraryList.add(argv[idx]);
                 continue;
             }
+            if (arg.equals("--pkg-config")) {
+              idx++;
+              pkgList.add(argv[idx]);
+              continue;
+            }
             if (arg.startsWith("-l")) {
-                env.addCLibrary(arg);
+                compileManager.addCLibrary(arg);
                 continue;
             }
             sankaList.add(arg);
@@ -85,6 +93,9 @@ public class SankaCompiler {
         if ((mainClass != null && exeName == null) || (mainClass == null && exeName != null)) {
             System.err.println("Specify --main and --exe together");
             System.exit(INVALID_ARGUMENT);
+        }
+        for (String pkgName : pkgList) {
+            compileManager.runPkgConfig(pkgName);
         }
         List<CompilationUnitContext> contextList = new ArrayList<>();
         for (String filename : sankaList) {
@@ -96,7 +107,7 @@ public class SankaCompiler {
             System.exit(CANNOT_PARSE);
         }
         for (String library : libraryList) {
-            LibraryManager.getInstance().unpackLibrary(library);
+            libraryManager.unpackLibrary(library, compileManager);
         }
         compiler.parse(contextList);
         if (env.errorCount > 0) {
@@ -111,12 +122,12 @@ public class SankaCompiler {
             System.exit(CANNOT_TRANSLATE);
         }
         if (libName != null) {
-            LibraryManager.getInstance().createLibrary(libName);
+            libraryManager.createLibrary(libName, compileManager);
         }
         if (mainClass != null) {
-            CompileManager.getInstance().compile(mainClass, exeName);
+            compileManager.compile(mainClass, exeName);
         }
-        LibraryManager.getInstance().cleanup();
+        libraryManager.cleanup();
     }
 
     public static SankaParser makeSankaParser(String filename, SankaLexer lexer) {

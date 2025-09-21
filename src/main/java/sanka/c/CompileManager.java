@@ -1,8 +1,11 @@
 package sanka.c;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +18,18 @@ public class CompileManager {
 
     static final String GCC = "gcc";
     static final String DBG = "-g";
+
+    private final List<String> cFlags;
+    private final List<String> cLibs;
+
+    public CompileManager() {
+        this.cFlags = new ArrayList<>();
+        this.cLibs = new ArrayList<>();
+    }
+
+    public void addCLibrary(String path) {
+        this.cLibs.add(path);
+    }
 
     public void compile(String mainClass, String exeName) throws Exception {
         Environment env = Environment.getInstance();
@@ -47,23 +62,19 @@ public class CompileManager {
             return;
         }
         compileFile(filename, linkcommand);
-        String ofilename = linkcommand.get(linkcommand.size()-1);
+        String ofilename = linkcommand.getLast();
         if (env.errorCount > 0) {
             return;
         }
-        linkcommand.add(0, GCC);
-        if (env.libraries != null) {
-            linkcommand.addAll(env.libraries);
-        }
+        linkcommand.addFirst(GCC);
         for (String libPath : env.libPath) {
             linkcommand.add("-L" + libPath);
         }
         linkcommand.add("-lsankaruntime");
         linkcommand.add("-lgc");
         linkcommand.add("-lpthread");
-        if (env.cLibraries != null) {
-            linkcommand.addAll(env.cLibraries);
-        }
+        linkcommand.add("-lm");
+        linkcommand.addAll(this.cLibs);
         linkcommand.add("-o");
         linkcommand.add(exeName);
         int status = executeCommand(linkcommand);
@@ -85,6 +96,7 @@ public class CompileManager {
         }
         String top = env.topDirectory == null ? "." : env.topDirectory;
         command.add("-I" + top);
+        command.addAll(this.cFlags);
         String objfilename = filename.substring(0, filename.length()-1) + "o";
         command.add("-o");
         command.add(objfilename);
@@ -107,7 +119,7 @@ public class CompileManager {
     private void printCommand(String[] args) {
         StringBuilder builder = new StringBuilder();
         for (String arg : args) {
-            if (builder.length() > 0) {
+            if (!builder.isEmpty()) {
                 builder.append(" ");
             }
             builder.append(arg);
@@ -158,12 +170,24 @@ public class CompileManager {
         return tmpfile.getAbsolutePath();
     }
 
-    private static CompileManager instance = null;
+    public void runPkgConfig(String pkgName) throws IOException, InterruptedException {
+        runPkgConfigOnce(pkgName, "--cflags", this.cFlags);
+        runPkgConfigOnce(pkgName, "--libs", this.cLibs);
+    }
 
-    public static CompileManager getInstance() {
-        if (instance == null) {
-            instance = new CompileManager();
+    private void runPkgConfigOnce(String pkgName, String arg, List<String> results)
+            throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder("pkg-config", arg, pkgName);
+        processBuilder.redirectErrorStream(true);
+        Process process = processBuilder.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line = reader.readLine();
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            System.err.println("pkg-config exited code " + exitCode);
         }
-        return instance;
+        for (String result : line.split("\\s+")) {
+            results.add(result);
+        }
     }
 }

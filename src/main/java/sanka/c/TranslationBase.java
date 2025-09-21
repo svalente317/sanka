@@ -61,6 +61,10 @@ abstract class TranslationBase {
         if (type.isStringType()) {
             return "const char *";
         }
+        ClassDefinition classdef = getClassDefinition(type);
+        if (classdef != null && classdef.c_repr != null) {
+            return classdef.c_repr + " ";
+        }
         return "struct " + type.name + " *";
     }
 

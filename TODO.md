@@ -1,5 +1,7 @@
 # TODO
 
+* to parse anonymous class, do not use caller's symbol table
+
 * support cast and typeswitch for abstract types
 
 * check result of TypeDefinition.parse()

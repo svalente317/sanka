@@ -55,6 +55,8 @@ public class ClassDefinition {
     public List<MethodDefinition> methodList;
     public List<String> c_includes;
     public List<String> c_fields;
+    public String c_repr;
+    public List<String> c_stmts;
     int exportStatus;
     int constantsStatus;
     int anonymousCount;
@@ -209,6 +211,24 @@ public class ClassDefinition {
             }
             String literal = item.StringLiteral().getText();
             this.c_fields.add(LiteralUtils.evaluateStringLiteral(literal));
+        }
+        if (item.getStart().getType() == SankaLexer.C__REPR) {
+            if (this.c_repr != null) {
+                env.printError(item, "class may only have one c__repr");
+            }
+            if (this.isInterface || this.isAbstract || this.isSerializable || this.isAnonymous ||
+                    this.superclass != null) {
+                env.printError(item, "invalid use of c__repr");
+            }
+            String literal = item.StringLiteral().getText();
+            this.c_repr = LiteralUtils.evaluateStringLiteral(literal);
+        }
+        if (item.getStart().getType() == SankaLexer.C__STMT) {
+            if (this.c_stmts == null) {
+                this.c_stmts = new LinkedList<>();
+            }
+            String literal = item.StringLiteral().getText();
+            this.c_stmts.add(LiteralUtils.evaluateStringLiteral(literal));
         }
     }
 
@@ -548,6 +568,9 @@ public class ClassDefinition {
         Environment env = Environment.getInstance();
         env.currentClass = this;
         env.classPackageMap = this.classPackageMap;
+        if (this.c_repr != null && (this.c_fields != null || hasVariableField())) {
+            env.printError(null, "cannot use c__repr with non-constant field");
+        }
         for (FieldDefinition field : this.fieldList) {
             if (!field.isConst && field.expression != null) {
                 ExpressionDefinition expr = new ExpressionDefinition();
@@ -567,6 +590,18 @@ public class ClassDefinition {
         for (MethodDefinition method : this.methodList) {
             method.evaluate();
         }
+    }
+
+    private boolean hasVariableField() {
+        for (FieldDefinition field : this.fieldList) {
+            if (!field.isConst) {
+                return true;
+            }
+        }
+        if (this.superclass != null) {
+            return this.superclass.hasVariableField();
+        }
+        return false;
     }
 
     public TypeDefinition toTypeDefinition() {

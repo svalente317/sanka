@@ -91,6 +91,8 @@ classBodyDeclaration
     |   methodDeclaration
     |   'c__include' StringLiteral ';'
     |   'c__field' StringLiteral ';'
+    |   'c__repr' StringLiteral ';'
+    |   'c__stmt' StringLiteral ';'
     ;
 
 constDeclaration
@@ -381,6 +383,7 @@ VOID          : 'void';
 WHILE         : 'while';
 C__INCLUDE    : 'c__include';
 C__FIELD      : 'c__field';
+C__REPR       : 'c__repr';
 C__STMT       : 'c__stmt';
 
 // 3.10.1 Integer Literals
