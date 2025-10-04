@@ -216,8 +216,7 @@ public class ClassDefinition {
             if (this.c_repr != null) {
                 env.printError(item, "class may only have one c__repr");
             }
-            if (this.isInterface || this.isAbstract || this.isSerializable || this.isAnonymous ||
-                    this.superclass != null) {
+            if (this.isInterface || this.isSerializable || this.isAnonymous) {
                 env.printError(item, "invalid use of c__repr");
             }
             String literal = item.StringLiteral().getText();
@@ -571,6 +570,7 @@ public class ClassDefinition {
         if (this.c_repr != null && (this.c_fields != null || hasVariableField())) {
             env.printError(null, "cannot use c__repr with non-constant field");
         }
+        // TODO c_repr != null && superclass != null ? must have same c_repr
         for (FieldDefinition field : this.fieldList) {
             if (!field.isConst && field.expression != null) {
                 ExpressionDefinition expr = new ExpressionDefinition();

@@ -287,12 +287,11 @@ class ExpressionTranslator extends TranslationBase {
             if (expr.expression1.type.arrayOf != null) {
                 return null;
             }
-            String className = isClassAccess ? expr.expression1.identifiedClass.name :
-                expr.expression1.type.name;
+            TypeDefinition classType =  isClassAccess ? expr.expression1.identifiedClass : expr.expression1.type;
             if (expr.method == null) {
-                return translateStaticField(className, expr.name);
+                return translateStaticField(classType.name, expr.name);
             }
-            return translateMethodName(className, expr.method);
+            return translateMethodName(classType.name, expr.method);
         }
         return text + "->" + expr.name;
     }

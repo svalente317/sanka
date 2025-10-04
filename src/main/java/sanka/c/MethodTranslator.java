@@ -16,7 +16,7 @@ class MethodTranslator extends TranslationBase {
      */
     public static void translate(ClassDefinition classdef, MethodDefinition method, boolean isHeader) {
         translate(classdef, method, isHeader, false);
-        if (classdef.isAbstract && method.hasBody() && method.canOverride()) {
+        if (classdef.isAbstract && classdef.c_repr == null && method.hasBody() && method.canOverride()) {
             if (!isHeader) {
                 Environment.getInstance().print("");
             }
@@ -26,6 +26,7 @@ class MethodTranslator extends TranslationBase {
 
     private static void translate(ClassDefinition classdef, MethodDefinition method,
             boolean isHeader, boolean isBase) {
+        // if (classdef.c_repr != null && method.block == null && method.overrideCount > 0) return;
         Environment env = Environment.getInstance();
         String name = translateMethodName(classdef.name, method);
         if (isBase) {
@@ -74,7 +75,7 @@ class MethodTranslator extends TranslationBase {
             env.print(builder.toString());
         }
         else if (classdef.isInterface ||
-                (classdef.isAbstract && method.canOverride() && !isBase)) {
+                (classdef.isAbstract && classdef.c_repr == null && method.canOverride() && !isBase)) {
             translateInterfaceBody(classdef, method);
         }
         else if (method.block != null) {
@@ -182,10 +183,15 @@ class MethodTranslator extends TranslationBase {
             builder.append("return ");
         }
         String name = translateMethodName(candidate.name, method);
-        builder.append(getBaseTranslatedName(name));
-        builder.append("(&this->" + ClassDefinition.SUPER_FIELD_NAME);
-        for (int idx = 1; idx < superCount; idx++) {
-            builder.append("." + ClassDefinition.SUPER_FIELD_NAME);
+        if (classdef.c_repr == null) {
+            builder.append(getBaseTranslatedName(name));
+            builder.append("(&this->" + ClassDefinition.SUPER_FIELD_NAME);
+            for (int idx = 1; idx < superCount; idx++) {
+                builder.append("." + ClassDefinition.SUPER_FIELD_NAME);
+            }
+        } else {
+            builder.append(name);
+            builder.append("(this");
         }
         addParameters(method, builder, false, true);
         builder.append(");");

@@ -117,6 +117,30 @@ public class ClassTranslator extends TranslationBase {
     private static void translateHeader(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
         env.typeList.clear();
+        if (classdef.c_repr == null) {
+            translateClassRep(classdef);
+        }
+        for (FieldDefinition field : classdef.fieldList) {
+            if (field.isStatic) {
+                StringBuilder builder = new StringBuilder();
+                builder.append("extern ");
+                if (field.isConst) {
+                    builder.append("const ");
+                }
+                env.addType(field.type);
+                builder.append(translateTypeSpace(field.type));
+                builder.append(translateStaticField(classdef.name, field.name));
+                builder.append(";");
+                env.print(builder.toString());
+            }
+        }
+        for (MethodDefinition method : classdef.methodList) {
+            MethodTranslator.translate(classdef, method, true);
+        }
+    }
+
+    private static void translateClassRep(ClassDefinition classdef) {
+        Environment env = Environment.getInstance();
         env.print("struct " + classdef.name + " {");
         env.level++;
         if (classdef.superclass != null) {
@@ -159,23 +183,6 @@ public class ClassTranslator extends TranslationBase {
         env.level--;
         env.print("};");
         env.print("");
-        for (FieldDefinition field : classdef.fieldList) {
-            if (field.isStatic) {
-                StringBuilder builder = new StringBuilder();
-                builder.append("extern ");
-                if (field.isConst) {
-                    builder.append("const ");
-                }
-                env.addType(field.type);
-                builder.append(translateTypeSpace(field.type));
-                builder.append(translateStaticField(classdef.name, field.name));
-                builder.append(";");
-                env.print(builder.toString());
-            }
-        }
-        for (MethodDefinition method : classdef.methodList) {
-            MethodTranslator.translate(classdef, method, true);
-        }
     }
 
     private static void translateForward(ClassDefinition classdef) {
