@@ -86,7 +86,6 @@ interfaceBody
 classBodyDeclaration
     :   constDeclaration
     |   fieldDeclaration
-    |   'export' Identifier ('.' Identifier)? ';'
     |   constructorDeclaration
     |   methodDeclaration
     |   'c__include' StringLiteral ';'
@@ -358,7 +357,6 @@ CONTINUE      : 'continue';
 DEFAULT       : 'default';
 DOUBLE        : 'double';
 ELSE          : 'else';
-EXPORT        : 'export';
 EXTENDS       : 'extends';
 FLOAT         : 'float';
 FOR           : 'for';

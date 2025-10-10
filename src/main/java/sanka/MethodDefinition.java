@@ -38,7 +38,6 @@ public class MethodDefinition {
     public boolean isOverloaded;
     public BlockDefinition block;
     public SymbolTable.Frame frame;
-    public String exportFrom;
     public int overrideCount;
 
     MethodDefinition() {
@@ -102,7 +101,7 @@ public class MethodDefinition {
     }
 
     public boolean hasBody() {
-        return this.blockContext != null || this.exportFrom != null || this.generator != null;
+        return this.blockContext != null || this.generator != null;
     }
 
     public boolean canOverride() {

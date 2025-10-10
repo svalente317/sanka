@@ -51,20 +51,18 @@ public class ClassDefinition {
     public String name;
     public ClassDefinition superclass;
     public List<FieldDefinition> fieldList;
-    public List<String> exports;
     public List<MethodDefinition> methodList;
     public List<String> c_includes;
     public List<String> c_fields;
     public String c_repr;
     public List<String> c_stmts;
-    int exportStatus;
+    int parseStatus;
     int constantsStatus;
     int anonymousCount;
 
     ClassDefinition() {
         this.fieldList = new LinkedList<>();
         this.methodList = new LinkedList<>();
-        this.exports = new LinkedList<>();
     }
 
     String qualifiedName() {
@@ -124,14 +122,6 @@ public class ClassDefinition {
         }
         if (item.fieldDeclaration() != null) {
             parseFields(item.fieldDeclaration());
-        }
-        if (item.getStart().getType() == SankaLexer.EXPORT) {
-            List<TerminalNode> nodes = item.Identifier();
-            String name = nodes.get(0).getText();
-            if (nodes.size() > 1) {
-                name = name + "." + nodes.get(1).getText();
-            }
-            this.exports.add(name);
         }
         if (item.constructorDeclaration() != null) {
             ConstructorDeclarationContext ctx = item.constructorDeclaration();
@@ -397,59 +387,19 @@ public class ClassDefinition {
     }
 
     /**
-     * Recursive function to add all exported methods and inherited methods to methodList.
+     * Recursive function to add inherited methods to methodList.
      */
-    boolean parseExports() {
+    boolean finalizeParse() {
         Environment env = Environment.getInstance();
-        if (this.exportStatus > 0) {
+        if (this.parseStatus > 0) {
             return true;
         }
-        if (this.exportStatus < 0) {
-            env.printError(null, qualifiedName() + ": export loop detected");
+        if (this.parseStatus < 0) {
+            env.printError(null, qualifiedName() + ": class parse loop detected");
             return false;
         }
-        this.exportStatus = -1;
-        for (String fieldName : this.exports) {
-            String methodName = null;
-            int idx = fieldName.indexOf('.');
-            if (idx > 0) {
-                methodName = fieldName.substring(idx+1);
-                fieldName = fieldName.substring(0, idx);
-            }
-            FieldDefinition fielddef = getField(fieldName);
-            if (fielddef == null) {
-                env.printError(null, "export in " + qualifiedName() + ": field " +
-                        fieldName + " not found");
-                continue;
-            }
-            TypeDefinition type = fielddef.type;
-            // TODO use getClassDefinition(type)?
-            ClassDefinition superclass = env.getClassDefinition(type.packageName, type.name);
-            if (superclass == null) {
-                env.printError(null, "export " + qualifiedName() + "." + fieldName +
-                        ": type " + type + " not found");
-                continue;
-            }
-            if (!superclass.parseExports()) {
-                continue;
-            }
-            // Export all public methods with the given name.
-            int count = 0;
-            for (MethodDefinition method : superclass.methodList) {
-                if (!method.isPrivate) {
-                    if (methodName == null || methodName.equals(method.name)) {
-                        count++;
-                        addMethodToClass(fieldName, method, methodName == null);
-                    }
-                }
-            }
-            if (methodName != null && count == 0) {
-                env.printError(null, "export " + qualifiedName() + "." + fieldName +
-                        ": public method " + methodName + " not found");
-                continue;
-            }
-        }
-        if (this.superclass != null && this.superclass.parseExports()) {
+        this.parseStatus = -1;
+        if (this.superclass != null && this.superclass.finalizeParse()) {
             if (!this.superclass.isAbstract) {
                 env.printError(null, "cannot extend " + this.superclass.qualifiedName() +
                         " because it is not abstract");
@@ -459,54 +409,35 @@ public class ClassDefinition {
                 if (method.isPrivate || method.isStatic) {
                     continue;
                 }
-                addMethodToClass(null, method, false);
+                addMethodToClass(method);
             }
         }
-        this.exportStatus = 1;
+        this.parseStatus = 1;
         return true;
     }
 
-    private void addMethodToClass(String fieldName, MethodDefinition method, boolean isImplicit) {
+    private void addMethodToClass(MethodDefinition method) {
         Environment env = Environment.getInstance();
         int numArgs = method.parameters.size();
         MethodDefinition existing = getMethod(method.name, numArgs);
         if (existing != null) {
-            if (fieldName == null) {
-                if (!method.sameSignature(existing)) {
-                    env.printError(null, "class " + this.name + " method " + existing.name +
-                            ": signature incompatible with " + this.superclass.name);
-                }
-                existing.overrideCount = method.overrideCount + 1;
-                return;
+            if (!method.sameSignature(existing)) {
+                env.printError(null, "class " + this.name + " method " + existing.name +
+                        ": signature incompatible with " + this.superclass.name);
             }
-            // Implicit exported methods do not override explicitly defined methods.
-            if (isImplicit && existing.exportFrom == null && method.sameSignature(existing)) {
-                return;
-            }
-            if (existing.exportFrom != null) {
-                env.printError(null, "export failed: class " + this.name +
-                        " method " + method.name + " exported from " + existing.exportFrom +
-                        " and " + fieldName);
-            } else {
-                env.printError(null, "export failed: class " + this.name +
-                        " method " + method.name + " already defined");
-            }
+            existing.overrideCount = method.overrideCount + 1;
             return;
         }
-        // TODO set isOverloaded?
+        // TODO What if base class defines method(1 arg) and superclass defines method(2 args)?
         MethodDefinition clone = new MethodDefinition();
         clone.isPrivate = method.isPrivate;
         clone.isStatic = method.isStatic;
         clone.returnType = method.returnType;
         clone.name = method.name;
         clone.parameters.addAll(method.parameters);
-        clone.exportFrom = fieldName;
-        if (fieldName == null) {
-            clone.overrideCount = method.overrideCount + 1;
-        }
+        clone.overrideCount = method.overrideCount + 1;
         this.methodList.add(clone);
-        if (!this.isAbstract && fieldName == null &&
-                getMethodWithBody(method.name, numArgs) == null) {
+        if (!this.isAbstract && getMethodWithBody(method.name, numArgs) == null) {
             env.printError(null, "class " + this.name + " must define method " + method.name);
         }
     }

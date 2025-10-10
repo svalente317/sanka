@@ -62,11 +62,11 @@ public class CompileManager {
             return;
         }
         compileFile(filename, linkcommand);
-        String ofilename = linkcommand.getLast();
+        String ofilename = linkcommand.get(linkcommand.size()-1);
         if (env.errorCount > 0) {
             return;
         }
-        linkcommand.addFirst(GCC);
+        linkcommand.add(0, GCC);
         for (String libPath : env.libPath) {
             linkcommand.add("-L" + libPath);
         }

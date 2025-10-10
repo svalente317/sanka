@@ -154,7 +154,7 @@ public class SankaCompiler {
         }
         Environment env = Environment.getInstance();
         for (ClassDefinition classdef : env.classList) {
-            classdef.parseExports();
+            classdef.finalizeParse();
         }
     }
 

@@ -61,20 +61,7 @@ class MethodTranslator extends TranslationBase {
         env.print(builder.toString());
         env.print("{");
         env.level++;
-        if (method.exportFrom != null) {
-            builder.setLength(0);
-            if (!method.returnType.equals(TypeDefinition.VOID_TYPE)) {
-                builder.append("return ");
-            }
-            FieldDefinition fielddef = classdef.getField(method.exportFrom);
-            builder.append(translateMethodName(fielddef.type.name, method));
-            builder.append("(this->");
-            builder.append(method.exportFrom);
-            addParameters(method, builder, false, true);
-            builder.append(");");
-            env.print(builder.toString());
-        }
-        else if (classdef.isInterface ||
+        if (classdef.isInterface ||
                 (classdef.isAbstract && classdef.c_repr == null && method.canOverride() && !isBase)) {
             translateInterfaceBody(classdef, method);
         }
