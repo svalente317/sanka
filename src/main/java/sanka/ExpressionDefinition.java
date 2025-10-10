@@ -43,6 +43,7 @@ public class ExpressionDefinition {
     public ExpressionDefinition[] argList;
     public String[] fieldList;
     public String translatedThis;
+    public boolean isInline;
 
     ExpressionDefinition copyAndClear() {
         ExpressionDefinition copy = new ExpressionDefinition();
@@ -303,6 +304,9 @@ public class ExpressionDefinition {
     private void evaluateNewInstance(CreatorContext creator) {
         Environment env = Environment.getInstance();
         this.expressionType = ExpressionType.NEW_INSTANCE;
+        if (creator.getToken(sanka.antlr4.SankaParser.INLINE, 0) != null) {
+            this.isInline = true;
+        }
         this.type = new TypeDefinition();
         this.type.parse(creator.classType());
         ClassDefinition classdef = env.loadClassDefinition(this.type);

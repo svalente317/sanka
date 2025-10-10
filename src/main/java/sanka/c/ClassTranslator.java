@@ -32,7 +32,7 @@ public class ClassTranslator extends TranslationBase {
 
     private static void translate(ClassDefinition classdef, boolean isHeader) throws IOException {
         // Translate the class before writing the #include lines, because translating
-        // the class modifies env.typeList.
+        // the class modifies env.referencedTypes.
         Environment env = Environment.getInstance();
         env.writer = new StringWriter();
         if (isHeader) {
@@ -54,17 +54,17 @@ public class ClassTranslator extends TranslationBase {
             env.print("#define " + symbol + " 1");
             translateForward(classdef);
             env.print("");
-            env.typeList.remove(classdef.toTypeDefinition());
+            env.referencedTypes.remove(classdef.toTypeDefinition());
         } else {
             env.print(INCLUDE_SANKA_HEADER);
-            env.typeList.add(classdef.toTypeDefinition());
+            env.referencedTypes.add(classdef.toTypeDefinition());
         }
         if (classdef.c_includes != null) {
             for (String c_include : classdef.c_includes) {
                 env.print("#include <" + c_include + ">");
             }
         }
-        for (TypeDefinition type : env.typeList) {
+        for (TypeDefinition type : env.referencedTypes) {
             env.print("#include <" + getHeaderFileName(type.packageName, type.name) + ">");
         }
         env.print("");
@@ -116,10 +116,8 @@ public class ClassTranslator extends TranslationBase {
      */
     private static void translateHeader(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
-        env.typeList.clear();
-        if (classdef.c_repr == null) {
-            translateClassRep(classdef);
-        }
+        env.referencedTypes.clear();
+        translateClassRep(classdef);
         for (FieldDefinition field : classdef.fieldList) {
             if (field.isStatic) {
                 StringBuilder builder = new StringBuilder();
@@ -141,11 +139,17 @@ public class ClassTranslator extends TranslationBase {
 
     private static void translateClassRep(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
+        TypeDefinition superType = null;
+        if (classdef.superclass != null) {
+            superType = classdef.superclass.toTypeDefinition();
+            env.addType(superType);
+        }
+        if (classdef.c_repr != null) {
+            return;
+        }
         env.print("struct " + classdef.name + " {");
         env.level++;
-        if (classdef.superclass != null) {
-            TypeDefinition superType = classdef.superclass.toTypeDefinition();
-            env.addType(superType);
+        if (superType != null) {
             env.print(translateTypeDeref(superType) + " " + SUPER_FIELD_NAME + ";");
         }
         if (classdef.isAbstract) {
@@ -195,7 +199,7 @@ public class ClassTranslator extends TranslationBase {
      */
     private static void translateClass(ClassDefinition classdef) {
         Environment env = Environment.getInstance();
-        env.typeList.clear();
+        env.referencedTypes.clear();
         boolean printedSomething = false;
         for (FieldDefinition field: classdef.fieldList) {
             if (field.isStatic) {

@@ -26,18 +26,19 @@ public class Environment {
     public ClassDefinition currentClass;
     public MethodDefinition currentMethod;
     public SymbolTable symbolTable;
-    public SortedSet<TypeDefinition> typeList;
 
     // Pass 3.
     public String topDirectory;
     public Writer writer = null;
     public int level = 0;
     public int tmpVariableCount = 0;
+    public SortedSet<TypeDefinition> referencedTypes;
+
 
     Environment() {
         this.classList = new LinkedList<>();
         this.symbolTable = new SymbolTable();
-        this.typeList = new TreeSet<>();
+        this.referencedTypes = new TreeSet<>();
     }
 
     // Pass 1
@@ -140,7 +141,7 @@ public class Environment {
     public void addType(TypeDefinition type) {
         type = type.baseType();
         if (!type.isPrimitiveType) {
-            this.typeList.add(type);
+            this.referencedTypes.add(type);
         }
     }
 

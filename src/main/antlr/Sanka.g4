@@ -209,7 +209,7 @@ statement
     ;
 
 variableDeclaration
-    :   ('inline')? 'var' Identifier ('=' expression)?
+    :   'var' Identifier ('=' expression)?
     ;
 
 variableAssignment
@@ -296,7 +296,7 @@ primary
     ;
 
 creator
-    :   classType '(' expressionList? ')' fieldValues?
+    :   'inline'? classType '(' expressionList? ')' fieldValues?
     |   arrayType '(' expression ')'
     |   arrayType arrayDefinition?
     |   mapType mapDefinition?

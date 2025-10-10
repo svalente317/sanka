@@ -125,7 +125,9 @@ class ExpressionTranslator extends TranslationBase {
             env.print(builder.toString());
             return variableName;
         }
-        builder.append(" = GC_MALLOC(sizeof(");
+        builder.append(" = ");
+        builder.append(expr.isInline ? "alloca" : "GC_MALLOC");
+        builder.append("(sizeof(");
         builder.append(translateTypeDeref(expr.type));
         builder.append("));");
         env.print(builder.toString());
