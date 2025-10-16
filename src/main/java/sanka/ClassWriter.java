@@ -26,6 +26,9 @@ public class ClassWriter {
             builder.append(" extends " + classdef.superclass.qualifiedName());
         }
         builder.append(" {\n");
+        if (classdef.c_repr != null) {
+            builder.append("c__repr \"" + classdef.c_repr + "\";\n\n");
+        }
         for (FieldDefinition field : classdef.fieldList) {
             if (field.isPrivate) {
                 continue;

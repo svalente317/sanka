@@ -1,5 +1,9 @@
 # TODO
 
+* for c__repr, make calls directly to superclass
+
+* for c__repr, validate types of class and superclass
+
 * to parse anonymous class, do not use caller's symbol table
 
 * support cast and typeswitch for abstract types

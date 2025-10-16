@@ -496,6 +496,8 @@ public class ClassDefinition {
 
     void evaluate() {
         Environment env = Environment.getInstance();
+        // TODO stop using this
+        env.currentPackage = this.packageName;
         env.currentClass = this;
         env.classPackageMap = this.classPackageMap;
         if (this.c_repr != null && (this.c_fields != null || hasVariableField())) {

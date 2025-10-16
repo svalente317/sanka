@@ -94,6 +94,9 @@ public class SankaCompiler {
             System.err.println("Specify --main and --exe together");
             System.exit(INVALID_ARGUMENT);
         }
+        for (String library : libraryList) {
+            libraryManager.unpackLibrary(library, compileManager);
+        }
         for (String pkgName : pkgList) {
             compileManager.runPkgConfig(pkgName);
         }
@@ -105,9 +108,6 @@ public class SankaCompiler {
         }
         if (env.errorCount > 0) {
             System.exit(CANNOT_PARSE);
-        }
-        for (String library : libraryList) {
-            libraryManager.unpackLibrary(library, compileManager);
         }
         compiler.parse(contextList);
         if (env.errorCount > 0) {
@@ -154,6 +154,7 @@ public class SankaCompiler {
         }
         Environment env = Environment.getInstance();
         for (ClassDefinition classdef : env.classList) {
+            // TODO set currentPackage?
             classdef.finalizeParse();
         }
     }
@@ -239,7 +240,11 @@ public class SankaCompiler {
      */
     void translate() throws IOException {
         Environment env = Environment.getInstance();
-        for (ClassDefinition classdef : env.classList) {
+        // Take a snapshot of the classes to evaluate.
+        // Do this now because env.classList can change while translating classes --
+        // ImportManager can import classes from libraries.
+        ClassDefinition[] toTranslate = env.classList.toArray(new ClassDefinition[0]);
+        for (ClassDefinition classdef : toTranslate) {
             if (!classdef.isImport) {
                 ClassTranslator.translate(classdef);
             }
