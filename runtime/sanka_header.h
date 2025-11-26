@@ -1,11 +1,24 @@
-#define GC_THREADS 1
 #ifdef __linux__
 #define _XOPEN_SOURCE 600
 #define _DEFAULT_SOURCE 1
 #endif
-#include <gc.h>
 #include <rb.h>
 #include <string.h>
+
+#if 1
+#include <stdlib.h>
+#include <pthread.h>
+extern void _nop_init(void);
+extern void *_malloc_and_zero(int x);
+#define GC_INIT          _nop_init
+#define GC_MALLOC        _malloc_and_zero
+#define GC_MALLOC_ATOMIC malloc
+#define GC_REALLOC       realloc
+#define GC_FREE          free
+#else
+#define GC_THREADS 1
+#include <gc.h>
+#endif
 
 /* Part 1: panic.c -- primitive types, pointers */
 

@@ -113,7 +113,16 @@ public class CompileManager {
         String[] args = command.toArray(new String[0]);
         printCommand(args);
         Process process = Runtime.getRuntime().exec(args);
-        return process.waitFor();
+        StreamGobbler stdoutGobbler =
+            new StreamGobbler(process.getInputStream(), System.out);
+        stdoutGobbler.start();
+        StreamGobbler stderrGobbler =
+            new StreamGobbler(process.getErrorStream(), System.err);
+        stderrGobbler.start();
+        int exitCode = process.waitFor();
+        stdoutGobbler.join();
+        stderrGobbler.join();
+        return exitCode;
     }
 
     private void printCommand(String[] args) {
@@ -187,7 +196,9 @@ public class CompileManager {
             System.err.println("pkg-config exited code " + exitCode);
         }
         for (String result : line.split("\\s+")) {
-            results.add(result);
+            if (!result.isEmpty()) {
+                results.add(result);
+            }
         }
     }
 }

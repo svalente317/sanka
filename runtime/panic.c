@@ -9,3 +9,11 @@ void PANIC(const char *text) {
     fprintf(stderr, "%s\n", text);
     exit(-1);
 }
+
+void _nop_init(void) {}
+
+void *_malloc_and_zero(int x) {
+    void *p = malloc(x);
+    memset(p, 0, x);
+    return p;
+}

@@ -24,11 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define GC_THREADS 1
-#include <gc.h>
+#include "sanka_header.h"
 #include "rb.h"
-
-extern void PANIC(const char *);
 
 struct rb_table *
 rb_create (short use_strcmp)

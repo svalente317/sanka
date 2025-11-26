@@ -34,10 +34,6 @@ class System {
         c__stmt "return random() % max";
     }
 
-    static void gc() {
-        c__stmt "while (GC_collect_a_little() != 0)";
-    }
-
     static long parseLong(String text) {
         c__stmt "return strtol(text, NULL, 0)";
     }
