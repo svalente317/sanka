@@ -1,0 +1,6 @@
+// -*- mode: Java; -*-
+package sanka.lang;
+
+class Integer {
+    int i;
+}

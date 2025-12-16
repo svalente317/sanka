@@ -1,0 +1,47 @@
+package sanka.lang;
+
+/**
+ * IntChannel is a Channel for ints
+ */
+class IntChannel {
+    private Channel channel;
+    private Integer[] objects;
+    private inline Mutex mutex;
+
+    IntChannel(int maxSize) {
+        this.channel = new Channel(maxSize);
+        this.objects = new Integer[];
+        this.mutex = new Mutex();
+    }
+
+    void push(int value) {
+        var object;
+        this.mutex.lock();
+        if this.objects.length > 0 {
+            object = this.objects.pop();
+        }
+        this.mutex.unlock(); 
+        if object == null {
+            object = new Integer();
+        }
+        object.i = value;
+        this.channel.push(object);
+    }
+
+    int pop() {
+        var object = (Integer) this.channel.pop();
+        var value = object.i;
+        this.mutex.lock();
+        this.objects.add(object);
+        this.mutex.unlock();
+        return value;
+    }
+
+    int getQueueSize() {
+        return this.channel.getQueueSize();
+    }
+
+    void close() {
+        this.channel.close();
+    }
+}

@@ -1,0 +1,80 @@
+// -*- mode: Java; -*-
+package sanka.json;
+import sanka.io.Writer;
+import sanka.json.JsonElement;
+import sanka.json.JsonObject;
+import sanka.json.StringEncoder;
+
+class JsonFormatter {
+    static JsonMember nullMember;
+
+    Writer writer;
+    String level;
+    boolean omitNulls;
+
+    JsonFormatter(Writer writer) {
+        this.writer = writer;
+        this.level = "    ";
+        this.omitNulls = false;
+    }
+
+    void format(JsonElement value) {
+        printElement(value, "", "", "");
+    }
+
+    private void printElement(JsonElement value, String prefix, String suffix,
+                      String indent) {
+        switch (value.type) {
+        case JsonElement.ARRAY_TYPE:
+            var arr = value.getAsArray();
+            if (arr.length == 0) {
+                println(prefix + "[]" + suffix);
+            } else {
+                println(prefix + "[");
+                printArray(arr, indent + this.level);
+                println(indent + "]" + suffix);
+            }
+            break;
+        case JsonElement.OBJECT_TYPE:
+            println(prefix + "{");
+            printObject(value.getAsObject(), indent + this.level);
+            println(indent + "}" + suffix);
+            break;
+        default:
+            println(prefix + value.toString() + suffix);
+        }
+    }
+
+    private void printObject(JsonObject obj, String indent) {
+        var member = JsonFormatter.nullMember;
+        for var candidate: obj.getMembers() {
+            if this.omitNulls && candidate.value.type == JsonElement.NULL_TYPE {
+                continue;
+            }
+            if member != null {
+                var key = StringEncoder.get().encodeAndQuote(member.key);
+                var prefix = indent + key + ": ";
+                printElement(member.value, prefix, ",", indent);
+            }
+            member = candidate;
+        }
+        if member != null { 
+            var key = StringEncoder.get().encodeAndQuote(member.key);
+            var prefix = indent + key + ": ";
+            printElement(member.value, prefix, "", indent);
+        }
+    }
+
+    private void printArray(JsonElement[] arr, String indent) {
+        for (var idx = 0; idx < arr.length; idx++) {
+            var value = arr[idx];
+            var suffix = (idx + 1 < arr.length) ? "," : "";
+            printElement(value, indent, suffix, indent);
+        }
+    }
+
+    private void println(String s) {
+        this.writer.print(s);
+        this.writer.print("\n");
+    }
+}

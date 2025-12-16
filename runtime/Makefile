@@ -10,6 +10,8 @@ PREFIX=/opt/sanka
 
 SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/lang/Condition.c \
+	bin/sanka/lang/IntChannel.c \
+	bin/sanka/lang/Integer.c \
 	bin/sanka/lang/Math.c \
 	bin/sanka/lang/Mutex.c \
 	bin/sanka/lang/Runnable.c \
@@ -26,6 +28,7 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/io/StandardInputReader.c \
 	bin/sanka/io/Writer.c \
 	bin/sanka/json/JsonElement.c \
+	bin/sanka/json/JsonFormatter.c \
 	bin/sanka/json/JsonMember.c \
 	bin/sanka/json/JsonObject.c \
 	bin/sanka/json/JsonParser.c \

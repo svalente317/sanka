@@ -9,5 +9,13 @@ interface Writer {
      */
     int write(byte[] buffer);
 
+    /**
+     * In Sanka, a String is an unencoded array of bytes.
+     * Write these bytes to the I/O device.
+     *
+     * @return the number of bytes written, or -1.
+     */
+    int print(String s);
+
     int close();
 }
