@@ -3,15 +3,20 @@ package sanka.c;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import sanka.ClassDefinition;
 import sanka.Environment;
 import sanka.MethodDefinition;
+import sanka.StringUtils;
 import sanka.TypeDefinition;
 
 public class CompileManager {
@@ -33,14 +38,14 @@ public class CompileManager {
 
     public void compile(String mainClass, String exeName) throws Exception {
         Environment env = Environment.getInstance();
-        String packageName = null;
+        String mainPackage = null;
         String className = mainClass;
         int idx = mainClass.lastIndexOf('.');
         if (idx >= 0) {
-            packageName = mainClass.substring(0,  idx);
+            mainPackage = mainClass.substring(0,  idx);
             className = className.substring(idx+1);
         }
-        ClassDefinition mcd = env.getClassDefinition(packageName, className);
+        ClassDefinition mcd = env.getClassDefinition(mainPackage, className);
         if (mcd == null) {
             env.printError(null, mainClass + ": class not found");
             return;
@@ -49,13 +54,36 @@ public class CompileManager {
             env.printError(null, mainClass + ": class cannot be instantiated");
             return;
         }
-        List<String> linkcommand = new ArrayList<>();
+        Set<String> packageSet = new TreeSet<>();
         for (ClassDefinition classdef : env.classList) {
-            if (classdef.isImport) {
-                continue;
+            if (!classdef.isImport) {
+                packageSet.add(classdef.packageName);
             }
-            File cfile = ClassTranslator.getClassFilename(classdef, false);
-            compileFile(cfile.getPath(), linkcommand);
+        }
+        List<String> linkcommand = new ArrayList<>();
+        for (String packageName : packageSet) {
+            File pkgFile = getPackageFilename(packageName);
+            Writer writer = new FileWriter(pkgFile);
+            Set<String> includeSet = new TreeSet<>();
+            for (ClassDefinition classdef : env.classList) {
+                if (classdef.isImport || !classdef.packageName.equals(packageName)) {
+                    continue;
+                }
+                File cfile = ClassTranslator.getClassFilename(classdef, false);
+                BufferedReader reader = new BufferedReader(new FileReader(cfile));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("#include ")) {
+                        if (!includeSet.add(line)) {
+                            continue;
+                        }
+                    }
+                    writer.write(line + "\n");
+                }
+                reader.close();
+            }
+            writer.close();
+            compileFile(pkgFile.getPath(), linkcommand);
         }
         String filename = generateMainFile(mcd);
         if (filename == null) {
@@ -84,6 +112,17 @@ public class CompileManager {
         } else {
             env.printError(null, exeName + ": compiler exited with status " + status);
         }
+    }
+
+    private static File getPackageFilename(String packageName) {
+        // See ClassTranslator.getClassFilename
+        Environment env = Environment.getInstance();
+        if (packageName == null) {
+            packageName = "sanka";
+        }
+        String filename = "pkg_" +  StringUtils.replaceDot(packageName, '_') + ".c";
+        return env.topDirectory == null ? new File(filename) :
+                    new File(env.topDirectory, filename);
     }
 
     public void compileFile(String filename, List<String> ofileList) throws Exception {
