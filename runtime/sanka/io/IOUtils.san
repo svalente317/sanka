@@ -84,4 +84,42 @@ class IOUtils {
         }
         return failureCount;
     }
+
+    /**
+     * Copy a file in the local file system.
+     * src and dst may be absolute or relative filenames.
+     *
+     * @return true if the new file was created successfully
+     */
+    static boolean copyFile(String src, String dst) {
+        var reader = new FileReader();
+        var status = reader.open(src);
+        if status != 0 {
+            System.println(src + ": " + System.strerror(status));
+            return false;
+        }
+        var writer = new FileWriter();
+        status = writer.open(dst);
+        if status != 0 {
+            reader.close();
+            System.println(dst + ": " + System.strerror(status));
+            return false;
+        }
+        var data = new byte[](8096);
+        while true {
+            status = reader.read(data);
+            if status <= 0 {
+                break;
+            }
+            data.setLength(status);
+            writer.write(data);
+        }
+        reader.close();
+        status = writer.close();
+        if status != 0 {
+            System.println(dst + ": " + System.strerror(status));
+            return false;
+        }
+        return true;
+    }
 }
