@@ -582,9 +582,13 @@ class ExpressionTranslator extends TranslationBase {
             env.print(builder.toString());
         }
         builder.setLength(0);
-        builder.append("if (");
-        builder.append(translate(expr.expression1));
-        builder.append(") {");
+        builder.append("if ");
+        text = translateExpression(expr.expression1);
+        if (expr.expression1.expressionType != ExpressionType.BINARY || text.charAt(0) != '(') {
+            text = "(" + text + ")";
+        }
+        builder.append(text);
+        builder.append(" {");
         env.print(builder.toString());
         env.level++;
         text = translate(expr.argList[0], variableName);

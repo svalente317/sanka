@@ -8,6 +8,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -26,14 +30,26 @@ public class CompileManager {
 
     private final List<String> cFlags;
     private final List<String> cLibs;
+    private final List<String> cHeaders;
+    private final List<String> cFiles;
 
     public CompileManager() {
         this.cFlags = new ArrayList<>();
         this.cLibs = new ArrayList<>();
+        this.cHeaders = new ArrayList<>();
+        this.cFiles = new ArrayList<>();
     }
 
     public void addCLibrary(String path) {
         this.cLibs.add(path);
+    }
+
+    public void addCHeader(String path) {
+        this.cHeaders.add(path);
+    }
+
+    public void addCFile(String path) {
+        this.cFiles.add(path);
     }
 
     public void compile(String mainClass, String exeName) throws Exception {
@@ -54,13 +70,57 @@ public class CompileManager {
             env.printError(null, mainClass + ": class cannot be instantiated");
             return;
         }
+        List<String> linkCommand = new ArrayList<>();
+        compileClassesToObjects(linkCommand);
+        String filename = generateMainFile(mcd);
+        if (filename == null) {
+            return;
+        }
+        compileFile(filename, null, linkCommand);
+        String ofilename = linkCommand.get(linkCommand.size()-1);
+        if (env.errorCount > 0) {
+            return;
+        }
+        linkCommand.add(0, GCC);
+        for (String libPath : env.libPath) {
+            linkCommand.add("-L" + libPath);
+        }
+        linkCommand.add("-lsankaruntime");
+        linkCommand.add("-lgc");
+        linkCommand.add("-lpthread");
+        linkCommand.add("-lm");
+        linkCommand.addAll(this.cLibs);
+        linkCommand.add("-o");
+        linkCommand.add(exeName);
+        int status = executeCommand(linkCommand);
+        if (status == 0) {
+            new File(filename).delete();
+            new File(ofilename).delete();
+        } else {
+            env.printError(null, exeName + ": compiler exited with status " + status);
+        }
+    }
+
+    /**
+     * env.classList is a list of classes that have already been compiled into .c files.
+     * Compile these .c files into one or more .o files.
+     * Add all generated .o files to outputList.
+     */
+    public void compileClassesToObjects(List<String> outputList) throws Exception {
+        Environment env = Environment.getInstance();
+        for (String filename : this.cHeaders) {
+            if (env.topDirectory != null) {
+                Path path = Paths.get(filename);
+                Files.copy(path, Paths.get(env.topDirectory, path.getFileName().toString()),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
         Set<String> packageSet = new TreeSet<>();
         for (ClassDefinition classdef : env.classList) {
             if (!classdef.isImport) {
                 packageSet.add(classdef.packageName);
             }
         }
-        List<String> linkcommand = new ArrayList<>();
         for (String packageName : packageSet) {
             File pkgFile = getPackageFilename(packageName);
             Writer writer = new FileWriter(pkgFile);
@@ -83,38 +143,19 @@ public class CompileManager {
                 reader.close();
             }
             writer.close();
-            compileFile(pkgFile.getPath(), linkcommand);
+            compileFile(pkgFile.getPath(), null, outputList);
         }
-        String filename = generateMainFile(mcd);
-        if (filename == null) {
-            return;
-        }
-        compileFile(filename, linkcommand);
-        String ofilename = linkcommand.get(linkcommand.size()-1);
-        if (env.errorCount > 0) {
-            return;
-        }
-        linkcommand.add(0, GCC);
-        for (String libPath : env.libPath) {
-            linkcommand.add("-L" + libPath);
-        }
-        linkcommand.add("-lsankaruntime");
-        linkcommand.add("-lgc");
-        linkcommand.add("-lpthread");
-        linkcommand.add("-lm");
-        linkcommand.addAll(this.cLibs);
-        linkcommand.add("-o");
-        linkcommand.add(exeName);
-        int status = executeCommand(linkcommand);
-        if (status == 0) {
-            new File(filename).delete();
-            new File(ofilename).delete();
-        } else {
-            env.printError(null, exeName + ": compiler exited with status " + status);
+        if (env.topDirectory != null) {
+            for (String filename : this.cFiles) {
+                String objFilename = filename.substring(0, filename.length() - 1) + "o";
+                objFilename = new File(env.topDirectory, new File(objFilename).getName()).getPath();
+                compileFile(filename, objFilename, outputList);
+            }
         }
     }
 
-    private static File getPackageFilename(String packageName) {
+
+    public static File getPackageFilename(String packageName) {
         // See ClassTranslator.getClassFilename
         Environment env = Environment.getInstance();
         if (packageName == null) {
@@ -125,7 +166,7 @@ public class CompileManager {
                     new File(env.topDirectory, filename);
     }
 
-    public void compileFile(String filename, List<String> ofileList) throws Exception {
+    public void compileFile(String filename, String objFilename, List<String> ofileList) throws Exception {
         Environment env = Environment.getInstance();
         List<String> command = new ArrayList<>();
         command.add(GCC);
@@ -136,16 +177,18 @@ public class CompileManager {
         String top = env.topDirectory == null ? "." : env.topDirectory;
         command.add("-I" + top);
         command.addAll(this.cFlags);
-        String objfilename = filename.substring(0, filename.length()-1) + "o";
+        if (objFilename == null) {
+            objFilename = filename.substring(0, filename.length() - 1) + "o";
+        }
         command.add("-o");
-        command.add(objfilename);
+        command.add(objFilename);
         command.add("-c");
         command.add(filename);
         int status = executeCommand(command);
         if (status != 0) {
             env.printError(null, filename + ": compiler exited with status " + status);
         }
-        ofileList.add(objfilename);
+        ofileList.add(objFilename);
     }
 
     public int executeCommand(List<String> command) throws Exception {

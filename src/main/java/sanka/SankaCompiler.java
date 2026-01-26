@@ -88,6 +88,14 @@ public class SankaCompiler {
                 compileManager.addCLibrary(arg);
                 continue;
             }
+            if (arg.endsWith(".h")) {
+                compileManager.addCHeader(arg);
+                continue;
+            }
+            if (arg.endsWith(".c")) {
+                compileManager.addCFile(arg);
+                continue;
+            }
             sankaList.add(arg);
         }
         if ((mainClass != null && exeName == null) || (mainClass == null && exeName != null)) {

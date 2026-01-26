@@ -122,7 +122,7 @@ public class ClassTranslator extends TranslationBase {
             if (field.isStatic) {
                 StringBuilder builder = new StringBuilder();
                 builder.append("extern ");
-                if (field.isConst) {
+                if (field.isConst && !field.type.isStringType()) {
                     builder.append("const ");
                 }
                 env.addType(field.type);
@@ -204,7 +204,7 @@ public class ClassTranslator extends TranslationBase {
         for (FieldDefinition field: classdef.fieldList) {
             if (field.isStatic) {
                 StringBuilder builder = new StringBuilder();
-                if (field.isConst) {
+                if (field.isConst && !field.type.isStringType()) {
                     builder.append("const ");
                 }
                 env.addType(field.type);

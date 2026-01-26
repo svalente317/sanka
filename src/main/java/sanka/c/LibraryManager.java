@@ -1,11 +1,6 @@
 package sanka.c;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,13 +35,7 @@ public class LibraryManager {
         arCommand.add("ar");
         arCommand.add("cqs");
         arCommand.add(tmpfile.toString());
-        for (ClassDefinition classdef : env.classList) {
-            if (classdef.isImport) {
-                continue;
-            }
-            File cfile = ClassTranslator.getClassFilename(classdef, false);
-            compileManager.compileFile(cfile.getPath(), arCommand);
-        }
+        compileManager.compileClassesToObjects(arCommand);
         if (env.errorCount > 0) {
             return;
         }
