@@ -5,8 +5,13 @@ class StringBuilder {
 
     private byte[] data;
 
-    StringBuilder() {
-        this.data = new byte[];
+    /**
+     * StringBuilder builds an array of bytes. It does not expose the mutable
+     * array. When finished, the array can be used as an immutable String.
+     */
+    StringBuilder(int allocate) {
+        this.data = new byte[](allocate+1);
+        this.data.setLength(0);
     }
 
     void add(byte c) {

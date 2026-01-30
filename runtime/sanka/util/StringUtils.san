@@ -5,21 +5,21 @@ class StringUtils {
 
     static String trim(String text) {
         var len = text.length();
-        if (len == 0) {
+        if len == 0 {
             return text;
         }
         var idx = 0;
-        while (idx < len && isSpace(text[idx])) {
+        while idx < len && isSpace(text[idx]) {
             idx++;
         }
-        if (idx == len) {
+        if idx == len {
             return "";
         }
         var end = len;
-        while (isSpace(text[end-1])) {
+        while isSpace(text[end-1]) {
             end--;
         }
-        if (idx == 0 && end == len) {
+        if idx == 0 && end == len {
             return text;
         }
         return text.substring(idx, end);
@@ -30,17 +30,16 @@ class StringUtils {
     }
 
     static String toLowerCase(String text) {
-        var data = new byte[](text.length());
+        var data = new StringBuilder(text.length());
         var changed = false;
-        for (var idx = 0; idx < data.length; idx++) {
-            var ch = text[idx];
-            if (ch >= 'A' && ch <= 'Z') {
+        for var ch : text {
+            if ch >= 'A' && ch <= 'Z' {
                 changed = true;
                 ch = ch - 'A' + 'a';
             }
-            data[idx] = ch;
+            data.add(ch);
         }
-        return changed ? new String(data) : text;
+        return changed ? data.done() : text;
     }
 
 }
