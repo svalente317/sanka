@@ -43,6 +43,7 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/util/DateTime.c \
 	bin/sanka/util/Integer.c \
 	bin/sanka/util/Random.c \
+	bin/sanka/util/StringBuilder.c \
 	bin/sanka/util/StringUtils.c
 
 OBJS=	bin/panic.o \

@@ -1,0 +1,28 @@
+// -*- mode: Java; -*-
+package sanka.util;
+
+class StringBuilder {
+
+    private byte[] data;
+
+    StringBuilder() {
+        this.data = new byte[];
+    }
+
+    void add(byte c) {
+        if this.data == null {
+            return;
+        }
+        this.data.add(c);
+    }
+
+    String done() {
+        if this.data == null {
+            return null;
+        }
+        this.data.add(0);
+        c__stmt "const char *cp = this->data->data";
+        this.data = null;
+        c__stmt "return cp";
+    }
+}
