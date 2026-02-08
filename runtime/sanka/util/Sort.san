@@ -1,0 +1,29 @@
+// -*- mode: Java; -*-
+package sanka.util;
+
+interface Swapper {
+    int compare(int x, int y);
+    void swap(int x, int y);
+}
+
+class Sort {
+    static void quicksort(int length, Swapper swapper) {
+        quicksort2(0, length-1, swapper);
+    }
+
+    private static void quicksort2(int lo, int hi, Swapper swapper) {
+        if lo >= hi || lo < 0 {
+            return;
+        }
+        var i = lo;
+        for var j = lo; j < hi; j++ {
+            if swapper.compare(j, hi) <= 0 {
+                swapper.swap(i, j);
+                i++;
+            }
+        }
+        swapper.swap(i, hi);
+        quicksort2(lo, i - 1, swapper);
+        quicksort2(i + 1, hi, swapper);
+    }
+}

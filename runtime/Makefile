@@ -37,14 +37,17 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/json/StringEncoder.c \
 	bin/sanka/net/InetAddress.c \
 	bin/sanka/net/Socket.c \
+	bin/sanka/net/URL.c \
 	bin/sanka/test/BaseTest.c \
 	bin/sanka/util/Base64.c \
 	bin/sanka/util/DateFormat.c \
 	bin/sanka/util/DateTime.c \
 	bin/sanka/util/Integer.c \
 	bin/sanka/util/Random.c \
+	bin/sanka/util/Sort.c \
 	bin/sanka/util/StringBuilder.c \
-	bin/sanka/util/StringUtils.c
+	bin/sanka/util/StringUtils.c \
+	bin/sanka/util/Swapper.c
 
 OBJS=	bin/panic.o \
 	bin/array.o \
