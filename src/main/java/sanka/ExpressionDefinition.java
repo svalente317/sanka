@@ -10,7 +10,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import sanka.ClassDefinition.FieldDefinition;
 import sanka.MethodDefinition.ParameterDefinition;
 import sanka.antlr4.SankaParser.AnonymousClassBodyContext;
-import sanka.antlr4.SankaParser.AnonymousClassBodyDeclarationContext;
 import sanka.antlr4.SankaParser.ArrayDefinitionContext;
 import sanka.antlr4.SankaParser.CreatorContext;
 import sanka.antlr4.SankaParser.ExpressionContext;
@@ -257,6 +256,10 @@ public class ExpressionDefinition {
             evaluateThis(primary);
             return;
         }
+        if (text.equals("@this")) {
+            evaluateAtThis(primary);
+            return;
+        }
         env.printError(primary, "unknown primary expression");
     }
 
@@ -269,6 +272,19 @@ public class ExpressionDefinition {
         this.type.name = env.currentClass.name;
         if (env.currentMethod.isStatic) {
             env.printError(primary, "'this' cannot be referenced from a static context");
+        }
+    }
+
+    void evaluateAtThis(PrimaryContext primary) {
+        Environment env = Environment.getInstance();
+        this.expressionType = ExpressionType.IDENTIFIER;
+        this.name = "@this";
+        if (env.atThisClass == null) {
+            env.printError(primary, "'@this' must be in anonymous class");
+        } else {
+            // TODO verify it's not a static method
+            this.type = env.atThisClass.toTypeDefinition();
+            env.currentClass.atThisType = this.type;
         }
     }
 
@@ -791,30 +807,28 @@ public class ExpressionDefinition {
         classdef.classPackageMap.putAll(env.classPackageMap);
         classdef.isAnonymous = true;
         List<String> fieldList = new ArrayList<>();
-        List<ExpressionDefinition> valueList = new ArrayList<>();
-        for (AnonymousClassBodyDeclarationContext decl : creator.anonymousClassBodyDeclaration()) {
-            if (decl.classBodyDeclaration() != null) {
-                classdef.parseClassBodyDeclaration(decl.classBodyDeclaration());
-            } else if (decl.Identifier() != null) {
-                String name = decl.Identifier().getText();
-                ExpressionDefinition expression = new ExpressionDefinition();
-                expression.evaluate(decl.expression());
-                if (expression.type != null) {
-                    classdef.addPublicField(decl, name, expression.type);
-                    fieldList.add(name);
-                    valueList.add(expression);
+        var fieldsCtx =  creator.anonymousClassFields();
+        if (fieldsCtx != null) {
+            var identifierList = fieldsCtx.identifierList().Identifier();
+            for (var identifier : identifierList) {
+                var name = identifier.getText();
+                var type = env.symbolTable.get(name);
+                if (type == null) {
+                    env.printError(fieldsCtx, "undefined local variable: " + name);
+                    continue;
                 }
+                classdef.addPublicField(fieldsCtx, name, type);
+                fieldList.add(name);
             }
+        }
+        for (var decl : creator.classBodyDeclaration()) {
+            classdef.parseClassBodyDeclaration(decl);
         }
         env.classList.add(classdef);
         classdef.evaluateConstants();
-        MethodDefinition parentMethod = env.currentMethod;
         classdef.evaluate();
-        env.currentMethod = parentMethod;
-        env.currentClass = parentClass;
         this.type = classdef.toTypeDefinition();
         this.fieldList = fieldList.toArray(new String[0]);
-        this.argList = valueList.toArray(new ExpressionDefinition[0]);
     }
 
     void evaluateTypeCast(ScalarTypeContext classCtx, ExpressionContext ctx) {

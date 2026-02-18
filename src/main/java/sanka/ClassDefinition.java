@@ -56,6 +56,7 @@ public class ClassDefinition {
     public List<String> c_fields;
     public String c_repr;
     public List<String> c_stmts;
+    public TypeDefinition atThisType;
     int parseStatus;
     int constantsStatus;
     int anonymousCount;
@@ -496,9 +497,12 @@ public class ClassDefinition {
 
     void evaluate() {
         Environment env = Environment.getInstance();
-        // TODO stop using this
+        // TODO is this the right place to define env.currentPackage?
         env.currentPackage = this.packageName;
+        var parentClass = env.currentClass;
         env.currentClass = this;
+        var parentThisClass = env.atThisClass;
+        env.atThisClass = parentClass;
         env.classPackageMap = this.classPackageMap;
         if (this.c_repr != null && (this.c_fields != null || hasVariableField())) {
             env.printError(null, "cannot use c__repr with non-constant field");
@@ -517,12 +521,13 @@ public class ClassDefinition {
                 field.value = expr;
             }
         }
-        if (this.isInterface) {
-            return;
+        if (!this.isInterface) {
+            for (MethodDefinition method : this.methodList) {
+                method.evaluate();
+            }
         }
-        for (MethodDefinition method : this.methodList) {
-            method.evaluate();
-        }
+        env.atThisClass = parentThisClass;
+        env.currentClass = parentClass;
     }
 
     private boolean hasVariableField() {

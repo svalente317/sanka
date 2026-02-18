@@ -26,6 +26,7 @@ public class Environment {
     public ClassDefinition currentClass;
     public MethodDefinition currentMethod;
     public SymbolTable symbolTable;
+    public ClassDefinition atThisClass;
 
     // Pass 3.
     public String topDirectory;

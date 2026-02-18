@@ -21,6 +21,7 @@ import sanka.TypeDefinition;
 public class ClassTranslator extends TranslationBase {
     static final String INCLUDE_SANKA_HEADER = "#include <sanka_header.h>";
     static final String SUPER_FIELD_NAME = "super";
+    static final String AT_THIS_FIELD_NAME = "_at_this";
 
     /**
      * Write Class.h and Class.c files in the output directory.
@@ -178,6 +179,9 @@ public class ClassTranslator extends TranslationBase {
             }
             env.addType(field.type);
             env.print(translateTypeSpace(field.type) + field.name + ";");
+        }
+        if (classdef.atThisType != null) {
+            env.print(translateTypeSpace(classdef.atThisType) + AT_THIS_FIELD_NAME + ";");
         }
         if (classdef.c_fields != null) {
             for (String cfield : classdef.c_fields) {

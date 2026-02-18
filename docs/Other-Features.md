@@ -42,25 +42,23 @@ implements the `Runnable` interface.
 An anonymous class cannot have a constructor method. The object is
 constructed immediately.
 
-An anonymous class can have public fields. The syntax is `fieldName:
-value;`, where `value` is evaluated immediately in the current
-context. The anonymous class methods do not have access to the context
-in which the object was created. (The methods may run long after that
-context has been destroyed.) So the public fields are the only way to
-preserve values from the current context for use by the methods. For
-example, here is a function that returns a Runnable object where the
-`run` method will output "Hello, {name}"
+The word "new" can be followed by the keyword "with" and then a list
+of local variables which are assigned to public fields with those
+names in the new anonymous object. For example:
+
 ~~~
-Runnable make(String nameParam) {
-    return new {
-        name: nameParam;
-        
+Runnable make(String name) {
+    return new with name {
         void run() {
             System.println("Hello, " + this.name);
         }
     };
 }
 ~~~
+
+The methods in an anonymous class can use the keyword "@this" to
+reference the the variable "this" of the context where the anonymous
+object was created.
 
 ### typeswitch
 

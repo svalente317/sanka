@@ -25,7 +25,7 @@ class ExpressionTranslator extends TranslationBase {
         case LITERAL:
             return translateLiteral(expr);
         case IDENTIFIER:
-            return expr.name;
+            return translateIdentifier(expr);
         case CLASS_IDENTIFIER:
             return expr.name;
         case NEW_INSTANCE:
@@ -88,6 +88,13 @@ class ExpressionTranslator extends TranslationBase {
         return "error";
     }
 
+    static String translateIdentifier(ExpressionDefinition expr) {
+        if (expr.name == "@this") {
+            return "this->" + ClassTranslator.AT_THIS_FIELD_NAME;
+        }
+        return expr.name;
+    }
+
     static String translateNewInstance(ExpressionDefinition expr, String variableName) {
         Environment env = Environment.getInstance();
         env.addType(expr.type);
@@ -132,6 +139,9 @@ class ExpressionTranslator extends TranslationBase {
         builder.append("));");
         env.print(builder.toString());
         translateSuperclasses(classdef, variableName);
+        if (classdef.atThisType != null) {
+            env.print(variableName + "->" + ClassTranslator.AT_THIS_FIELD_NAME + " = this;");
+        }
         if (constructor != null) {
             builder = new StringBuilder();
             builder.append(translateMethodName(classdef.name, constructor));
@@ -173,8 +183,8 @@ class ExpressionTranslator extends TranslationBase {
         }
         if (expr.fieldList != null) {
             for (int idx = 0; idx < expr.fieldList.length; idx++) {
-                String value = translate(expr.argList[idx]);
-                env.print(variableName + "->" + expr.fieldList[idx] + " = " + value + ";");
+                String name = expr.fieldList[idx];
+                env.print(variableName + "->" + name + " = " + name + ";");
             }
         }
         return variableName;

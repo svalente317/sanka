@@ -110,6 +110,7 @@ public class MethodDefinition {
 
     void evaluate() {
         Environment env = Environment.getInstance();
+        var parentMethod = env.currentMethod;
         env.currentMethod = this;
         env.symbolTable.push(null);
         for (ParameterDefinition param : this.parameters) {
@@ -130,5 +131,6 @@ public class MethodDefinition {
             this.block.evaluate(this.blockContext);
         }
         this.frame = env.symbolTable.pop();
+        env.currentMethod = parentMethod;
     }
 }

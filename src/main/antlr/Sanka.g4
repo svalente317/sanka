@@ -290,6 +290,7 @@ expression
 
 primary
     :   '(' expression ')'
+    |   '@' 'this'
     |   'this'
     |   literal
     |   Identifier
@@ -326,12 +327,11 @@ literal
     ;
 
 anonymousClassBody
-    :   '{' anonymousClassBodyDeclaration* '}'
+    :   anonymousClassFields? '{' classBodyDeclaration* '}'
     ;
 
-anonymousClassBodyDeclaration
-    :   Identifier ':' expression ';'
-    |   classBodyDeclaration
+anonymousClassFields
+    :   'with' identifierList
     ;
 
 fieldValues
@@ -379,6 +379,7 @@ TYPESWITCH    : 'typeswitch';
 VAR           : 'var';
 VOID          : 'void';
 WHILE         : 'while';
+WITH          : 'with' ;
 C__INCLUDE    : 'c__include';
 C__FIELD      : 'c__field';
 C__REPR       : 'c__repr';
@@ -680,6 +681,7 @@ BITAND          : '&';
 BITOR           : '|';
 CARET           : '^';
 MOD             : '%';
+AT              : '@' ;
 
 //ADD_ASSIGN      : '+=';
 //SUB_ASSIGN      : '-=';

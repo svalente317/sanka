@@ -6,20 +6,9 @@ class AnonymousMaker {
     String firstName;
     String lastName;
 
-    String append(String x, String y) {
-        return x + " " + y;
-    }
-
     Runnable makeRunnable(String[] results) {
-        return new {
-            // In these assignments, the RHS is evaluated in the current
-            // context. So they can access "this", instance methods,
-            // local variables, etc. The results of these expressions
-            // are stored in the new Runnable object.
-            //
-            fullName: append(this.firstName, this.lastName);
-            results: results;
-
+        var fullName = this.firstName + " " + this.lastName;
+        return new with fullName, results {
             // run() is a method in the new unnamed class.
             // This class has no relationship to the AnonymousMaker class.
             // It's not a subclass, it can't access instance or local
@@ -27,6 +16,18 @@ class AnonymousMaker {
             //
             void run() {
                 this.results.add(this.fullName);
+            }
+        };
+    }
+}
+
+class AtThisUser {
+    String[] results;
+
+    Runnable makeUser() {
+        return new {
+            void run() {
+                @this.results.add("used");
             }
         };
     }
@@ -50,6 +51,11 @@ class AnonymousClassTest extends BaseTest {
         var runnable = makeRunnableOnly(results);
         runnable.run();
         assertString("John Doe", results[0], "runnable results");
+
+        var user = new AtThisUser(){results: results};
+        runnable = user.makeUser();
+        runnable.run();
+        assertString("used", results[1], "at this test");
     }
 
     static int main(String[] argv) {
