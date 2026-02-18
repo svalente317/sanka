@@ -184,7 +184,14 @@ class ExpressionTranslator extends TranslationBase {
         if (expr.fieldList != null) {
             for (int idx = 0; idx < expr.fieldList.length; idx++) {
                 String name = expr.fieldList[idx];
-                env.print(variableName + "->" + name + " = " + name + ";");
+                String value;
+                if (expr.argList != null) {
+                    value = translate(expr.argList[idx]);
+                } else {
+                    assert classdef.isAnonymous;
+                    value = name;
+                }
+                env.print(variableName + "->" + name + " = " + value + ";");
             }
         }
         return variableName;
