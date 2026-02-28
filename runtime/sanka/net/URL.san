@@ -6,6 +6,8 @@ import sanka.json.JsonObject;
 class URL {
     String url;
     String scheme;
+    String username;
+    String password;
     String hostname;
     int port;
     String path;
@@ -54,8 +56,18 @@ class URL {
             value = value.substring(idx);
         }
         if this.hostname != null {
+            idx = this.hostname.indexOf('@');
+            if idx >= 0 {
+                this.username = this.hostname.substring(0, idx);
+                this.hostname = this.hostname.substring(idx+1);
+                idx = this.username.indexOf(':');
+                if idx >= 0 {
+                    this.password = this.username.substring(idx+1);
+                    this.username = this.username.substring(0, idx);
+                }
+            }
             idx = this.hostname.indexOf(':');
-            if (idx >= 0) {
+            if idx >= 0 {
                 this.port = System.parseInt(this.hostname.substring(idx+1));
                 this.hostname = this.hostname.substring(0, idx);
             }
