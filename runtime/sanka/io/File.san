@@ -199,4 +199,15 @@ class File {
         c__stmt "status = rename(this->pathname, dest->pathname)";
         return (status == 0);
     }
+
+    /**
+     * Shortcut to call getStats() and return the lastModified field.
+     */
+    long lastModified() {
+        c__stmt "struct stat statbuf";
+        c__stmt "int status";
+        c__stmt "status = stat(this->pathname, &statbuf)";
+        c__stmt "if (status < 0) return errno";
+        c__stmt "return statbuf.st_mtime*1000";
+    }
 }
