@@ -116,24 +116,29 @@ class File {
     File getParent() {
         var strip = this.pathname;
         var done = false;
-        while (!done) {
+        while !done {
             var len = strip.length();
             var origLen = len;
-            while (len > 0 && strip[len-1] == '/') {
+            while len > 0 && strip[len-1] == '/' {
                 len--;
             }
-            if (len == 0) {
-                return null;
+            if len == 0 {
+                strip = null;
+                break;
             }
-            if (len < origLen) {
+            if len < origLen {
                 strip = strip.substring(0, len);
             }
             var idx = strip.lastIndexOf('/');
-            if (idx < 0) {
-                return null;
+            if idx < 0 {
+                strip = null;
+                break;
             }
             done = !((idx+2 == len) && (strip[idx+1] == '.'));
             strip = strip.substring(0, idx);
+        }
+        if strip == null {
+            strip = ".";
         }
         return new File(strip);
     }

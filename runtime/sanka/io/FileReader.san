@@ -8,6 +8,10 @@ class FileReader {
 
     private String filename;
 
+    const SEEK_SET = 0;
+    const SEEK_CUR = 1;
+    const SEEK_END = 2;
+    
     int open(String filename) {
         this.filename = filename;
         c__stmt "char rd[2] = {'r', 0}";
@@ -41,5 +45,11 @@ class FileReader {
         read(body);
         close();
         return body;
+    }
+
+    int seek(long offset, int origin) {
+        c__stmt "int c = (origin == 1 ? SEEK_CUR : (origin == 2 ? SEEK_END : SEEK_SET))";
+        c__stmt "int status = fseek(this->fp, offset, SEEK_SET)";
+        c__stmt "return status == 0 ? 0 : errno";
     }
 }
