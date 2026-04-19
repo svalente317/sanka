@@ -344,6 +344,11 @@ class StatementTranslator extends TranslationBase {
         env.print("union rb_value " + valueName + ";");
         String field = typeToMapFieldName(statement.expression.type);
         String value = translateExpression(statement.expression);
+        if (statement.expression.type.isStringType()) {
+            // Strings have type "const char *" and maps allow values to be edited.
+            // This is safe because Sanka strings are immutable.
+            value = "(char *)" + value;
+        }
         env.print(valueName + "." + field + " = " + value + ";");
         env.print("rb_put(" + text1 + ", (union rb_key) " + text2 + ", " + valueName + ", 0);");
     }
@@ -353,6 +358,9 @@ class StatementTranslator extends TranslationBase {
         Environment env = Environment.getInstance();
         String keyText = translateExpression(keyExpr);
         String valueText = translateExpression(valueExpr);
+        if (valueExpr.type.isStringType()) {
+            valueText = "(char *)" + valueText;
+        }
         if (keyExpr.type.isStringType()) {
             if (keyExpr.expressionType == ExpressionType.LITERAL) {
                 keyText = "(" + translateType(TypeDefinition.STRING_TYPE) + ")" + keyText;

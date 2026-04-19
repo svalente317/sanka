@@ -49,7 +49,7 @@ class FileReader {
 
     int seek(long offset, int origin) {
         c__stmt "int c = (origin == 1 ? SEEK_CUR : (origin == 2 ? SEEK_END : SEEK_SET))";
-        c__stmt "int status = fseek(this->fp, offset, SEEK_SET)";
+        c__stmt "int status = fseek(this->fp, offset, origin)";
         c__stmt "return status == 0 ? 0 : errno";
     }
 }

@@ -57,4 +57,8 @@ class System {
     static String getenv(String name) {
         c__stmt "return getenv(name)";
     }
+
+    static void byteArrayCopy(byte[] src, int srcpos, byte[] dst, int dstpos, int len) {
+        c__stmt "memcpy(((char *)dst->data)+dstpos, ((char *)src->data)+srcpos, len)";
+    }
 }

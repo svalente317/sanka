@@ -368,7 +368,7 @@ public class ExpressionDefinition {
             ex.argList[idx] = value;
             FieldDefinition fd = classdef.getField(name);
             if (fd == null || fd.isPrivate || fd.isStatic || fd.isConst) {
-                env.printError(fvc, "class " + this.expression1.type + " field " + name +
+                env.printError(fvc, "class " + this.type + " field " + name +
                         " invalid initialization");
                 continue;
             }

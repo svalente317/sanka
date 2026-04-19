@@ -85,11 +85,11 @@ public class CompileManager {
         for (String libPath : env.libPath) {
             linkCommand.add("-L" + libPath);
         }
+        linkCommand.addAll(this.cLibs);
         linkCommand.add("-lsankaruntime");
         linkCommand.add("-lgc");
         linkCommand.add("-lpthread");
         linkCommand.add("-lm");
-        linkCommand.addAll(this.cLibs);
         linkCommand.add("-o");
         linkCommand.add(exeName);
         int status = executeCommand(linkCommand);
@@ -241,7 +241,7 @@ public class CompileManager {
         String fname = ClassTranslator.getHeaderFileName(classdef.packageName, classdef.name);
         env.print("#include <" + fname + ">");
         env.print("");
-        env.print("int main(int argc, char *const *argv) {");
+        env.print("int main(int argc, char **argv) {");
         env.level++;
         env.print("GC_INIT();");
         env.print("struct array arr;");
