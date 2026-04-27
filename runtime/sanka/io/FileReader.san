@@ -52,4 +52,8 @@ class FileReader {
         c__stmt "int status = fseek(this->fp, offset, origin)";
         c__stmt "return status == 0 ? 0 : errno";
     }
+
+    long tell() {
+        c__stmt "return ftell(this->fp)";
+    }
 }
