@@ -96,6 +96,10 @@ public class LibraryManager {
     public void unpackLibrary(String filename, CompileManager compileManager) throws IOException {
         Environment env = Environment.getInstance();
         File library = findLibrary(filename);
+        if (library == null) {
+            env.printError(null, filename + ": library not found");
+            return;
+        }
         File tmpdir = Files.createTempDirectory("sanka").toFile();
         this.tmpDirectories.add(tmpdir);
         TarArchiveInputStream tarStream = new TarArchiveInputStream(new FileInputStream(library));

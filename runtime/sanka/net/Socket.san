@@ -6,9 +6,8 @@ class Socket {
     c__include "string.h";
     c__include "errno.h";
     c__include "sys/types.h";
-    c__include "sys/socket.h";
-    c__include "netinet/in.h";
     c__include "unistd.h";
+    c__include "sanka_net.h";
 
     private int fd;
 
@@ -20,7 +19,7 @@ class Socket {
         c__stmt "this->fd = socket(AF_INET, SOCK_STREAM, 0)";
         c__stmt "if (this->fd < 0) return errno";
         c__stmt "int enable = 1";
-        c__stmt "setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int))";
+        c__stmt "setsockopt(this->fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&enable, sizeof(int))";
         c__stmt "struct sockaddr_in sa";
         c__stmt "memset(&sa, 0, sizeof(sa))";
         c__stmt "sa.sin_family = AF_INET";

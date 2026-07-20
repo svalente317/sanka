@@ -3,6 +3,7 @@ package sanka.util;
 
 class Random {
     c__include "stdlib.h";
+    c__include "sanka_std.h";
 
     /**
      * Initialize random number generator so the application is not
@@ -16,28 +17,19 @@ class Random {
     }
 
     /**
-     * @return random number across the entire range of signed 32 bit ints.
+     * @return random number across the entire range of unsigned 32 bit ints.
      */
     static int randomInt() {
-        c__stmt "return random()";
+        c__stmt "return random31()";
     }
 
     /**
-     * @return random number across the entire range of non-negative
-     * 32 bit ints.
+     * @return a random number across the range of unsigned 15 bit ints.
      */
-    static int randomUInt() {
-        while (true) {
-            var value = randomInt();
-            if (value >= 0) {
-                return value;
-            }
-            if (value > -2147483648) {
-                return -value;
-            }
-        }
+    static int randomShort() {
+        c__stmt "return random15()";
     }
-    
+
     /**
      * @return random UUID
      */
@@ -61,4 +53,8 @@ class Random {
         result[23] = '-';
         return new String(result);
     }
+
+    c__stmt "long random31_from_15(void) { long result = (long)(rand() & 0x7FFF);";
+    c__stmt "result |= (long)(rand() & 0x7FFF) << 15; result |= (long)(rand() & 0x0001) << 30;";
+    c__stmt "return result & 0x7FFFFFFFL; }";
 }

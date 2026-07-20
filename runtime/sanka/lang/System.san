@@ -7,6 +7,7 @@ class System {
     c__include "unistd.h";
     c__include "sys/time.h";
     c__include "time.h";
+    c__include "sanka_std.h";
 
     static void print(String text) {
         c__stmt "fputs(text, stdout)";
@@ -28,10 +29,6 @@ class System {
 
     static void sleep(int millis) {
         c__stmt "usleep(millis * 1000)";
-    }
-
-    static int random(int max) {
-        c__stmt "return random() % max";
     }
 
     static long parseLong(String text) {

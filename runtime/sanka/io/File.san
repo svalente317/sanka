@@ -11,6 +11,7 @@ class File {
     c__include "errno.h";
     c__include "dirent.h";
     c__include "stdio.h";
+    c__include "sanka_std.h";
 
     const PATH_SEPARATOR = "/";
 
@@ -168,7 +169,7 @@ class File {
             parent.mkdirs();
         }
         var status = 0;
-        c__stmt "status = mkdir(this->pathname, 0777)";
+        c__stmt "status = makedirectory(this->pathname, 0777)";
         return (status == 0);
     }
 

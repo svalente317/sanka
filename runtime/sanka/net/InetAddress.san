@@ -5,10 +5,7 @@ package sanka.net;
  * InetAddress represents an IPv4 address.
  */
 class InetAddress {
-    c__include "sys/socket.h";
-    c__include "netinet/in.h";
-    c__include "arpa/inet.h";
-    c__include "netdb.h";
+    c__include "sanka_net.h";
 
     byte[] numbers;
     int family;
@@ -18,7 +15,7 @@ class InetAddress {
      */
     static InetAddress parse(String text) {
         c__stmt "struct in_addr addr";
-        c__stmt "int status = inet_aton(text, &addr)";
+        c__stmt "int status = inet_pton(AF_INET, text, &addr)";
         c__stmt "if (status == 0) return NULL";
         var size = 0;
         c__stmt "size = sizeof(addr.s_addr)";

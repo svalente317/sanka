@@ -40,7 +40,6 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/net/URL.c \
 	bin/sanka/test/BaseTest.c \
 	bin/sanka/util/Base64.c \
-	bin/sanka/util/DateFormat.c \
 	bin/sanka/util/DateTime.c \
 	bin/sanka/util/Iconverter.c \
 	bin/sanka/util/Integer.c \
@@ -85,7 +84,7 @@ install: all
 	mkdir -p $(PREFIX)/lib
 	cp bin/libsankaruntime.a $(PREFIX)/lib/
 	mkdir -p $(PREFIX)/include
-	cp -p rb.h sanka_header.h $(PREFIX)/include/
+	cp -p rb.h sanka_header.h sanka_net.h sanka_std.h $(PREFIX)/include/
 	tar cf - `find sanka -name '*.san'` | (cd $(PREFIX)/include; tar xf -)
 	cd bin; tar cf - `find sanka -name '*.h'` | (cd $(PREFIX)/include; tar xf -)
 

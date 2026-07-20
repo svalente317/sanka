@@ -5,6 +5,7 @@ class FileWriter {
     c__include "stdio.h";
     c__include "errno.h";
     c__include "unistd.h";
+    c__include "sanka_std.h";
     c__field "FILE *fp";
 
     int open(String filename) {
