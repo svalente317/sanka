@@ -90,6 +90,10 @@ public class CompileManager {
         linkCommand.add("-lgc");
         linkCommand.add("-lpthread");
         linkCommand.add("-lm");
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("win")) {
+            linkCommand.add("-lws2_32");
+        }
         linkCommand.add("-o");
         linkCommand.add(exeName);
         int status = executeCommand(linkCommand);
