@@ -1,0 +1,27 @@
+// -*- mode: Java; -*-
+package sanka.util;
+
+singleton class DateNames {
+    String[] month_full;
+    String[] month_abbr;
+    String[] day_full;
+    String[] day_abbr;
+
+    DateNames() {
+        this.month_full = {
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        };
+        this.month_abbr = {
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        };
+        this.day_full = {
+            "Sunday", "Monday", "Tuesday", "Wednesday",
+            "Thursday", "Friday", "Saturday"
+        };
+        this.day_abbr = {
+            "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+        };
+    }
+}

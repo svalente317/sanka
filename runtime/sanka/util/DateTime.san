@@ -2,12 +2,78 @@
 package sanka.util;
 
 serializable class DateTime {
-    long timeMillis;
-
     int year;   // year - 1900
     int month;  // 0 - 11
     int mday;   // 1 - 31
     int hour;   // 0 - 23
     int minute; // 0 - 59
     int second; // 0 - 59
+    int wday;   // 0 - 6
+    int gmtoff; // -43,200 - +50,400 seconds
+
+    void clear() {
+        this.year = 0;
+        this.month = 0;
+        this.mday = 0;
+        this.hour = 0;
+        this.minute = 0;
+        this.second = 0;
+        this.wday = 0;
+        this.gmtoff = 0;
+    }
+
+    /**
+     * @return the  seconds since the Epoch, 1970-01-01T00:00:00Z.
+     */
+    long unixTime() {
+        // Normalize the month into [0,11], carrying overflow into the year.
+        var year = this.year + 1900;
+        var extra_years = floor_div(this.month, 12);
+        var month_norm = this.month - extra_years * 12;
+        year = year + extra_years;
+
+        // Day count for the 1st of that (year, month), then let this.mday
+        // (which may be <1 or >the month's length) walk that count forward.
+        // This is what lets "2026-03-0" mean "the day before 2026-03-01".
+        var days = days_from_civil(year, month_norm + 1, 1);
+        days = days + this.mday - 1;
+
+        // Normalize hour/min/sec (which may also be out of their usual ranges)
+        // into a day count plus a proper seconds-since-midnight value in [0, 86399].
+        var secs_of_day_raw = 3600L * this.hour + 60L * this.minute + this.second;
+        var extra_days = floor_div(secs_of_day_raw, 86400);
+        var secs_of_day = secs_of_day_raw - extra_days * 86400;
+        days = days + extra_days;
+
+        return 86400L * days + secs_of_day - this.gmtoff;
+    }
+
+    /**
+     * Floor division and floor modulo: C's built-in / and % truncate
+     * toward zero, which is wrong for calendar math with negative inputs
+     * (e.g. -1 / 12 truncates to 0, but we want the month before January
+     * of year 0, i.e. -1).
+     */
+    private static long floor_div(long a, long b) {
+        var q = a / b;
+        var r = a % b;
+
+        if r != 0 && ((r < 0) != (b < 0)) {
+            q = q - 1;
+        }
+        return q;
+    }
+
+    /**
+     * Number of days from 1970-01-01 to the civil date (y, m, d), where
+     * m is 1-12 and d is 1-31. This function assumes valid, in-range m and d.
+     */
+    private static long days_from_civil(long y, int m, int d) {
+        y = y - (m <= 2 ? 1 : 0);
+        var era = floor_div(y, 400);
+        var yoe = y - era * 400;
+        var doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1;
+        var doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+        return era * 146097 + doe - 719468;
+    }
 }
