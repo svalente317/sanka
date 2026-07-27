@@ -2,7 +2,7 @@
 
 Sanka has ten builtin types:
 * 1 boolean
-* 4 integral
+* 5 integral
 * 2 floating point
 * 3 classes
 
@@ -19,7 +19,7 @@ expression.
 
 ## Integral Types
 
-There are four integral types: `byte`, `short`, `int`, and `long`.
+There are four signed integral types: `byte`, `short`, `int`, and `long`.
 They are signed types of 8, 16, 32, and 64 bits, respectively.
 
 The arithmetic operators are the four obvious ones: `+`, `-`, `*`,
@@ -59,12 +59,20 @@ void promoter(byte b, short s, int i, long lg) {
 }
 ~~~
 
+The other integral type is `unsigned` which is a 32 bit unsigned
+type. There are no implicit conversions between `unsigned` and the
+signed types `byte`, `short`, and `int`. These conversions must use
+explicit casts.
+
+When a negative number is cast to an `unsigned`, the result is the
+positive number (8 or 16 or 32 bits) with the bit pattern of the two's
+complement representation of the negative number.
+
 ## Floating Point Types
 
 There are two floating point types: `float` and `double`. They are
-signed 32 and 64 bit types that work as they do in C. Something about
-two's complement? And I think that floats are promoted to double for
-arithmetic? I should care more about this.
+signed 32 and 64 bit types that work as they do in C. I think that
+floats are promoted to double for arithmetic?
 
 ## Character Type
 

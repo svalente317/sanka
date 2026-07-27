@@ -149,6 +149,7 @@ primitiveType
     |   'byte'
     |   'short'
     |   'int'
+    |   'unsigned'
     |   'long'
     |   'float'
     |   'double'

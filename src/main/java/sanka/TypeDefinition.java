@@ -19,6 +19,7 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
     public static final TypeDefinition BYTE_TYPE = new TypeDefinition("byte");
     public static final TypeDefinition SHORT_TYPE = new TypeDefinition("short");
     public static final TypeDefinition INT_TYPE = new TypeDefinition("int");
+    public static final TypeDefinition UNSIGNED_TYPE = new TypeDefinition("unsigned");
     public static final TypeDefinition LONG_TYPE = new TypeDefinition("long");
     public static final TypeDefinition FLOAT_TYPE = new TypeDefinition("float");
     public static final TypeDefinition DOUBLE_TYPE = new TypeDefinition("double");
@@ -149,13 +150,13 @@ public class TypeDefinition implements Comparable<TypeDefinition> {
 
     public boolean isIntegralType() {
         return this.isPrimitiveType &&
-                (this.name.equals("int") || this.name.equals("long") ||
+                (this.name.equals("int") || this.name.equals("unsigned") || this.name.equals("long") ||
                  this.name.equals("short") || this.name.equals("byte"));
     }
 
     public boolean isNumericType() {
         return this.isPrimitiveType &&
-                (this.name.equals("int") || this.name.equals("long") ||
+                (this.name.equals("int") || this.name.equals("unsigned") || this.name.equals("long") ||
                  this.name.equals("float") || this.name.equals("double") ||
                  this.name.equals("short") || this.name.equals("byte"));
     }

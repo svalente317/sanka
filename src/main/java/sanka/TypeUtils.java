@@ -109,7 +109,7 @@ public class TypeUtils {
             return !(type.equals(TypeDefinition.BYTE_TYPE) ||
                     type.equals(TypeDefinition.SHORT_TYPE));
         }
-        // long, float, and double can be converted to themselves and double.
+        // unsigned, long, float, and double can be converted to themselves and double.
         return type.equals(expr.type) || type.equals(TypeDefinition.DOUBLE_TYPE);
     }
 

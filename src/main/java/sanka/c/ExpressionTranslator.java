@@ -67,7 +67,8 @@ class ExpressionTranslator extends TranslationBase {
             return expr.value;
         }
         if (expr.type == TypeDefinition.SHORT_TYPE ||
-            expr.type == TypeDefinition.INT_TYPE) {
+            expr.type == TypeDefinition.INT_TYPE ||
+            expr.type == TypeDefinition.UNSIGNED_TYPE) {
             return expr.value;
         }
         if (expr.type == TypeDefinition.LONG_TYPE) {
@@ -678,7 +679,7 @@ class ExpressionTranslator extends TranslationBase {
         }
         if (expr.type.isNumericType()) {
             String variableName = env.getTmpVariable();
-            if (expr.type.equals(TypeDefinition.LONG_TYPE)) {
+            if (expr.type.equals(TypeDefinition.LONG_TYPE) || expr.type.equals(TypeDefinition.UNSIGNED_TYPE)) {
                 env.print("char " + variableName + "[22];");
                 env.print("LONG_TO_STRING(" + text + ", " + variableName + ");");
             } else if (expr.type.equals(TypeDefinition.BYTE_TYPE)) {
@@ -719,6 +720,12 @@ class ExpressionTranslator extends TranslationBase {
     static String translateTypeCast(ExpressionDefinition expr, String variableName) {
         Environment env = Environment.getInstance();
         String text = translate(expr.expression1);
+        if (expr.type.equals(TypeDefinition.UNSIGNED_TYPE)) {
+            TypeDefinition ft = expr.expression1.type;
+            if (ft.equals(TypeDefinition.BYTE_TYPE) || ft.equals(TypeDefinition.SHORT_TYPE)) {
+                return "((unsigned " +translateType(ft) + ")" + text + ")";
+            }
+        }
         if (expr.type.isNumericType()) {
             return "((" + translateType(expr.type) + ")" + text + ")";
         }
