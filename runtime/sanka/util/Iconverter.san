@@ -1,0 +1,27 @@
+// -*- mode: Java; -*-
+package sanka.util;
+
+class Iconverter {
+    c__include "iconv.h";
+
+    static byte[] convert(String dst, String src, byte[] data) {
+        if dst == src || data == null || data.length == 0 {
+            return data;
+        }
+        var out = new byte[]((int)(data.length / 2) * 3 + 1);
+        var status = 0;
+        // Technically, this should call iconv() in a loop until the input is exhausted,
+        // reallocating the output array as necessary.
+        // But in practice, for my purposes, a single call is good enough.
+        c__stmt "char *dp = (char *) data->data, *op = (char *) out->data";
+        c__stmt "size_t dlen = data->length, olen = out->length";
+        c__stmt "iconv_t cd = iconv_open(dst, src)";
+        c__stmt "status = iconv(cd, &dp, &dlen, &op, &olen)";
+        c__stmt "iconv_close(cd)";
+        c__stmt "out->length -= olen";
+        if status < 0 {
+            return null;
+        }
+        return out;
+    }
+}
