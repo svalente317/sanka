@@ -1,0 +1,25 @@
+// -*- mode: Java; -*-
+package sanka.io;
+
+class StringReader {
+    private byte[] bytes;
+    private int idx;
+
+    StringReader(String text) {
+        this.bytes = text.toByteArray();
+        this.idx = 0;
+    }
+    
+    int read(byte[] buffer) {
+        var len = this.bytes.length - this.idx;
+        if len > buffer.length {
+            len = buffer.length;
+        }
+        System.byteArrayCopy(this.bytes, this.idx, buffer, 0, len);
+        this.idx = this.idx + len;
+    }
+
+    int close() {
+        return 0;
+    }
+}
