@@ -14,6 +14,7 @@ SRCS=	bin/sanka/lang/Channel.c \
 	bin/sanka/lang/Integer.c \
 	bin/sanka/lang/Math.c \
 	bin/sanka/lang/Mutex.c \
+	bin/sanka/lang/Process.c \
 	bin/sanka/lang/Runnable.c \
 	bin/sanka/lang/String.c \
 	bin/sanka/lang/System.c \

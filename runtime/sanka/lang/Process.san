@@ -1,0 +1,39 @@
+// -*- mode: Java; -*-
+package sanka.lang;
+
+class Process {
+    c__include "spawn.h";
+    c__include "sys/wait.h";
+
+    private int pid;
+
+    static Process spawn(String program, int[] actions, int[] attrs,
+                         String[] argv, String[] envp) {
+        var status = 0;
+        if argv != null {
+            argv.add(null);
+            argv.setLength(argv.length-1);
+        }
+        if envp != null {
+            envp.add(null);
+            envp.setLength(envp.length-1);
+        }
+        c__stmt "pid_t pid";
+        c__stmt "extern char **environ";
+        c__stmt "char *const *c_argv = argv == NULL ? NULL : argv->data";
+        c__stmt "char *const *c_envp = envp == NULL ? environ : envp->data";
+        c__stmt "status = posix_spawnp(&pid, program, NULL, NULL, c_argv, c_envp)";
+        if status != 0 {
+            return null;
+        }
+        var child = new Process();
+        c__stmt "child->pid = pid";
+        return child;
+    }
+
+    int wait() {
+        var status = 0;
+        c__stmt "waitpid(this->pid, &status, 0)";
+        return status;
+    }
+}
