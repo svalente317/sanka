@@ -17,6 +17,7 @@ class StringReader {
         }
         System.byteArrayCopy(this.bytes, this.idx, buffer, 0, len);
         this.idx = this.idx + len;
+        return len;
     }
 
     int close() {

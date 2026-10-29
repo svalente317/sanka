@@ -93,6 +93,8 @@ public class CompileManager {
         String osName = System.getProperty("os.name").toLowerCase();
         if (osName.contains("win")) {
             linkCommand.add("-lws2_32");
+        }
+        if (osName.contains("win") || osName.contains("mac")) {
             linkCommand.add("-liconv");
         }
         linkCommand.add("-o");
